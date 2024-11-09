@@ -65,6 +65,7 @@ export async function createOrUpdateEstimate(storyId: string, vote: string): Pro
 				estimate: vote
 			});
 
+			// TODO this causes bugs
 			// Remove the estimate for a sec to force refresh on the client
 			await pb.collection('stories').update(storyId, {
 				'story_estimates-': newEstimate.id

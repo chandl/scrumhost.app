@@ -18,7 +18,6 @@
 		const to_remove_ids = new Set();
 		currentEstimates.forEach((currEst) => {
 			if (!update.story_estimates.find((newEst) => newEst == currEst.id)) {
-				console.log('Estimate REMOVED: ', currEst.id);
 				to_remove_ids.add(currEst.id);
 			}
 		});

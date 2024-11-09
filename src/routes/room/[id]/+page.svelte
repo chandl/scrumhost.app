@@ -13,7 +13,13 @@
 		type Participant,
 		type RoomDetails
 	} from '$lib/room';
-	import { createStory, getStoriesInRoom, getStoryById, type Story } from '$lib/story';
+	import {
+		createStory,
+		getStoriesInRoom,
+		getStoryById,
+		setStoryCompleted,
+		type Story
+	} from '$lib/story';
 	import { validateLogin } from '$lib/user';
 	import { onMount } from 'svelte';
 	import Vote from './components/Vote.svelte';

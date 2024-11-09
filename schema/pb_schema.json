@@ -1,0 +1,383 @@
+[
+	{
+		"id": "_pb_users_auth_",
+		"name": "users",
+		"type": "auth",
+		"system": false,
+		"schema": [
+			{
+				"system": false,
+				"id": "users_name",
+				"name": "name",
+				"type": "text",
+				"required": false,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"min": null,
+					"max": null,
+					"pattern": ""
+				}
+			},
+			{
+				"system": false,
+				"id": "users_avatar",
+				"name": "avatar",
+				"type": "file",
+				"required": false,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"mimeTypes": ["image/jpeg", "image/png", "image/svg+xml", "image/gif", "image/webp"],
+					"thumbs": null,
+					"maxSelect": 1,
+					"maxSize": 5242880,
+					"protected": false
+				}
+			}
+		],
+		"indexes": [],
+		"listRule": "id = @request.auth.id",
+		"viewRule": "id = @request.auth.id",
+		"createRule": "",
+		"updateRule": "id = @request.auth.id",
+		"deleteRule": "id = @request.auth.id",
+		"options": {
+			"allowEmailAuth": true,
+			"allowOAuth2Auth": false,
+			"allowUsernameAuth": true,
+			"exceptEmailDomains": null,
+			"manageRule": null,
+			"minPasswordLength": 8,
+			"onlyEmailDomains": null,
+			"onlyVerified": false,
+			"requireEmail": false
+		}
+	},
+	{
+		"id": "qrc65jr3edr9tjz",
+		"name": "participants",
+		"type": "base",
+		"system": false,
+		"schema": [
+			{
+				"system": false,
+				"id": "soz8xrxg",
+				"name": "user",
+				"type": "relation",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "_pb_users_auth_",
+					"cascadeDelete": false,
+					"minSelect": null,
+					"maxSelect": 1,
+					"displayFields": null
+				}
+			},
+			{
+				"system": false,
+				"id": "ks6kykzp",
+				"name": "room",
+				"type": "relation",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "1jtwasjfr2bq5q9",
+					"cascadeDelete": false,
+					"minSelect": null,
+					"maxSelect": 1,
+					"displayFields": null
+				}
+			},
+			{
+				"system": false,
+				"id": "nn6jxhuj",
+				"name": "name",
+				"type": "text",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"min": 1,
+					"max": null,
+					"pattern": ""
+				}
+			}
+		],
+		"indexes": ["CREATE UNIQUE INDEX `idx_cVgl1nI` ON `participants` (\n  `user`,\n  `room`\n)"],
+		"listRule": "@request.auth.id != \"\" ",
+		"viewRule": "@request.auth.id != \"\" ",
+		"createRule": "@request.auth.id != \"\"",
+		"updateRule": null,
+		"deleteRule": null,
+		"options": {}
+	},
+	{
+		"id": "1jtwasjfr2bq5q9",
+		"name": "rooms",
+		"type": "base",
+		"system": false,
+		"schema": [
+			{
+				"system": false,
+				"id": "qlcmkbba",
+				"name": "host",
+				"type": "relation",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "_pb_users_auth_",
+					"cascadeDelete": false,
+					"minSelect": null,
+					"maxSelect": 1,
+					"displayFields": null
+				}
+			},
+			{
+				"system": false,
+				"id": "l3bhydqq",
+				"name": "room_code",
+				"type": "text",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"min": 6,
+					"max": 8,
+					"pattern": ""
+				}
+			},
+			{
+				"system": false,
+				"id": "2t38q0re",
+				"name": "point_values",
+				"type": "text",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"min": null,
+					"max": null,
+					"pattern": ""
+				}
+			},
+			{
+				"system": false,
+				"id": "br0d7ojx",
+				"name": "is_voting_period",
+				"type": "bool",
+				"required": false,
+				"presentable": false,
+				"unique": false,
+				"options": {}
+			},
+			{
+				"system": false,
+				"id": "lczj8fjz",
+				"name": "active_story",
+				"type": "relation",
+				"required": false,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "zgom9t2qtmagpd4",
+					"cascadeDelete": false,
+					"minSelect": null,
+					"maxSelect": 1,
+					"displayFields": null
+				}
+			},
+			{
+				"system": false,
+				"id": "63dzsqtm",
+				"name": "room_name",
+				"type": "text",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"min": null,
+					"max": null,
+					"pattern": ""
+				}
+			},
+			{
+				"system": false,
+				"id": "xvzyqbfa",
+				"name": "stories",
+				"type": "relation",
+				"required": false,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "zgom9t2qtmagpd4",
+					"cascadeDelete": false,
+					"minSelect": null,
+					"maxSelect": null,
+					"displayFields": null
+				}
+			},
+			{
+				"system": false,
+				"id": "mttttusv",
+				"name": "participants",
+				"type": "relation",
+				"required": false,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "qrc65jr3edr9tjz",
+					"cascadeDelete": false,
+					"minSelect": null,
+					"maxSelect": null,
+					"displayFields": null
+				}
+			}
+		],
+		"indexes": ["CREATE UNIQUE INDEX `idx_3igflSm` ON `rooms` (`room_code`)"],
+		"listRule": "@request.auth.id != \"\"",
+		"viewRule": "@request.auth.id != \"\"",
+		"createRule": "@request.auth.id != \"\"",
+		"updateRule": "@request.auth.id != \"\" && @request.auth.id = @collection.rooms.host",
+		"deleteRule": null,
+		"options": {}
+	},
+	{
+		"id": "zgom9t2qtmagpd4",
+		"name": "stories",
+		"type": "base",
+		"system": false,
+		"schema": [
+			{
+				"system": false,
+				"id": "qbb3jkbc",
+				"name": "room",
+				"type": "relation",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "1jtwasjfr2bq5q9",
+					"cascadeDelete": true,
+					"minSelect": null,
+					"maxSelect": 1,
+					"displayFields": null
+				}
+			},
+			{
+				"system": false,
+				"id": "l7dutq6p",
+				"name": "details",
+				"type": "text",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"min": null,
+					"max": null,
+					"pattern": ""
+				}
+			},
+			{
+				"system": false,
+				"id": "w6uy72m0",
+				"name": "completed",
+				"type": "bool",
+				"required": false,
+				"presentable": false,
+				"unique": false,
+				"options": {}
+			},
+			{
+				"system": false,
+				"id": "ow1lbvkk",
+				"name": "story_estimates",
+				"type": "relation",
+				"required": false,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "5dfxwgvsybcmrpn",
+					"cascadeDelete": false,
+					"minSelect": null,
+					"maxSelect": null,
+					"displayFields": null
+				}
+			}
+		],
+		"indexes": [],
+		"listRule": "@request.auth.id != \"\" ",
+		"viewRule": "@request.auth.id != \"\" ",
+		"createRule": "@request.auth.id != \"\" ",
+		"updateRule": "@request.auth.id != \"\" ",
+		"deleteRule": null,
+		"options": {}
+	},
+	{
+		"id": "5dfxwgvsybcmrpn",
+		"name": "story_estimates",
+		"type": "base",
+		"system": false,
+		"schema": [
+			{
+				"system": false,
+				"id": "n56fmblu",
+				"name": "story",
+				"type": "relation",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "zgom9t2qtmagpd4",
+					"cascadeDelete": false,
+					"minSelect": null,
+					"maxSelect": 1,
+					"displayFields": null
+				}
+			},
+			{
+				"system": false,
+				"id": "6wmfsqvt",
+				"name": "estimate",
+				"type": "text",
+				"required": false,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"min": null,
+					"max": null,
+					"pattern": ""
+				}
+			},
+			{
+				"system": false,
+				"id": "kn6spobl",
+				"name": "user",
+				"type": "relation",
+				"required": false,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "_pb_users_auth_",
+					"cascadeDelete": false,
+					"minSelect": null,
+					"maxSelect": 1,
+					"displayFields": null
+				}
+			}
+		],
+		"indexes": [
+			"CREATE UNIQUE INDEX `idx_JPeLEUG` ON `story_estimates` (\n  `story`,\n  `user`\n)"
+		],
+		"listRule": "@request.auth.id != \"\" ",
+		"viewRule": "",
+		"createRule": "@request.auth.id != \"\" ",
+		"updateRule": "@request.auth.id != \"\" ",
+		"deleteRule": null,
+		"options": {}
+	}
+]

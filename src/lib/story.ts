@@ -44,7 +44,7 @@ export async function getStoriesInRoom(roomId: string): Promise<Story[]> {
 	try {
 		const storiesInRoom = pb.collection('stories').getList(1, 50, {
 			filter: `room = "${roomId}"`,
-			sort: '-created'
+			sort: 'completed,-created'
 		});
 
 		return (await storiesInRoom).items.map((record) => {
@@ -77,6 +77,19 @@ export function subscribeToStoryUpdates(storyId: string, callback: (record: Stor
 			});
 		}
 	});
+}
+
+export async function setStoryCompleted(storyId: string, completed: boolean) {
+	try {
+		const storyData = await getStoryById(storyId);
+		const record = await pb
+			.collection('stories')
+			.update(storyId, { ...storyData, completed: completed });
+		console.log(`Set story ${storyId} completed to ${completed}`, record);
+	} catch (err) {
+		console.error('Failed to set active story in room', err);
+		throw err;
+	}
 }
 
 export function unsubscribeToStoryUpdates() {

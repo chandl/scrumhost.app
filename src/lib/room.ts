@@ -7,29 +7,39 @@ export async function joinRoomWithCode(roomCode: string) {
 		console.log('Found room with code:', roomCode, room);
 
 		await joinRoom(room.id);
-		goto(`/room/${room.id}`)
+		goto(`/room/${room.id}`);
 	} catch (err) {
 		console.error('Failed to join room', err);
 	}
 }
 
-
+export async function doesParticipantExistInRoom(userId: string, roomId: string): Promise<boolean> {
+	try {
+		const participant = await pb
+			.collection('participants')
+			.getFirstListItem(`user = "${userId}" && room = "${roomId}"`);
+		if (participant) {
+			return true;
+		}
+	} catch (err) {
+		console.warn('Could not find participant in room', userId, roomId, err);
+	}
+	return false;
+}
 
 export async function joinRoom(roomId: string) {
 	try {
-		const room = await getRoom(roomId);
-
 		const userId = pb.authStore.model?.id;
-		// Create the participant entry
-		const participantData = {
-			user: userId,
-			room: roomId,
-			name: pb.authStore.model?.username
-		};
-
-		if (room.)
-		const newParticipant = await pb.collection('participants').create(participantData);
-		console.log('Room Joined successfully:', newParticipant);
+		if (!(await doesParticipantExistInRoom(userId, roomId))) {
+			// Create the participant entry
+			const participantData = {
+				user: userId,
+				room: roomId,
+				name: pb.authStore.model?.username
+			};
+			const newParticipant = await pb.collection('participants').create(participantData);
+			console.log('Room Joined successfully:', newParticipant);
+		}
 	} catch (err) {
 		console.warn('Failed to join room', err);
 	}
@@ -70,7 +80,6 @@ export interface RoomDetails extends Room {
 	is_voting_period: boolean;
 	point_values: string;
 	stories: string[];
-	participants: string[];
 }
 
 export interface Participant {
@@ -81,7 +90,7 @@ export interface Participant {
 
 export function subscribeToRoomUpdates(roomId: string, callback: (record: RoomDetails) => void) {
 	pb.collection('rooms').subscribe(roomId, function (e) {
-		if (e.action == 'update' && e.record.id == roomId) {
+		if (e.action == 'update') {
 			console.log('Room Update: ', e);
 			callback({
 				id: e.record.id,
@@ -91,8 +100,7 @@ export function subscribeToRoomUpdates(roomId: string, callback: (record: RoomDe
 				active_story_id: e.record.active_story,
 				is_voting_period: e.record.is_voting_period,
 				point_values: e.record.point_values,
-				stories: e.record.stories,
-				participants: e.record.participants
+				stories: e.record.stories
 			});
 		}
 	});
@@ -153,8 +161,7 @@ export async function getRoom(roomId: string): Promise<RoomDetails> {
 			active_story_id: room.active_story,
 			is_voting_period: room.is_voting_period,
 			point_values: room.point_values,
-			stories: room.stories,
-			participants: room.participants
+			stories: room.stories
 		};
 	} catch (err) {
 		console.error('Failed to get room with id:', roomId);
