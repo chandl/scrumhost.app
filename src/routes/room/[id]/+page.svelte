@@ -10,15 +10,18 @@
 		setVotingFlag,
 		subscribeToNewParticipants,
 		subscribeToRoomUpdates,
+		type Participant,
 		type RoomDetails
 	} from '$lib/room';
-	import { createStory, getStoriesInRoom, subscribeToNewStories, type Story } from '$lib/story';
+	import { createStory, getStoriesInRoom, getStoryById, type Story } from '$lib/story';
 	import { validateLogin } from '$lib/user';
 	import { onMount } from 'svelte';
+	import Vote from './components/Vote.svelte';
+	import VoteResults from './components/VoteResults.svelte';
 
 	const roomId = $page.params.id;
 	let room: RoomDetails;
-	let participants: any[];
+	let participants: Participant[];
 	let stories: Story[];
 	let activeStoryDetails: Story;
 
@@ -73,11 +76,15 @@
 			console.log('Room Update Received', record);
 			room = record;
 			setActiveStoryDetails(room);
-		});
 
-		subscribeToNewStories(roomId, (record) => {
-			console.log('New Story Received:', record);
-			stories = [record, ...stories];
+			// Check if any new stories
+			room.stories.forEach(async (story) => {
+				if (!stories.find((s) => s.id == story)) {
+					console.log('Adding new story', story);
+					const newStory = await getStoryById(story);
+					stories = [newStory, ...stories];
+				}
+			});
 		});
 
 		subscribeToNewParticipants(roomId, (record) => {
@@ -114,8 +121,12 @@
 <ul>
 	{#each stories as story}
 		<li>
-			<strong>{story.details}</strong> - Completed: {story.completed} - {story.created} - {story.final_estimate}
+			<strong>{story.details}</strong> - Completed: {story.completed} - {story.created}
 			<Button on:click={() => handleSetActiveStory(story.id)}>Set Active</Button>
 		</li>
 	{/each}
 </ul>
+
+<Vote pointValues={room?.point_values} currentStory={room?.active_story_id} />
+
+<VoteResults currentStory={room?.active_story_id} {participants} />

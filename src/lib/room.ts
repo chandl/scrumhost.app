@@ -1,3 +1,4 @@
+import { goto } from '$app/navigation';
 import pb from '$lib/pocketbase';
 
 export async function joinRoomWithCode(roomCode: string) {
@@ -6,13 +7,18 @@ export async function joinRoomWithCode(roomCode: string) {
 		console.log('Found room with code:', roomCode, room);
 
 		await joinRoom(room.id);
+		goto(`/room/${room.id}`)
 	} catch (err) {
 		console.error('Failed to join room', err);
 	}
 }
 
+
+
 export async function joinRoom(roomId: string) {
 	try {
+		const room = await getRoom(roomId);
+
 		const userId = pb.authStore.model?.id;
 		// Create the participant entry
 		const participantData = {
@@ -20,6 +26,8 @@ export async function joinRoom(roomId: string) {
 			room: roomId,
 			name: pb.authStore.model?.username
 		};
+
+		if (room.)
 		const newParticipant = await pb.collection('participants').create(participantData);
 		console.log('Room Joined successfully:', newParticipant);
 	} catch (err) {
@@ -61,10 +69,13 @@ export interface RoomDetails extends Room {
 	active_story_id: string;
 	is_voting_period: boolean;
 	point_values: string;
+	stories: string[];
+	participants: string[];
 }
 
 export interface Participant {
 	id: string;
+	userId: string;
 	name: string;
 }
 
@@ -79,7 +90,9 @@ export function subscribeToRoomUpdates(roomId: string, callback: (record: RoomDe
 				room_code: e.record.room_code,
 				active_story_id: e.record.active_story,
 				is_voting_period: e.record.is_voting_period,
-				point_values: e.record.point_values
+				point_values: e.record.point_values,
+				stories: e.record.stories,
+				participants: e.record.participants
 			});
 		}
 	});
@@ -89,12 +102,13 @@ export function subscribeToNewParticipants(
 	roomId: string,
 	callback: (record: Participant) => void
 ) {
-	// TODO create specific view for this that only shows user's stories
+	// TODO utilize room's 'participants' relation instead
 	pb.collection('participants').subscribe('*', function (e) {
 		if (e.action === 'create' && e.record.room == roomId) {
 			console.log('Participant Subscription Hit:', e);
 			callback({
 				id: e.record.id,
+				userId: e.record.user,
 				name: e.record.name
 			});
 		}
@@ -138,7 +152,9 @@ export async function getRoom(roomId: string): Promise<RoomDetails> {
 			room_code: room.room_code,
 			active_story_id: room.active_story,
 			is_voting_period: room.is_voting_period,
-			point_values: room.point_values
+			point_values: room.point_values,
+			stories: room.stories,
+			participants: room.participants
 		};
 	} catch (err) {
 		console.error('Failed to get room with id:', roomId);
@@ -147,16 +163,17 @@ export async function getRoom(roomId: string): Promise<RoomDetails> {
 }
 
 export async function getRoomParticipants(roomId: string): Promise<Participant[]> {
+	// TODO use room's 'participants' list instead
 	try {
 		const roomParticipants = pb.collection('participants').getList(1, 50, {
 			filter: `room = "${roomId}"`,
-
 			sort: '-created'
 		});
 
 		return (await roomParticipants).items.map((participant) => {
 			return {
 				id: participant.id,
+				userId: participant.user,
 				name: participant.name
 			};
 		});
