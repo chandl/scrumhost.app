@@ -12,14 +12,19 @@ export async function joinRoomWithCode(roomCode: string) {
 }
 
 export async function joinRoom(roomId: string) {
-	const userId = pb.authStore.model?.id;
-	// Create the participant entry
-	const participantData = {
-		user: userId,
-		room: roomId
-	};
-	const newParticipant = await pb.collection('participants').create(participantData);
-	console.log('Room Joined successfully:', newParticipant);
+	try {
+		const userId = pb.authStore.model?.id;
+		// Create the participant entry
+		const participantData = {
+			user: userId,
+			room: roomId,
+			name: pb.authStore.model?.username
+		};
+		const newParticipant = await pb.collection('participants').create(participantData);
+		console.log('Room Joined successfully:', newParticipant);
+	} catch (err) {
+		console.warn('Failed to join room', err);
+	}
 }
 
 export async function createRoom(room_name: string, point_values: string) {
@@ -80,6 +85,22 @@ export function subscribeToRoomUpdates(roomId: string, callback: (record: RoomDe
 	});
 }
 
+export function subscribeToNewParticipants(
+	roomId: string,
+	callback: (record: Participant) => void
+) {
+	// TODO create specific view for this that only shows user's stories
+	pb.collection('participants').subscribe('*', function (e) {
+		if (e.action === 'create' && e.record.room == roomId) {
+			console.log('Participant Subscription Hit:', e);
+			callback({
+				id: e.record.id,
+				name: e.record.name
+			});
+		}
+	});
+}
+
 export async function setVotingFlag(roomId: string, enableVoting: boolean) {
 	try {
 		const currentRoomData = await getRoom(roomId);
@@ -129,15 +150,14 @@ export async function getRoomParticipants(roomId: string): Promise<Participant[]
 	try {
 		const roomParticipants = pb.collection('participants').getList(1, 50, {
 			filter: `room = "${roomId}"`,
-			expand: 'user',
-			fields: 'expand.user.id,expand.user.username',
+
 			sort: '-created'
 		});
 
 		return (await roomParticipants).items.map((participant) => {
 			return {
-				id: participant.expand?.user.id,
-				name: participant.expand?.user.username
+				id: participant.id,
+				name: participant.name
 			};
 		});
 	} catch (err) {

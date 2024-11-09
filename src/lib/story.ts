@@ -49,6 +49,7 @@ export async function getStoriesInRoom(roomId: string): Promise<Story[]> {
 }
 
 export function subscribeToNewStories(roomId: string, callback: (record: Story) => void) {
+	// TODO create specific view for this that only shows user's stories
 	pb.collection('stories').subscribe('*', function (e) {
 		if (e.action === 'create' && e.record.room == roomId) {
 			console.log('Story Subscription Hit:', e);

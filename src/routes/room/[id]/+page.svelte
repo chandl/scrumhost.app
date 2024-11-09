@@ -1,11 +1,14 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		getRoom,
 		getRoomParticipants,
+		joinRoom,
 		setActiveStory,
 		setVotingFlag,
+		subscribeToNewParticipants,
 		subscribeToRoomUpdates,
 		type RoomDetails
 	} from '$lib/room';
@@ -50,7 +53,18 @@
 	onMount(async () => {
 		validateLogin();
 
-		room = await getRoom(roomId);
+		try {
+			room = await getRoom(roomId);
+		} catch (err) {
+			console.error('Could not find room with id', roomId);
+			// TODO go to 404 page
+			goto('/');
+			return;
+		}
+		// Attempt to join the room. Will fail if already in it, but that's fine
+		await joinRoom(roomId);
+
+		participants = await getRoomParticipants(roomId);
 		stories = await getStoriesInRoom(roomId);
 
 		setActiveStoryDetails(room);
@@ -66,8 +80,10 @@
 			stories = [record, ...stories];
 		});
 
-		participants = await getRoomParticipants(roomId);
-		console.log('Participants', participants);
+		subscribeToNewParticipants(roomId, (record) => {
+			console.log('New Participant Received:', record);
+			participants = [record, ...participants];
+		});
 	});
 </script>
 
