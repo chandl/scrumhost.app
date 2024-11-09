@@ -1,5 +1,27 @@
 import pb from '$lib/pocketbase';
 
+export async function joinRoomWithCode(roomCode: string) {
+	try {
+		const room = await pb.collection('rooms').getFirstListItem(`room_code = "${roomCode}"`);
+		console.log('Found room with code:', roomCode, room);
+
+		await joinRoom(room.id);
+	} catch (err) {
+		console.error('Failed to join room', err);
+	}
+}
+
+export async function joinRoom(roomId: string) {
+	const userId = pb.authStore.model?.id;
+	// Create the participant entry
+	const participantData = {
+		user: userId,
+		room: roomId
+	};
+	const newParticipant = await pb.collection('participants').create(participantData);
+	console.log('Room Joined successfully:', newParticipant);
+}
+
 export async function createRoom(room_name: string, point_values: string) {
 	// room code
 	// point values
@@ -16,13 +38,7 @@ export async function createRoom(room_name: string, point_values: string) {
 		const newRoom = await pb.collection('rooms').create(roomData);
 		console.log(`Room created successfully:`, newRoom);
 
-		// Create the participant entry
-		const participantData = {
-			user: pb.authStore.model?.id,
-			room: newRoom.id
-		};
-		const newParticipant = await pb.collection('participants').create(participantData);
-		console.log('Participant created successfully:', newParticipant);
+		await joinRoom(newRoom.id);
 	} catch (err) {
 		console.error('Error creating room:', err);
 		throw err;

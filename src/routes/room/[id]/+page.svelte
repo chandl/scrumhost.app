@@ -10,6 +10,7 @@
 		type RoomDetails
 	} from '$lib/room';
 	import { createStory, getStoriesInRoom, subscribeToNewStories, type Story } from '$lib/story';
+	import { validateLogin } from '$lib/user';
 	import { onMount } from 'svelte';
 
 	const roomId = $page.params.id;
@@ -47,6 +48,8 @@
 	}
 
 	onMount(async () => {
+		validateLogin();
+
 		room = await getRoom(roomId);
 		stories = await getStoriesInRoom(roomId);
 

@@ -1,25 +1,14 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { login, logout, user } from '$lib/user';
-	import { createRoom, getUserRooms, type Room } from '$lib/room';
+	import { logout, user, validateLogin } from '$lib/user';
+	import { createRoom, getUserRooms, joinRoomWithCode, type Room } from '$lib/room';
 	import type { AuthModel } from 'pocketbase';
 	import { onMount } from 'svelte';
 
-	let email = '';
-	let password = '';
 	let currentUser: AuthModel;
-
 	user.subscribe((value) => {
 		currentUser = value;
 	});
-
-	async function handleLogin() {
-		await login(email, password);
-	}
-
-	function handleLogout() {
-		logout();
-	}
 
 	function handleCreateRoom() {
 		createRoom('Test Room', '0,1,2,3,4,5,6,7,8,9,10');
@@ -27,20 +16,20 @@
 
 	let rooms: Room[];
 	onMount(async () => {
+		validateLogin();
 		rooms = await getUserRooms();
 		console.log('Found rooms:', rooms);
 	});
+
+	let joinRoomCode: string;
+	function handleJoinRoom() {
+		joinRoomWithCode(joinRoomCode);
+	}
 </script>
 
 {#if currentUser}
 	<p>Welcome, {currentUser.email}!</p>
-	<button on:click={handleLogout}>Logout</button>
-{:else}
-	<form on:submit|preventDefault={handleLogin}>
-		<input type="email" bind:value={email} placeholder="Email" required />
-		<input type="password" bind:value={password} placeholder="Password" required />
-		<button type="submit">Login</button>
-	</form>
+	<button on:click={logout}>Logout</button>
 {/if}
 
 <br />
@@ -61,3 +50,8 @@
 </ul>
 
 <br />
+
+<form on:submit|preventDefault={handleJoinRoom}>
+	<input type="text" bind:value={joinRoomCode} placeholder="Room Code" required />
+	<button type="submit">Join Room with Code</button>
+</form>
