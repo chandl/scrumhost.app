@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { user, validateLogin } from '$lib/user';
-	import { getUserRooms, joinRoomWithCode, type Room } from '$lib/room';
+	import { getUserRooms, joinRoomWithCode, type ParticipantRoomDetails, type Room, type RoomDetails } from '$lib/room';
 	import type { AuthModel } from 'pocketbase';
 	import { onMount } from 'svelte';
 	import {
@@ -21,7 +21,7 @@
 		currentUser = value;
 	});
 
-	let rooms: Room[];
+	let rooms: ParticipantRoomDetails[];
 	onMount(async () => {
 		validateLogin();
 		rooms = await getUserRooms();
@@ -36,6 +36,29 @@
 
 	function truncate(str: string, n: number) {
 		return str.length > n ? str.slice(0, n - 1) + '…' : str;
+	}
+
+	function formatTimeAgo(date: Date): string {
+		const now = new Date();
+		const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+		const intervals: { [key: string]: number } = {
+			year: 31536000,
+			month: 2592000,
+			week: 604800,
+			day: 86400,
+			hour: 3600,
+			minute: 60,
+			second: 1,
+		};
+
+		for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+			const interval = Math.floor(seconds / secondsInUnit);
+			if (interval >= 1) {
+			return `${interval} ${unit}${interval > 1 ? 's' : ''} ago`;
+			}
+		}
+		return "just now";
 	}
 </script>
 
@@ -90,12 +113,12 @@
 								<span class="flex items-center">
 									<!-- TODO user icon -->
 									<h1 class="mr-1 h-4 w-4">X</h1>
-									0(TBD) participants
+									{room.participants.length} participant(s)
 								</span>
 								<span class="flex items-center">
 									<!-- TODO clock icon -->
 									<h1 class="mr-1 h-4 w-4">Y</h1>
-									Last Joined Date
+									{formatTimeAgo(new Date(room.time_joined))}
 								</span>
 							</div>
 						</div>

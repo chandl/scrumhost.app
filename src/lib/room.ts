@@ -82,6 +82,12 @@ export interface RoomDetails extends Room {
 	is_voting_period: boolean;
 	point_values: string;
 	stories: string[];
+	participants: string[];
+}
+
+
+export interface ParticipantRoomDetails extends RoomDetails {
+	time_joined: string;
 }
 
 export interface Participant {
@@ -102,7 +108,8 @@ export function subscribeToRoomUpdates(roomId: string, callback: (record: RoomDe
 				active_story_id: e.record.active_story,
 				is_voting_period: e.record.is_voting_period,
 				point_values: e.record.point_values,
-				stories: e.record.stories
+				stories: e.record.stories,
+				participants: e.record.participants
 			});
 		}
 	});
@@ -163,7 +170,8 @@ export async function getRoom(roomId: string): Promise<RoomDetails> {
 			active_story_id: room.active_story,
 			is_voting_period: room.is_voting_period,
 			point_values: room.point_values,
-			stories: room.stories
+			stories: room.stories,
+			participants: room.participants
 		};
 	} catch (err) {
 		console.error('Failed to get room with id:', roomId);
@@ -192,7 +200,7 @@ export async function getRoomParticipants(roomId: string): Promise<Participant[]
 	}
 }
 
-export async function getUserRooms(): Promise<Room[]> {
+export async function getUserRooms(): Promise<ParticipantRoomDetails[]> {
 	const userId = pb.authStore.model?.id;
 
 	try {
@@ -202,7 +210,7 @@ export async function getUserRooms(): Promise<Room[]> {
 			sort: '-created'
 		});
 
-		return (await userRooms).items.map((item) => item.expand?.room);
+		return (await userRooms).items.map((item) => {return {time_joined: item.created, ...item.expand?.room}});
 	} catch (err) {
 		console.error('Failed to get rooms for user ', userId, err);
 		throw err;
