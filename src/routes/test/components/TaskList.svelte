@@ -4,8 +4,6 @@
 
 	let {
 		tasks,
-		onVote,
-		votingEnabled,
 		onTaskAction,
 		currentStatus
 	}: { tasks: Task[]; onVote: any; votingEnabled: any; onTaskAction: any; currentStatus: any } =
