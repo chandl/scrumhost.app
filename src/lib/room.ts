@@ -62,6 +62,8 @@ export async function createRoom(room_name: string, point_values: string) {
 		console.log(`Room created successfully:`, newRoom);
 
 		await joinRoom(newRoom.id);
+
+		return newRoom.id;
 	} catch (err) {
 		console.error('Error creating room:', err);
 		throw err;
@@ -194,7 +196,7 @@ export async function getUserRooms(): Promise<Room[]> {
 	const userId = pb.authStore.model?.id;
 
 	try {
-		const userRooms = pb.collection('participants').getList(1, 10, {
+		const userRooms = pb.collection('participants').getList(1, 5, {
 			filter: `user = "${userId}"`,
 			expand: 'room',
 			sort: '-created'
