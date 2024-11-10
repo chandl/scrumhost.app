@@ -3,15 +3,18 @@
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
-	import { Plus, StopCircle, PlayCircle } from 'lucide-svelte';
+	import { Plus, Check } from 'lucide-svelte';
 	import ParticipantList from './components/ParticipantList.svelte';
 	import TaskList from './components/TaskList.svelte';
+	import Progress from '$lib/components/ui/progress/progress.svelte';
 
-	let votingEnabled: boolean;
+	let votingEnabled: boolean = true;
 	let newTask: string;
 	let currentTab: string;
 
-	function toggleVoting() {}
+	function toggleVoting() {
+		votingEnabled = !votingEnabled;
+	}
 
 	function handleCreateTask() {}
 
@@ -40,11 +43,12 @@
 
 		{
 			id: 'taskId2',
-			description: 'Some Description2',
+			description: 'Do something as a task with a specific tracking ticket number ABCD-123',
 			votes: {},
 			status: 'queued'
 		}
 	];
+	let currentTask = queuedTasks[0];
 	let reviewedTasks: any[] = [
 		{
 			id: 'taskId3',
@@ -56,11 +60,15 @@
 		}
 	];
 	let skippedTasks: any[] = [];
+
+	type PointValue = 1 | 2 | 3 | 5 | 8 | 13 | 21;
+
+	const pointValues: PointValue[] = [1, 2, 3, 5, 8, 13, 21];
 </script>
 
 <div class="min-h-screen bg-gradient-to-b from-blue-100 to-white p-8">
 	<div class="mx-auto max-w-6xl space-y-8">
-		<h1 class="text-3xl font-bold">Room: Planning Poker</h1>
+		<h1 class="text-4xl font-bold">Room Name Goes Here</h1>
 
 		<div class="grid grid-cols-1 gap-8 md:grid-cols-3">
 			<div class="space-y-8 md:col-span-2">
@@ -75,6 +83,34 @@
 						</Button>
 					</CardContent>
 				</Card>
+
+				<!-- Section for Current Task Being Voted On -->
+				{#if votingEnabled && currentTask}
+					<Card class="mt-4">
+						<CardHeader>
+							<CardTitle>Currently Voting On</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<h3 class="mb-2 text-3xl font-semibold">{currentTask.description}</h3>
+							{#each pointValues as value}
+								<Button
+									variant={Object.values(currentTask.votes).includes(value) ? 'default' : 'outline'}
+									size="lg"
+									on:click={() => console.log('vote', currentTask.id, value)}
+									disabled={!votingEnabled || currentTask.status !== 'queued'}
+								>
+									{value}
+								</Button>
+							{/each}
+
+							<Button size="lg" class="mt-4 bg-primary" on:click={() => console.log('Mark as reviewed')}>
+								<Check class="mr-2 h-4 w-4" /> Mark as Reviewed
+							</Button>
+						</CardContent>
+
+						<Progress value={33} />
+					</Card>
+				{/if}
 
 				<Tabs bind:value={currentTab}>
 					<TabsList class="grid w-full grid-cols-3">
@@ -131,18 +167,6 @@
 						</Card>
 					</TabsContent>
 				</Tabs>
-
-				<Button
-					class="w-full"
-					on:click={toggleVoting}
-					variant={votingEnabled ? 'destructive' : 'default'}
-				>
-					{#if votingEnabled}
-						<StopCircle class="mr-2 h-4 w-4" /> Stop Voting
-					{:else}
-						<PlayCircle class="mr-2 h-4 w-4" /> Start Voting
-					{/if}
-				</Button>
 			</div>
 
 			<div>
