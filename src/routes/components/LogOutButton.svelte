@@ -12,6 +12,7 @@
 	} from '$lib/components/ui/alert-dialog';
 	import { Button } from '$lib/components/ui/button';
 	import { logout, user } from '$lib/user';
+	import { LogOut } from 'lucide-svelte';
 	import type { AuthModel } from 'pocketbase';
 
 	let showConfirmDialog = $state(false);
@@ -36,7 +37,7 @@
 			on:click={() => (showConfirmDialog = true)}
 			aria-label="Logout"
 		>
-			<h1 class="h-5 w-5">LogoutButton</h1>
+			<LogOut class="h-5 w-5"/>
 		</Button>
 
 		<AlertDialog

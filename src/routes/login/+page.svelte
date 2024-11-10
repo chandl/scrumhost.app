@@ -11,7 +11,8 @@
 	} from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import { logout, signup, user } from '$lib/user';
+	import { signup, user } from '$lib/user';
+	import { UserPen } from 'lucide-svelte';
 	import type { AuthModel } from 'pocketbase';
 	import { onMount } from 'svelte';
 
@@ -52,8 +53,7 @@
 				<div class="space-y-2">
 					<Label for="name">Your Name</Label>
 					<div class="relative">
-						<!-- TODO user icon -->
-						<h1 class="absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-500">u</h1>
+						<UserPen class="absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-500"/>
 						<Input
 							id="name"
 							type="text"

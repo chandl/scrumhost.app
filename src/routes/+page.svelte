@@ -21,6 +21,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { goto } from '$app/navigation';
 	import RoomCreator from './components/RoomCreator.svelte';
+	import {User, Clock2} from 'lucide-svelte';
 
 	let currentUser: AuthModel;
 	user.subscribe((value) => {
@@ -103,37 +104,39 @@
 	</Card>
 
 	<!-- Recently Joined Rooms  -->
-	<Card class="w-full max-w-md">
-		<CardHeader>
-			<CardTitle class="text-xl font-bold">Recently Joined Rooms</CardTitle>
-		</CardHeader>
-		<CardContent>
-			<ul class="space-y-4">
-				{#each rooms as room}
-					<li
-						class="flex items-center justify-between rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100"
-					>
-						<div>
-							<h3 class="font-semibold">{truncate(room.room_name, 25)} [{room.room_code}]</h3>
-							<div class="flex items-center space-x-4 text-sm text-gray-500">
-								<span class="flex items-center">
-									<!-- TODO user icon -->
-									<h1 class="mr-1 h-4 w-4">X</h1>
-									{room.participants.length} participant(s)
-								</span>
-								<span class="flex items-center">
-									<!-- TODO clock icon -->
-									<h1 class="mr-1 h-4 w-4">Y</h1>
-									{formatTimeAgo(new Date(room.time_joined))}
-								</span>
+	{#if rooms?.length > 0}
+		<Card class="w-full max-w-md">
+			<CardHeader>
+				<CardTitle class="text-xl font-bold">Recently Joined Rooms</CardTitle>
+			</CardHeader>
+			<CardContent>
+				<ul class="space-y-4">
+					{#each rooms as room}
+						<li
+							class="flex items-center justify-between rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100"
+						>
+							<div>
+								<h3 class="font-semibold">{truncate(room.room_name, 25)} [{room.room_code}]</h3>
+								<div class="flex items-center space-x-4 text-sm text-gray-500">
+									<span class="flex items-center">
+										<User class="mr-1 h-4 w-4" />
+										{room.participants.length} participant(s)
+									</span>
+									<span class="flex items-center">
+										<!-- TODO clock icon -->
+										<Clock2 class="mr-1 h-4 w-4"/>
+										{formatTimeAgo(new Date(room.time_joined))}
+									</span>
+								</div>
 							</div>
-						</div>
-						<Button variant="outline" size="sm" on:click={() => goto(`/room/${room.id}`)}>
-							Rejoin
-						</Button>
-					</li>
-				{/each}
-			</ul>
-		</CardContent>
-	</Card>
+							<Button variant="outline" size="sm" on:click={() => goto(`/room/${room.id}`)}>
+								Rejoin
+							</Button>
+						</li>
+					{/each}
+				</ul>
+			</CardContent>
+		</Card>
+	{/if}
+	
 </div>

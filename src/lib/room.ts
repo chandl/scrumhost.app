@@ -39,6 +39,11 @@ export async function joinRoom(roomId: string) {
 			};
 			const newParticipant = await pb.collection('participants').create(participantData);
 			console.log('Room Joined successfully:', newParticipant);
+
+			// Update Room with new participant
+			await pb.collection("rooms").update(roomId, {
+				'participants+': newParticipant.id
+			});
 		}
 	} catch (err) {
 		console.warn('Failed to join room', err);
