@@ -85,7 +85,6 @@ export interface RoomDetails extends Room {
 	participants: string[];
 }
 
-
 export interface ParticipantRoomDetails extends RoomDetails {
 	time_joined: string;
 }
@@ -210,7 +209,9 @@ export async function getUserRooms(): Promise<ParticipantRoomDetails[]> {
 			sort: '-created'
 		});
 
-		return (await userRooms).items.map((item) => {return {time_joined: item.created, ...item.expand?.room}});
+		return (await userRooms).items.map((item) => {
+			return { time_joined: item.created, ...item.expand?.room };
+		});
 	} catch (err) {
 		console.error('Failed to get rooms for user ', userId, err);
 		throw err;

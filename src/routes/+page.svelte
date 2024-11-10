@@ -1,7 +1,13 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { user, validateLogin } from '$lib/user';
-	import { getUserRooms, joinRoomWithCode, type ParticipantRoomDetails, type Room, type RoomDetails } from '$lib/room';
+	import {
+		getUserRooms,
+		joinRoomWithCode,
+		type ParticipantRoomDetails,
+		type Room,
+		type RoomDetails
+	} from '$lib/room';
 	import type { AuthModel } from 'pocketbase';
 	import { onMount } from 'svelte';
 	import {
@@ -49,16 +55,16 @@
 			day: 86400,
 			hour: 3600,
 			minute: 60,
-			second: 1,
+			second: 1
 		};
 
 		for (const [unit, secondsInUnit] of Object.entries(intervals)) {
 			const interval = Math.floor(seconds / secondsInUnit);
 			if (interval >= 1) {
-			return `${interval} ${unit}${interval > 1 ? 's' : ''} ago`;
+				return `${interval} ${unit}${interval > 1 ? 's' : ''} ago`;
 			}
 		}
-		return "just now";
+		return 'just now';
 	}
 </script>
 
