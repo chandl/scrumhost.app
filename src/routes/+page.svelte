@@ -21,7 +21,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { goto } from '$app/navigation';
 	import RoomCreator from './components/RoomCreator.svelte';
-	import {User, Clock2} from 'lucide-svelte';
+	import { User, Clock2 } from 'lucide-svelte';
 
 	let currentUser: AuthModel;
 	user.subscribe((value) => {
@@ -124,7 +124,7 @@
 									</span>
 									<span class="flex items-center">
 										<!-- TODO clock icon -->
-										<Clock2 class="mr-1 h-4 w-4"/>
+										<Clock2 class="mr-1 h-4 w-4" />
 										{formatTimeAgo(new Date(room.time_joined))}
 									</span>
 								</div>
@@ -138,5 +138,4 @@
 			</CardContent>
 		</Card>
 	{/if}
-	
 </div>

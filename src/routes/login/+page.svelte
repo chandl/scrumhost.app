@@ -53,7 +53,7 @@
 				<div class="space-y-2">
 					<Label for="name">Your Name</Label>
 					<div class="relative">
-						<UserPen class="absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-500"/>
+						<UserPen class="absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-500" />
 						<Input
 							id="name"
 							type="text"

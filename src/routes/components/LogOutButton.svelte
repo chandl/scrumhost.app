@@ -37,7 +37,7 @@
 			on:click={() => (showConfirmDialog = true)}
 			aria-label="Logout"
 		>
-			<LogOut class="h-5 w-5"/>
+			<LogOut class="h-5 w-5" />
 		</Button>
 
 		<AlertDialog

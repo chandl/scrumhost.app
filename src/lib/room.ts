@@ -41,7 +41,7 @@ export async function joinRoom(roomId: string) {
 			console.log('Room Joined successfully:', newParticipant);
 
 			// Update Room with new participant
-			await pb.collection("rooms").update(roomId, {
+			await pb.collection('rooms').update(roomId, {
 				'participants+': newParticipant.id
 			});
 		}
