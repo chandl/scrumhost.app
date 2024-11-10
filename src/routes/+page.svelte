@@ -41,7 +41,7 @@
 </script>
 
 <div
-	class="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-blue-100 to-white p-4"
+	class="flex min-h-screen flex-col items-center justify-center space-y-8 bg-gradient-to-b from-blue-100 to-white p-4"
 >
 	<Card class="w-full max-w-md">
 		<CardHeader>
@@ -86,7 +86,7 @@
 						class="flex items-center justify-between rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100"
 					>
 						<div>
-							<h3 class="font-semibold">{room.room_name}</h3>
+							<h3 class="font-semibold">{room.room_name} [{room.room_code}]</h3>
 							<div class="flex items-center space-x-4 text-sm text-gray-500">
 								<span class="flex items-center">
 									<!-- TODO user icon -->
@@ -103,9 +103,6 @@
 						<Button variant="outline" size="sm" on:click={() => goto(`/room/${room.id}`)}>
 							Rejoin
 						</Button>
-						<!-- <a href="/room/{room.id}">
-					<strong>{room.room_name}</strong> - {room.room_code} - {room.created} - {room.id}
-				</a> -->
 					</li>
 				{/each}
 

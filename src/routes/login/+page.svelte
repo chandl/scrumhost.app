@@ -1,31 +1,73 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { login, logout, user } from '$lib/user';
+	import { Button } from '$lib/components/ui/button';
+	import {
+		Card,
+		CardContent,
+		CardDescription,
+		CardFooter,
+		CardHeader,
+		CardTitle
+	} from '$lib/components/ui/card';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import { logout, signup, user } from '$lib/user';
 	import type { AuthModel } from 'pocketbase';
-
-	let email = '';
-	let password = '';
+	import { onMount } from 'svelte';
 
 	let currentUser: AuthModel;
 	user.subscribe((value) => {
 		currentUser = value;
 	});
 
-	async function handleLogin() {
-		await login(email, password);
+	function handleRedirect() {
 		goto('/');
 	}
+
+	let name = '';
+	async function handleSubmit() {
+		console.log('Submit name to register', name);
+		await signup(name);
+		handleRedirect();
+	}
+
+	onMount(() => {
+		if (currentUser) {
+			console.log('Already logged in');
+			handleRedirect();
+		}
+	});
 </script>
 
-{#if currentUser}
-	<strong><a href="/">Home</a></strong>
-
-	<p>Welcome, {currentUser.email}!</p>
-	<button on:click={logout}>Logout</button>
-{:else}
-	<form on:submit|preventDefault={handleLogin}>
-		<input type="email" bind:value={email} placeholder="Email" required />
-		<input type="password" bind:value={password} placeholder="Password" required />
-		<button type="submit">Login</button>
-	</form>
-{/if}
+<div
+	class="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-blue-100 to-white p-4"
+>
+	<Card class="w-full max-w-md">
+		<CardHeader>
+			<CardTitle class="text-center text-2xl font-bold">scrum.host</CardTitle>
+			<CardDescription class="text-center">Please enter your name to continue</CardDescription>
+		</CardHeader>
+		<form on:submit={handleSubmit}>
+			<CardContent class="space-y-4">
+				<div class="space-y-2">
+					<Label for="name">Your Name</Label>
+					<div class="relative">
+						<!-- TODO user icon -->
+						<h1 class="absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-500">u</h1>
+						<Input
+							id="name"
+							type="text"
+							placeholder="Enter your name"
+							bind:value={name}
+							class="py-6 pl-10 text-lg"
+							required
+						/>
+					</div>
+				</div>
+			</CardContent>
+			<CardFooter>
+				<Button type="submit" class="w-full py-6 text-lg" disabled={!name.trim()}>Continue</Button>
+			</CardFooter>
+		</form>
+	</Card>
+</div>

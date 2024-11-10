@@ -9,9 +9,9 @@ pb.authStore.onChange(() => {
 	user.set(pb.authStore.model);
 });
 
-export async function login(email: string, password: string) {
+export async function login(username: string, password: string) {
 	try {
-		await pb.collection('users').authWithPassword(email, password);
+		await pb.collection('users').authWithPassword(username, password);
 		console.log('Logged in successfully');
 	} catch (err) {
 		console.error('Login error:', err);
@@ -23,14 +23,19 @@ export function logout() {
 	console.log('Logged out');
 }
 
-export async function signup(email: string, password: string, passwordConfirm: string) {
+export async function signup(name: string) {
+	const userName = generateUsername(name);
+	const passwd = generatePassword(16);
 	try {
-		await pb.collection('users').create({
-			email,
-			password,
-			passwordConfirm
+		const user = await pb.collection('users').create({
+			username: userName,
+			name,
+			password: passwd,
+			passwordConfirm: passwd
 		});
-		console.log('Sign-up successful');
+
+		console.log('Sign-up successful. Logging in', user);
+		await login(userName, passwd);
 	} catch (err) {
 		console.error('Sign-up error:', err);
 	}
@@ -55,4 +60,22 @@ export function validateLogin() {
 		console.error('Error checking authentication:', error);
 		goto('/login'); // Redirect to login page if there’s an error
 	}
+}
+
+function generatePassword(length: number): string {
+	const chars =
+		'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=';
+	let password = '';
+
+	for (let i = 0; i < length; i++) {
+		const randomIndex = Math.floor(Math.random() * chars.length);
+		password += chars[randomIndex];
+	}
+
+	return password;
+}
+
+function generateUsername(name: string): string {
+	const randomNumber = Math.floor(Math.random() * 10000); // Random number between 0 and 9999
+	return `${name.replace(/[^a-zA-Z]/g, '')}${randomNumber}`;
 }
