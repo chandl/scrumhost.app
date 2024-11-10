@@ -35,7 +35,7 @@ export async function joinRoom(roomId: string) {
 			const participantData = {
 				user: userId,
 				room: roomId,
-				name: pb.authStore.model?.username
+				name: pb.authStore.model?.name
 			};
 			const newParticipant = await pb.collection('participants').create(participantData);
 			console.log('Room Joined successfully:', newParticipant);
