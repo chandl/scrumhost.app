@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import pb from './pocketbase';
+import pb, { COLLECTIONS } from './pocketbase';
 import { goto } from '$app/navigation';
 
 export const user = writable(pb.authStore.model);
@@ -19,6 +19,16 @@ export async function login(username: string, password: string) {
 }
 
 export function logout() {
+	// clear all subscriptions
+	COLLECTIONS.forEach(async coll => {
+		try {
+			console.log("Trying to unsubscribe from collection", coll);
+			await pb.collection(coll).unsubscribe();
+		} catch (err) {
+			console.warn("Failed to unsubscribe to", coll, err)
+		}
+	})
+
 	pb.authStore.clear();
 	console.log('Logged out');
 }
