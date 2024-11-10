@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { logout, user, validateLogin } from '$lib/user';
-	import { createRoom, getUserRooms, joinRoomWithCode, type Room } from '$lib/room';
+	import { user, validateLogin } from '$lib/user';
+	import { getUserRooms, joinRoomWithCode, type Room } from '$lib/room';
 	import type { AuthModel } from 'pocketbase';
 	import { onMount } from 'svelte';
 	import {
@@ -14,17 +14,12 @@
 	} from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { goto } from '$app/navigation';
+	import RoomCreator from './components/RoomCreator.svelte';
 
 	let currentUser: AuthModel;
 	user.subscribe((value) => {
 		currentUser = value;
 	});
-
-	async function handleCreateRoom() {
-		const roomId = await createRoom('Test Room', '0,1,2,3,4,5,6,7,8,9,10');
-
-		goto(`/room/${roomId}`);
-	}
 
 	let rooms: Room[];
 	onMount(async () => {
@@ -38,6 +33,10 @@
 		console.log('handleJoinRoom', joinRoomCode);
 		joinRoomWithCode(joinRoomCode);
 	}
+
+	function truncate(str: string, n: number) {
+		return str.length > n ? str.slice(0, n - 1) + '…' : str;
+	}
 </script>
 
 <div
@@ -45,13 +44,13 @@
 >
 	<Card class="w-full max-w-md">
 		<CardHeader>
-			<CardTitle class="text-center text-2xl font-bold">scrum.host</CardTitle>
+			<CardTitle class="text-center text-2xl font-bold">Welcome, {currentUser?.name}</CardTitle>
 			<CardDescription class="text-center"
 				>Create or join a room to get started refining your backlog</CardDescription
 			>
 		</CardHeader>
 		<CardContent class="space-y-4">
-			<Button class="w-full py-6 text-lg" on:click={handleCreateRoom}>Create Room</Button>
+			<RoomCreator />
 			<div class="relative">
 				<div class="absolute inset-0 flex items-center">
 					<span class="w-full border-t"></span>
@@ -86,7 +85,7 @@
 						class="flex items-center justify-between rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100"
 					>
 						<div>
-							<h3 class="font-semibold">{room.room_name} [{room.room_code}]</h3>
+							<h3 class="font-semibold">{truncate(room.room_name, 25)} [{room.room_code}]</h3>
 							<div class="flex items-center space-x-4 text-sm text-gray-500">
 								<span class="flex items-center">
 									<!-- TODO user icon -->
@@ -105,27 +104,6 @@
 						</Button>
 					</li>
 				{/each}
-
-				<!-- {recentRooms.map(room => (
-			<li key={room.id} >
-			<div>
-				<h3 class="font-semibold">{room.name}</h3>
-				<div class="flex items-center text-sm text-gray-500 space-x-4">
-				<span class="flex items-center">
-					<Users class="w-4 h-4 mr-1" />
-					{room.participants} participants
-				</span>
-				<span class="flex items-center">
-					<Clock class="w-4 h-4 mr-1" />
-					{room.lastJoined}
-				</span>
-				</div>
-			</div>
-			<Button variant="outline" size="sm" onClick={() => console.log(`Rejoining room: ${room.name}`)}>
-				Rejoin
-			</Button>
-			</li>
-		))} -->
 			</ul>
 		</CardContent>
 	</Card>

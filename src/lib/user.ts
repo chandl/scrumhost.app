@@ -20,14 +20,14 @@ export async function login(username: string, password: string) {
 
 export function logout() {
 	// clear all subscriptions
-	COLLECTIONS.forEach(async coll => {
+	COLLECTIONS.forEach(async (coll) => {
 		try {
-			console.log("Trying to unsubscribe from collection", coll);
+			console.log('Trying to unsubscribe from collection', coll);
 			await pb.collection(coll).unsubscribe();
 		} catch (err) {
-			console.warn("Failed to unsubscribe to", coll, err)
+			console.warn('Failed to unsubscribe to', coll, err);
 		}
-	})
+	});
 
 	pb.authStore.clear();
 	console.log('Logged out');
