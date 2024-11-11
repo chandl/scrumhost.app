@@ -103,7 +103,6 @@ export interface Participant {
 export function subscribeToRoomUpdates(roomId: string, callback: (record: RoomDetails) => void) {
 	pb.collection('rooms').subscribe(roomId, function (e) {
 		if (e.action == 'update') {
-			console.log('Room Update: ', e);
 			callback({
 				id: e.record.id,
 				created: e.record.created,

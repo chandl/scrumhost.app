@@ -4,7 +4,7 @@ export async function createStory(details: string, roomId: string) {
 	const data = {
 		room: roomId,
 		details: details,
-		completed: false
+		status: 'QUEUED'
 	};
 
 	const record = await pb.collection('stories').create(data);
@@ -17,11 +17,13 @@ export async function createStory(details: string, roomId: string) {
 	return record;
 }
 
+export type StoryStatus = 'QUEUED' | 'REVIEWED' | 'SKIPPED';
+
 export interface Story {
 	id: string;
 	room: string;
 	details: string;
-	completed: boolean;
+	status: StoryStatus;
 	created: string;
 	story_estimates: string[];
 }
@@ -33,7 +35,7 @@ export async function getStoryById(storyId: string): Promise<Story> {
 		id: story.id,
 		room: story.room,
 		details: story.details,
-		completed: story.completed,
+		status: story.status,
 		created: story.created,
 		story_estimates: story.story_estimates
 	};
@@ -44,7 +46,7 @@ export async function getStoriesInRoom(roomId: string): Promise<Story[]> {
 	try {
 		const storiesInRoom = pb.collection('stories').getList(1, 50, {
 			filter: `room = "${roomId}"`,
-			sort: 'completed,-created'
+			sort: 'status,-created'
 		});
 
 		return (await storiesInRoom).items.map((record) => {
@@ -52,7 +54,7 @@ export async function getStoriesInRoom(roomId: string): Promise<Story[]> {
 				id: record.id,
 				room: record.room,
 				details: record.details,
-				completed: record.completed,
+				status: record.status,
 				created: record.created,
 				story_estimates: record.story_estimates
 			};
@@ -71,7 +73,7 @@ export function subscribeToStoryUpdates(storyId: string, callback: (record: Stor
 				id: e.record.id,
 				room: e.record.room,
 				details: e.record.details,
-				completed: e.record.completed,
+				status: e.record.status,
 				created: e.record.created,
 				story_estimates: e.record.story_estimates
 			});

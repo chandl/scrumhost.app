@@ -1,28 +1,22 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
+	import type { Story } from '$lib/story';
 	import { Check, CornerDownLeft, PlayCircle, SkipForward } from 'lucide-svelte';
 
 	let {
 		tasks,
 		onTaskAction,
 		currentStatus
-	}: { tasks: Task[]; onVote: any; votingEnabled: any; onTaskAction: any; currentStatus: any } =
+	}: { tasks: Story[]; onVote: any; votingEnabled: any; onTaskAction: any; currentStatus: any } =
 		$props();
 
 	type TaskStatus = 'queued' | 'reviewed' | 'skipped';
-
-	type Task = {
-		id: string;
-		description: string;
-		votes: Record<string, number | null>;
-		status: TaskStatus;
-	};
 </script>
 
 <ul class="space-y-4">
 	{#each tasks as task}
 		<li class="border-b pb-4 last:border-b-0 last:pb-0">
-			<h3 class="mb-2 text-2xl">{task.description}</h3>
+			<h3 class="mb-2 text-2xl">{task.details}</h3>
 			<div class="mb-2 flex space-x-2">
 				<div class="mt-2 flex space-x-2">
 					{#if currentStatus === 'queued'}
