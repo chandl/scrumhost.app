@@ -4,7 +4,7 @@ export async function createStory(details: string, roomId: string) {
 	const data = {
 		room: roomId,
 		details: details,
-		status: 'QUEUED'
+		story_status: 'QUEUED'
 	};
 
 	const record = await pb.collection('stories').create(data);
@@ -19,11 +19,13 @@ export async function createStory(details: string, roomId: string) {
 
 export type StoryStatus = 'QUEUED' | 'REVIEWED' | 'SKIPPED';
 
+export type StoryAction = 'START_VOTING' | 'MARK_REVIEWED' | 'SKIP' | 'REQUEUE';
+
 export interface Story {
 	id: string;
 	room: string;
 	details: string;
-	status: StoryStatus;
+	story_status: StoryStatus;
 	created: string;
 	story_estimates: string[];
 }
@@ -35,7 +37,7 @@ export async function getStoryById(storyId: string): Promise<Story> {
 		id: story.id,
 		room: story.room,
 		details: story.details,
-		status: story.status,
+		story_status: story.story_status,
 		created: story.created,
 		story_estimates: story.story_estimates
 	};
@@ -46,7 +48,7 @@ export async function getStoriesInRoom(roomId: string): Promise<Story[]> {
 	try {
 		const storiesInRoom = pb.collection('stories').getList(1, 50, {
 			filter: `room = "${roomId}"`,
-			sort: 'status,-created'
+			sort: 'story_status,-created'
 		});
 
 		return (await storiesInRoom).items.map((record) => {
@@ -54,7 +56,7 @@ export async function getStoriesInRoom(roomId: string): Promise<Story[]> {
 				id: record.id,
 				room: record.room,
 				details: record.details,
-				status: record.status,
+				story_status: record.story_status,
 				created: record.created,
 				story_estimates: record.story_estimates
 			};
@@ -73,12 +75,25 @@ export function subscribeToStoryUpdates(storyId: string, callback: (record: Stor
 				id: e.record.id,
 				room: e.record.room,
 				details: e.record.details,
-				status: e.record.status,
+				story_status: e.record.story_status,
 				created: e.record.created,
 				story_estimates: e.record.story_estimates
 			});
 		}
 	});
+}
+
+export async function setStoryStatus(storyId: string, story_status: StoryStatus) {
+	try {
+		const storyData = await getStoryById(storyId);
+		const record = await pb
+			.collection('stories')
+			.update(storyId, { ...storyData, story_status: story_status });
+		console.log(`Set story ${storyId} status to ${status}`, record);
+	} catch (err) {
+		console.error('Failed to set story status', err);
+		throw err;
+	}
 }
 
 export async function setStoryCompleted(storyId: string, completed: boolean) {

@@ -1,16 +1,19 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import type { Story } from '$lib/story';
+	import type { Story, StoryAction } from '$lib/story';
 	import { Check, CornerDownLeft, PlayCircle, SkipForward } from 'lucide-svelte';
 
 	let {
 		tasks,
 		onTaskAction,
 		currentStatus
-	}: { tasks: Story[]; onVote: any; votingEnabled: any; onTaskAction: any; currentStatus: any } =
-		$props();
-
-	type TaskStatus = 'queued' | 'reviewed' | 'skipped';
+	}: {
+		tasks: Story[];
+		onVote: any;
+		votingEnabled: any;
+		onTaskAction: (taskId: string, taskAction: StoryAction) => void;
+		currentStatus: any;
+	} = $props();
 </script>
 
 <ul class="space-y-4">
@@ -20,14 +23,14 @@
 			<div class="mb-2 flex space-x-2">
 				<div class="mt-2 flex space-x-2">
 					{#if currentStatus === 'queued'}
-						<Button size="sm" on:click={() => onTaskAction(task.id, 'start_voting')}>
-							<PlayCircle class="mr-2 h-4 w-4" /> Start Voting
+						<Button size="sm" on:click={() => onTaskAction(task.id, 'START_VOTING')}>
+							<PlayCircle class="mr-2 h-4 w-4" />Start Voting
 						</Button>
-						<Button size="sm" variant="outline" on:click={() => onTaskAction(task.id, 'skip')}>
+						<Button size="sm" variant="outline" on:click={() => onTaskAction(task.id, 'SKIP')}>
 							<SkipForward class="mr-2 h-4 w-4" /> Skip
 						</Button>
 					{:else if currentStatus === 'reviewed' || currentStatus === 'skipped'}
-						<Button size="sm" variant="outline" on:click={() => onTaskAction(task.id, 'requeue')}>
+						<Button size="sm" variant="outline" on:click={() => onTaskAction(task.id, 'REQUEUE')}>
 							<CornerDownLeft class="mr-2 h-4 w-4" /> Requeue
 						</Button>
 					{/if}

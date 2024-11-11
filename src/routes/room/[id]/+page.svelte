@@ -13,6 +13,8 @@
 		getRoom,
 		getRoomParticipants,
 		joinRoom,
+		setActiveStory,
+		setVotingFlag,
 		subscribeToNewParticipants,
 		subscribeToRoomUpdates,
 		type Participant,
@@ -20,7 +22,14 @@
 	} from '$lib/room';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { createStory, getStoriesInRoom, getStoryById, type Story } from '$lib/story';
+	import {
+		createStory,
+		getStoriesInRoom,
+		getStoryById,
+		setStoryStatus,
+		type Story,
+		type StoryAction
+	} from '$lib/story';
 
 	const roomId = $page.params.id;
 	let room: RoomDetails | undefined = $state();
@@ -29,15 +38,15 @@
 	let activeStoryDetails: Story | undefined = $state();
 
 	let queuedTasks: Story[] | undefined = $derived.by(() =>
-		stories?.filter((story) => story.status == 'QUEUED')
+		stories?.filter((story) => story.story_status == 'QUEUED' && story.id != room?.active_story_id)
 	);
 
 	let reviewedTasks: Story[] | undefined = $derived.by(() =>
-		stories?.filter((story) => story.status == 'REVIEWED')
+		stories?.filter((story) => story.story_status == 'REVIEWED')
 	);
 
 	let skippedTasks: Story[] | undefined = $derived.by(() =>
-		stories?.filter((story) => story.status == 'SKIPPED')
+		stories?.filter((story) => story.story_status == 'SKIPPED')
 	);
 
 	onMount(async () => {
@@ -99,12 +108,45 @@
 		newTaskDescription = '';
 	}
 
-	let votingEnabled: boolean = $state(true);
+	let votingEnabled: boolean = $derived.by(() => room?.room_status == 'VOTING');
 	let newTaskDescription: string = $state('');
 	let currentTab: string = $state('');
 
-	function toggleVoting() {
-		votingEnabled = !votingEnabled;
+	async function handleTaskAction(taskId: string, taskAction: StoryAction) {
+		console.log('HandleTaskAction', taskId, taskAction);
+
+		if (taskAction == 'START_VOTING') {
+			// TODO check if voting enabled
+			await setActiveStory(roomId, taskId);
+			setVotingFlag(roomId, true);
+		} else if (taskAction == 'REQUEUE') {
+			// TODO only allow this if it's not in QUEUED state
+
+			if (room?.active_story_id == taskId) {
+				await setActiveStory(roomId, null);
+
+				// Stop voting
+				await setVotingFlag(roomId, false);
+			}
+
+			await setStoryStatus(taskId, 'QUEUED');
+		} else if (taskAction == 'MARK_REVIEWED') {
+			if (room?.active_story_id == taskId) {
+				// Stop voting
+				await setActiveStory(roomId, null);
+				await setVotingFlag(roomId, false);
+
+				await setStoryStatus(taskId, 'REVIEWED');
+			}
+		} else if (taskAction == 'SKIP') {
+			if (room?.active_story_id == taskId) {
+				// Stop voting
+				await setActiveStory(roomId, null);
+				await setVotingFlag(roomId, false);
+			}
+
+			await setStoryStatus(taskId, 'SKIPPED');
+		}
 	}
 
 	const pointValues: string[] = $derived(room?.point_values.split(',') || []);
@@ -112,38 +154,40 @@
 
 <div class="min-h-screen bg-gradient-to-b from-blue-100 to-white p-8">
 	<div class="mx-auto max-w-6xl space-y-8">
-		<h1 class="text-4xl font-bold">{room?.room_name} [{room?.room_code}]</h1>
+		<h1 class="text-4xl font-bold">{room?.room_name} [{room?.room_code}] {room?.room_status}</h1>
 
 		<div class="grid grid-cols-1 gap-8 md:grid-cols-3">
 			<div class="space-y-8 md:col-span-2">
-				<!-- New Section: Voting Summary -->
-				<Card class="rounded-lg border border-gray-200 shadow-lg">
-					<CardHeader class="rounded-t-lg border-b border-gray-300 bg-gray-100 pb-4">
-						<CardTitle class="text-lg font-semibold text-gray-800">Vote Summary</CardTitle>
-					</CardHeader>
-					<CardContent class="flex flex-col items-start px-6">
-						<!-- Task Description with Separation -->
-						<div class="mb-6 w-full rounded-lg border-l-4 border-blue-500 bg-gray-50 p-4 shadow-md">
-							<h3 class="text-3xl font-semibold text-gray-800">{activeStoryDetails?.details}</h3>
-						</div>
-						<p class="mb-4 text-lg text-gray-600">
-							Here's how many people voted for each story point:
-						</p>
-
-						{#each pointValues as value}
-							<div class="mb-4 flex w-full items-center justify-between">
-								<span class="text-lg text-gray-700">{value} Points</span>
-								<div class="mx-4 h-3 w-full max-w-xs rounded-full bg-gray-200">
-									<div class="h-full rounded-full bg-blue-500" style="width: {10}%"></div>
-								</div>
-								<span class="text-sm text-gray-500">{/* list of votes */ 0 || 0} votes</span>
+				{#if room?.room_status == 'REVIEWING'}
+					<!-- New Section: Voting Summary -->
+					<Card class="rounded-lg border border-gray-200 shadow-lg">
+						<CardHeader class="rounded-t-lg border-b border-gray-300 bg-gray-100 pb-4">
+							<CardTitle class="text-lg font-semibold text-gray-800">Vote Summary</CardTitle>
+						</CardHeader>
+						<CardContent class="flex flex-col items-start px-6">
+							<!-- Task Description with Separation -->
+							<div
+								class="mb-6 w-full rounded-lg border-l-4 border-blue-500 bg-gray-50 p-4 shadow-md"
+							>
+								<h3 class="text-3xl font-semibold text-gray-800">{activeStoryDetails?.details}</h3>
 							</div>
-						{/each}
-					</CardContent>
-				</Card>
+							<p class="mb-4 text-lg text-gray-600">
+								Here's how many people voted for each story point:
+							</p>
 
-				<!-- Section for Current Task Being Voted On -->
-				{#if votingEnabled && activeStoryDetails}
+							{#each pointValues as value}
+								<div class="mb-4 flex w-full items-center justify-between">
+									<span class="text-lg text-gray-700">{value} Points</span>
+									<div class="mx-4 h-3 w-full max-w-xs rounded-full bg-gray-200">
+										<div class="h-full rounded-full bg-blue-500" style="width: {10}%"></div>
+									</div>
+									<span class="text-sm text-gray-500">{/* list of votes */ 0 || 0} votes</span>
+								</div>
+							{/each}
+						</CardContent>
+					</Card>
+				{:else if room?.room_status == 'VOTING'}
+					<!-- Section for Current Task Being Voted On -->
 					<Card class="mt-6 rounded-lg border border-gray-200 shadow-lg">
 						<!-- Card Header (Toolbar style) -->
 						<CardHeader class="rounded-t-lg border-b border-gray-300 bg-gray-100 pb-4">
@@ -169,12 +213,12 @@
 							<div class="mb-8 flex flex-wrap gap-3">
 								{#each pointValues as value}
 									<Button
-										variant={Object.values([/* list of votes */ 0]).includes(value)
+										variant={Object.values([/* list of votes */ '0']).includes(value)
 											? 'default'
 											: 'outline'}
 										class="h-12 w-20 font-medium"
 										on:click={() => console.log('vote', activeStoryDetails?.id, value)}
-										disabled={!votingEnabled || activeStoryDetails.status !== 'QUEUED'}
+										disabled={!votingEnabled || activeStoryDetails?.story_status !== 'QUEUED'}
 									>
 										{value}
 									</Button>
@@ -196,7 +240,7 @@
 								<Button
 									size="lg"
 									class="flex w-full items-center justify-start bg-blue-500 py-2 font-semibold text-white hover:bg-blue-600 sm:w-auto"
-									on:click={() => console.log('Mark as reviewed')}
+									on:click={() => handleTaskAction(activeStoryDetails?.id || '', 'MARK_REVIEWED')}
 								>
 									<Check class="mr-2 h-5 w-5" /> Finish Voting
 								</Button>
@@ -206,7 +250,7 @@
 									size="lg"
 									variant="outline"
 									class="w-full border-gray-300 text-gray-700 hover:bg-gray-100 sm:w-auto"
-									on:click={() => console.log('Put back in queue')}
+									on:click={() => handleTaskAction(activeStoryDetails?.id || '', 'REQUEUE')}
 								>
 									<CornerDownLeft class="mr-2 h-5 w-5" /> Put Back in Queue
 								</Button>
@@ -240,10 +284,10 @@
 								</CardHeader>
 								<CardContent>
 									<TaskList
-										tasks={stories}
+										tasks={queuedTasks}
 										onVote={() => console.log('onVote called')}
 										{votingEnabled}
-										onTaskAction={() => console.log('onTaskAction called')}
+										onTaskAction={handleTaskAction}
 										currentStatus="queued"
 									/>
 								</CardContent>
@@ -259,7 +303,7 @@
 										tasks={reviewedTasks}
 										onVote={() => console.log('onVote')}
 										votingEnabled={false}
-										onTaskAction={() => console.log('onTaskAction')}
+										onTaskAction={handleTaskAction}
 										currentStatus="reviewed"
 									/>
 								</CardContent>
@@ -275,7 +319,7 @@
 										tasks={skippedTasks}
 										onVote={() => console.log('Handle vote')}
 										votingEnabled={false}
-										onTaskAction={() => console.log('onTaskAction')}
+										onTaskAction={handleTaskAction}
 										currentStatus="skipped"
 									/>
 								</CardContent>

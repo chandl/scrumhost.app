@@ -167,16 +167,6 @@
 			},
 			{
 				"system": false,
-				"id": "br0d7ojx",
-				"name": "is_voting_period",
-				"type": "bool",
-				"required": false,
-				"presentable": false,
-				"unique": false,
-				"options": {}
-			},
-			{
-				"system": false,
 				"id": "lczj8fjz",
 				"name": "active_story",
 				"type": "relation",
@@ -197,11 +187,11 @@
 				"name": "room_name",
 				"type": "text",
 				"required": true,
-				"presentable": false,
+				"presentable": true,
 				"unique": false,
 				"options": {
 					"min": null,
-					"max": null,
+					"max": 128,
 					"pattern": ""
 				}
 			},
@@ -236,13 +226,26 @@
 					"maxSelect": null,
 					"displayFields": null
 				}
+			},
+			{
+				"system": false,
+				"id": "aq88xf3w",
+				"name": "room_status",
+				"type": "select",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"maxSelect": 1,
+					"values": ["IDLE", "VOTING", "REVIEWING"]
+				}
 			}
 		],
 		"indexes": ["CREATE UNIQUE INDEX `idx_3igflSm` ON `rooms` (`room_code`)"],
 		"listRule": "@request.auth.id != \"\"",
 		"viewRule": "@request.auth.id != \"\"",
 		"createRule": "@request.auth.id != \"\"",
-		"updateRule": "@request.auth.id != \"\" && @request.auth.id = @collection.rooms.host",
+		"updateRule": "@request.auth.id != \"\"",
 		"deleteRule": null,
 		"options": {}
 	},
@@ -284,16 +287,6 @@
 			},
 			{
 				"system": false,
-				"id": "w6uy72m0",
-				"name": "completed",
-				"type": "bool",
-				"required": false,
-				"presentable": false,
-				"unique": false,
-				"options": {}
-			},
-			{
-				"system": false,
 				"id": "ow1lbvkk",
 				"name": "story_estimates",
 				"type": "relation",
@@ -306,6 +299,19 @@
 					"minSelect": null,
 					"maxSelect": null,
 					"displayFields": null
+				}
+			},
+			{
+				"system": false,
+				"id": "cl8842mu",
+				"name": "story_status",
+				"type": "select",
+				"required": false,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"maxSelect": 1,
+					"values": ["QUEUED", "REVIEWED", "SKIPPED"]
 				}
 			}
 		],

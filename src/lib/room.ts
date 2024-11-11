@@ -59,7 +59,7 @@ export async function createRoom(room_name: string, point_values: string) {
 			room_name: room_name,
 			room_code: createRoomCode(),
 			point_values: point_values,
-			is_voting_period: false,
+			room_status: 'IDLE',
 			active_story: null
 		};
 
@@ -82,9 +82,11 @@ export interface Room {
 	room_code: string;
 }
 
+export type RoomState = 'IDLE' | 'VOTING' | 'REVIEWING';
+
 export interface RoomDetails extends Room {
 	active_story_id: string;
-	is_voting_period: boolean;
+	room_status: RoomState;
 	point_values: string;
 	stories: string[];
 	participants: string[];
@@ -109,7 +111,7 @@ export function subscribeToRoomUpdates(roomId: string, callback: (record: RoomDe
 				room_name: e.record.room_name,
 				room_code: e.record.room_code,
 				active_story_id: e.record.active_story,
-				is_voting_period: e.record.is_voting_period,
+				room_status: e.record.room_status,
 				point_values: e.record.point_values,
 				stories: e.record.stories,
 				participants: e.record.participants
@@ -140,7 +142,7 @@ export async function setVotingFlag(roomId: string, enableVoting: boolean) {
 		const currentRoomData = await getRoom(roomId);
 		const record = await pb
 			.collection('rooms')
-			.update(roomId, { ...currentRoomData, is_voting_period: enableVoting });
+			.update(roomId, { ...currentRoomData, room_status: enableVoting ? 'VOTING' : 'IDLE' });
 		console.log(`Set room ${roomId} voting flag to ${enableVoting}`, record);
 	} catch (err) {
 		console.error('Failed to set active story in room', err);
@@ -148,7 +150,7 @@ export async function setVotingFlag(roomId: string, enableVoting: boolean) {
 	}
 }
 
-export async function setActiveStory(roomId: string, storyId: string) {
+export async function setActiveStory(roomId: string, storyId: string | null) {
 	try {
 		const currentRoomData = await getRoom(roomId);
 		const record = await pb
@@ -164,14 +166,13 @@ export async function setActiveStory(roomId: string, storyId: string) {
 export async function getRoom(roomId: string): Promise<RoomDetails> {
 	try {
 		const room = await pb.collection('rooms').getOne(roomId);
-		console.log('Got room:', room);
 		return {
 			id: room.id,
 			created: room.created,
 			room_name: room.room_name,
 			room_code: room.room_code,
 			active_story_id: room.active_story,
-			is_voting_period: room.is_voting_period,
+			room_status: room.room_status,
 			point_values: room.point_values,
 			stories: room.stories,
 			participants: room.participants

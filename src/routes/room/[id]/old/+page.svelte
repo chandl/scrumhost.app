@@ -38,7 +38,7 @@
 			return;
 		}
 		// Flip the flag
-		setVotingFlag(roomId, !room.is_voting_period);
+		setVotingFlag(roomId, true);
 	}
 
 	function setActiveStoryDetails(room: RoomDetails) {
@@ -101,7 +101,7 @@
 <h1>Room Code: {room?.room_code}</h1>
 <h1>Active Story: {activeStoryDetails?.details} - {activeStoryDetails?.id}</h1>
 <h1>Point Values: {room?.point_values}</h1>
-<h1>Voting Now: {room?.is_voting_period}</h1>
+<h1>Room State: {room?.room_status}</h1>
 
 <Button on:click={handleSetVotingFlag}>Flip Voting Flag</Button>
 
