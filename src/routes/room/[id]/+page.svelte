@@ -21,7 +21,6 @@
 		type RoomDetails
 	} from '$lib/room';
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
 	import {
 		createStory,
 		getStoriesInRoom,
@@ -30,6 +29,7 @@
 		type Story,
 		type StoryAction
 	} from '$lib/story';
+	import { validateLogin } from '$lib/user';
 
 	const roomId = $page.params.id;
 	let room: RoomDetails | undefined = $state();
@@ -50,6 +50,8 @@
 	);
 
 	onMount(async () => {
+		validateLogin();
+
 		// Get the room details
 		try {
 			if (!room) {
@@ -61,7 +63,6 @@
 		} catch (err) {
 			console.error('Could not find room with id', roomId);
 			// TODO go to 404 page
-			goto('/');
 			return;
 		}
 
@@ -154,7 +155,7 @@
 
 <div class="min-h-screen bg-gradient-to-b from-blue-100 to-white p-8">
 	<div class="mx-auto max-w-6xl space-y-8">
-		<h1 class="text-4xl font-bold">{room?.room_name} [{room?.room_code}] {room?.room_status}</h1>
+		<h1 class="text-4xl font-bold">{room?.room_name} [{room?.room_code}]</h1>
 
 		<div class="grid grid-cols-1 gap-8 md:grid-cols-3">
 			<div class="space-y-8 md:col-span-2">

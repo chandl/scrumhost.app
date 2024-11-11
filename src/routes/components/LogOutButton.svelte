@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import {
 		AlertDialog,
 		AlertDialogAction,
@@ -12,10 +13,12 @@
 	} from '$lib/components/ui/alert-dialog';
 	import { Button } from '$lib/components/ui/button';
 	import { logout, user } from '$lib/user';
-	import { LogOut } from 'lucide-svelte';
+	import { Home, LogOut } from 'lucide-svelte';
 	import type { AuthModel } from 'pocketbase';
 
 	let showConfirmDialog = $state(false);
+
+	let isNotRootPage = $derived($page.url.pathname !== '/');
 
 	let currentUser: AuthModel = $state(null);
 	user.subscribe((value) => {
@@ -30,6 +33,17 @@
 
 {#if currentUser != null}
 	<div>
+		{#if isNotRootPage}
+			<Button
+				variant="outline"
+				size="icon"
+				class="fixed right-16 top-4 rounded-full bg-background p-2 text-foreground shadow-md transition-all duration-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50"
+				on:click={() => goto('/')}
+				aria-label="Home"
+			>
+				<Home class="h-5 w-5" />
+			</Button>
+		{/if}
 		<Button
 			variant="outline"
 			size="icon"

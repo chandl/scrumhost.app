@@ -15,14 +15,19 @@
 	import { UserPen } from 'lucide-svelte';
 	import type { AuthModel } from 'pocketbase';
 	import { onMount } from 'svelte';
+	import { get } from 'svelte/store';
+	import { page } from '$app/stores';
 
 	let currentUser: AuthModel;
 	user.subscribe((value) => {
 		currentUser = value;
 	});
 
+	let targetPath: string = '/';
+
 	function handleRedirect() {
-		goto('/');
+		console.log('Redirect to target path', targetPath);
+		goto(targetPath);
 	}
 
 	let name = '';
@@ -37,6 +42,9 @@
 			console.log('Already logged in');
 			handleRedirect();
 		}
+
+		const params = new URLSearchParams(get(page).url.search);
+		targetPath = params.get('target') || '/';
 	});
 </script>
 

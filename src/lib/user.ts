@@ -1,6 +1,7 @@
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 import pb, { COLLECTIONS } from './pocketbase';
 import { goto } from '$app/navigation';
+import { page } from '$app/stores';
 
 export const user = writable(pb.authStore.model);
 
@@ -58,7 +59,12 @@ export function validateLogin() {
 
 		// If user is not logged in, redirect to the login page
 		if (!user) {
-			goto('/login'); // Redirect to login page
+			console.log('Current page url', get(page).url);
+			const currentUrl = get(page).url.pathname;
+			const loginUrl = `/login?target=${encodeURIComponent(currentUrl)}`;
+
+			console.log('Redirect', loginUrl);
+			// goto(loginUrl); // Redirect to login page
 		}
 
 		return {
