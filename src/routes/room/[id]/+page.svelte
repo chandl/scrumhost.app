@@ -107,9 +107,7 @@
 		votingEnabled = !votingEnabled;
 	}
 
-	type PointValue = 1 | 2 | 3 | 5 | 8 | 13 | 21;
-
-	const pointValues: PointValue[] = [1, 2, 3, 5, 8, 13, 21];
+	const pointValues: string[] = $derived(room?.point_values.split(',') || []);
 </script>
 
 <div class="min-h-screen bg-gradient-to-b from-blue-100 to-white p-8">
