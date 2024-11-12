@@ -12,8 +12,6 @@ export async function joinRoomWithCode(roomCode: string) {
 	try {
 		const room = await pb.collection('rooms').getFirstListItem(`room_code = "${roomCode}"`);
 		console.log('Found room with code:', roomCode, room);
-
-		await joinRoomAndGetParticipantDetails(room.id);
 		goto(`/room/${room.id}`);
 	} catch (err) {
 		console.error('Failed to join room', err);
