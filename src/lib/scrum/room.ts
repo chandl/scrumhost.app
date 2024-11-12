@@ -20,14 +20,17 @@ export async function joinRoomWithCode(roomCode: string) {
 	}
 }
 
-export async function getParticipantInRoom(userId: string, roomId: string): Promise<Participant> {
+export async function getParticipantInRoom(
+	userId: string,
+	roomId: string
+): Promise<Participant | undefined> {
 	try {
 		return await pb
 			.collection('participants')
 			.getFirstListItem(`user = "${userId}" && room = "${roomId}"`);
 	} catch (err) {
 		console.warn('Could not find participant in room', userId, roomId, err);
-		throw err;
+		return undefined;
 	}
 }
 

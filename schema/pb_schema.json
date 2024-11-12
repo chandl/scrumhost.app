@@ -306,7 +306,7 @@
 				"id": "cl8842mu",
 				"name": "story_status",
 				"type": "select",
-				"required": false,
+				"required": true,
 				"presentable": false,
 				"unique": false,
 				"options": {
@@ -374,13 +374,29 @@
 					"maxSelect": 1,
 					"displayFields": null
 				}
+			},
+			{
+				"system": false,
+				"id": "ac86hbse",
+				"name": "participant",
+				"type": "relation",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "qrc65jr3edr9tjz",
+					"cascadeDelete": false,
+					"minSelect": null,
+					"maxSelect": 1,
+					"displayFields": null
+				}
 			}
 		],
 		"indexes": [
 			"CREATE UNIQUE INDEX `idx_JPeLEUG` ON `story_estimates` (\n  `story`,\n  `user`\n)"
 		],
 		"listRule": "@request.auth.id != \"\" ",
-		"viewRule": "",
+		"viewRule": "@request.auth.id != \"\" ",
 		"createRule": "@request.auth.id != \"\" ",
 		"updateRule": "@request.auth.id != \"\" ",
 		"deleteRule": null,

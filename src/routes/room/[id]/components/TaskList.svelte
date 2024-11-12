@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import { CornerDownLeft, PlayCircle, SkipForward } from 'lucide-svelte';
+	import { CornerDownLeft, Eye, PlayCircle, SkipForward } from 'lucide-svelte';
 	import type { StoryAction, StorySummary } from '$lib/scrum/types';
 
 	let {
@@ -30,6 +30,9 @@
 							<SkipForward class="mr-2 h-4 w-4" /> Skip
 						</Button>
 					{:else if currentStatus === 'reviewed' || currentStatus === 'skipped'}
+						<Button size="sm" on:click={() => onTaskAction(task.id, 'REVIEW_RESULTS')}>
+							<Eye class="mr-2 h-4 w-4" /> Review Results
+						</Button>
 						<Button size="sm" variant="outline" on:click={() => onTaskAction(task.id, 'REQUEUE')}>
 							<CornerDownLeft class="mr-2 h-4 w-4" /> Requeue
 						</Button>

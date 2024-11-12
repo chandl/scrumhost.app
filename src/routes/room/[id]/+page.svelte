@@ -67,7 +67,9 @@
 			? undefined
 			: currentVotes.find((vote) => vote.participant === userParticipant?.id)?.estimate
 	);
-	let hasVoted: boolean = $derived(userVoteValue !== undefined);
+	let hasVoted: boolean = $derived(
+		userVoteValue !== undefined || room?.room_status === 'REVIEWING'
+	);
 	let userParticipant: Participant | undefined = $state();
 
 	$effect(async () => {
@@ -80,7 +82,6 @@
 			console.log('Set currentVotes to', storyWithVotes.story_estimates);
 			currentVotes = storyWithVotes.story_estimates;
 
-			// currentVotes = storyWithVotes.story_estimates;
 			console.log('Subscribing to story updates for', activeStoryDetails.id);
 			subscribeToStoryUpdates(activeStoryDetails.id, (storyWithEstimates) => {
 				currentVotes = storyWithEstimates.story_estimates;
@@ -97,6 +98,11 @@
 			if (!room) {
 				room = await getRoomSummary(roomId);
 
+				subscribeToRoomUpdates(roomId, (record) => {
+					console.log('Room Update Received', record);
+					room = record;
+				});
+
 				// Attempt to join the room. Will fail if already in it, but that's fine
 				userParticipant = await joinRoomAndGetParticipantDetails(roomId);
 			}
@@ -105,11 +111,6 @@
 			// TODO go to 404 page
 			return;
 		}
-
-		subscribeToRoomUpdates(roomId, (record) => {
-			console.log('Room Update Received', record);
-			room = record;
-		});
 	});
 
 	async function handleCreateTask() {
@@ -166,6 +167,12 @@
 				// Trigger room refresh if skipping 'queued' task
 				await setActiveStory(roomId, room?.active_story_id || null);
 			}
+		} else if (taskAction === 'REVIEW_RESULTS') {
+			if (room?.room_status !== 'IDLE') {
+				throw new Error('Cannot review results when another task is active.');
+			}
+			await setActiveStory(roomId, taskId);
+			await setRoomState(roomId, 'REVIEWING');
 		}
 	}
 
@@ -193,7 +200,7 @@
 							</div>
 							<p class="mb-4 text-lg text-gray-600">Vote Distribution:</p>
 
-							{#each new Set(currentVotes.map((vote) => vote.estimate)) as value}
+							{#each new Set(!currentVotes ? [] : currentVotes.map((vote) => vote.estimate)) as value}
 								<div class="mb-4 flex w-full items-center justify-between">
 									<span class="text-lg text-gray-700">{value}</span>
 									<div class="mx-4 h-3 w-full max-w-xs rounded-full bg-gray-200">
@@ -206,11 +213,11 @@
 										></div>
 									</div>
 									<span class="text-sm text-gray-500"
-										>{currentVotes.filter((vote) => vote.estimate === value).length} vote(s) - {(currentVotes.filter(
-											(vote) => vote.estimate === value
-										).length /
-											currentVotes.length) *
-											100}%</span
+										>{currentVotes.filter((vote) => vote.estimate === value).length} vote(s) - {(
+											(currentVotes.filter((vote) => vote.estimate === value).length /
+												currentVotes.length) *
+											100
+										).toFixed(0)}%</span
 									>
 								</div>
 							{/each}
@@ -272,7 +279,7 @@
 							<div class=" w-full">
 								<!-- Voting Progress Text -->
 								<p class="mt-2 text-xl font-semibold text-gray-700">
-									Vote Progress: <span class="text-blue-600">{voteProgress}%</span>
+									Vote Progress: <span class="text-blue-600">{voteProgress.toFixed(0)}%</span>
 								</p>
 								<Progress value={voteProgress} class="h-3 w-full bg-gray-200"></Progress>
 							</div>
@@ -326,6 +333,9 @@
 									<CardTitle>Queued Tasks</CardTitle>
 								</CardHeader>
 								<CardContent>
+									{#if queuedTasks.length === 0}
+										<p class="text-sm italic text-gray-700">Create a new task above.</p>
+									{/if}
 									<TaskList
 										tasks={queuedTasks}
 										onVote={() => console.log('onVote called')}

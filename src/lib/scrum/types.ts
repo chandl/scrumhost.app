@@ -39,7 +39,7 @@ export interface Estimate {
 }
 
 export type StoryStatus = 'QUEUED' | 'REVIEWED' | 'SKIPPED';
-export type StoryAction = 'START_VOTING' | 'MARK_REVIEWED' | 'SKIP' | 'REQUEUE';
+export type StoryAction = 'START_VOTING' | 'MARK_REVIEWED' | 'SKIP' | 'REQUEUE' | 'REVIEW_RESULTS';
 
 export interface StorySummary {
 	id: string;
