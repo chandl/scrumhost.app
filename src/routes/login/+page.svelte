@@ -11,7 +11,7 @@
 	} from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import { signup, user } from '$lib/user';
+	import { signup, user } from '$lib/scrum/user';
 	import { UserPen } from 'lucide-svelte';
 	import type { AuthModel } from 'pocketbase';
 	import { onMount } from 'svelte';

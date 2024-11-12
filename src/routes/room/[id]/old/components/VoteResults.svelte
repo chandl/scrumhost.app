@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { getEstimateById, getEstimatesByStory, type Estimate } from '$lib/estimates';
-	import type { Participant } from '$lib/room';
-	import { subscribeToStoryUpdates, unsubscribeToStoryUpdates, type Story } from '$lib/story';
+	import { getEstimateById, getEstimatesByStory } from '$lib/scrum/estimates';
+	import { subscribeToStoryUpdates, unsubscribeToStoryUpdates } from '$lib/scrum/story';
+	import type { Estimate, Participant, StoryDetails } from '$lib/scrum/types';
 
 	let { currentStory, participants }: { currentStory: string; participants: Participant[] } =
 		$props();
@@ -12,7 +12,7 @@
 		currentEstimates = await getEstimatesByStory(currentStory);
 	}
 
-	function handleStoryUpdates(update: Story) {
+	function handleStoryUpdates(update: StoryDetails) {
 		console.log('story update', update);
 		// Removing estimates that need to be removed
 		const to_remove_ids = new Set();

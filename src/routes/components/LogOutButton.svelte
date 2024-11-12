@@ -12,7 +12,7 @@
 		AlertDialogTitle
 	} from '$lib/components/ui/alert-dialog';
 	import { Button } from '$lib/components/ui/button';
-	import { logout, user } from '$lib/user';
+	import { logout, user } from '$lib/scrum/user';
 	import { Home, LogOut } from 'lucide-svelte';
 	import type { AuthModel } from 'pocketbase';
 

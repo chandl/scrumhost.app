@@ -8,22 +8,21 @@
 		joinRoom,
 		setActiveStory,
 		setVotingFlag,
-		subscribeToNewParticipants,
-		subscribeToRoomUpdates,
-		type Participant,
-		type RoomDetails
-	} from '$lib/room';
-	import { createStory, getStoriesInRoom, getStoryById, type Story } from '$lib/story';
-	import { validateLogin } from '$lib/user';
+		// subscribeToNewParticipants,
+		subscribeToRoomUpdates
+	} from '$lib/scrum/room';
+	import { createStory, getStoriesInRoom, getStoryById } from '$lib/scrum/story';
+	import { validateLogin } from '$lib/scrum/user';
 	import { onMount } from 'svelte';
 	import Vote from './components/Vote.svelte';
 	import VoteResults from './components/VoteResults.svelte';
+	import type { Participant, RoomDetails, StoryDetails } from '$lib/scrum/types';
 
 	const roomId = $page.params.id;
 	let room: RoomDetails;
 	let participants: Participant[];
-	let stories: Story[];
-	let activeStoryDetails: Story;
+	let stories: StoryDetails[];
+	let activeStoryDetails: StoryDetails;
 
 	function handleCreateStory() {
 		createStory('Story Details Example', roomId);
@@ -87,10 +86,10 @@
 			});
 		});
 
-		subscribeToNewParticipants(roomId, (record) => {
-			console.log('New Participant Received:', record);
-			participants = [record, ...participants];
-		});
+		// subscribeToNewParticipants(roomId, (record) => {
+		// 	console.log('New Participant Received:', record);
+		// 	participants = [record, ...participants];
+		// });
 	});
 </script>
 

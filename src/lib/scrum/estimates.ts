@@ -1,11 +1,5 @@
-import pb from '$lib/pocketbase';
-
-export interface Estimate {
-	id: string;
-	storyId: string;
-	estimate: string;
-	user: string;
-}
+import pb from '$lib/pb/pocketbase';
+import type { Estimate } from '$lib/scrum/types';
 
 export async function getEstimateById(estimateId: string): Promise<Estimate> {
 	const estimate = await pb.collection('story_estimates').getOne(estimateId);

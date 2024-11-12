@@ -1,4 +1,5 @@
-import pb from '$lib/pocketbase';
+import pb from '$lib/pb/pocketbase';
+import type { StoryDetails, StoryStatus } from '$lib/scrum/types';
 
 export async function createStory(details: string, roomId: string) {
 	const data = {
@@ -17,20 +18,7 @@ export async function createStory(details: string, roomId: string) {
 	return record;
 }
 
-export type StoryStatus = 'QUEUED' | 'REVIEWED' | 'SKIPPED';
-
-export type StoryAction = 'START_VOTING' | 'MARK_REVIEWED' | 'SKIP' | 'REQUEUE';
-
-export interface Story {
-	id: string;
-	room: string;
-	details: string;
-	story_status: StoryStatus;
-	created: string;
-	story_estimates: string[];
-}
-
-export async function getStoryById(storyId: string): Promise<Story> {
+export async function getStoryById(storyId: string): Promise<StoryDetails> {
 	const story = await pb.collection('stories').getOne(storyId);
 	console.log('Got story by id', storyId, story);
 	return {
@@ -43,7 +31,7 @@ export async function getStoryById(storyId: string): Promise<Story> {
 	};
 }
 
-export async function getStoriesInRoom(roomId: string): Promise<Story[]> {
+export async function getStoriesInRoom(roomId: string): Promise<StoryDetails[]> {
 	// TODO just look at the 'stories' field in room
 	try {
 		const storiesInRoom = pb.collection('stories').getList(1, 50, {
@@ -67,7 +55,7 @@ export async function getStoriesInRoom(roomId: string): Promise<Story[]> {
 	}
 }
 
-export function subscribeToStoryUpdates(storyId: string, callback: (record: Story) => void) {
+export function subscribeToStoryUpdates(storyId: string, callback: (record: StoryDetails) => void) {
 	pb.collection('stories').subscribe(storyId, function (e) {
 		if (e.action === 'update') {
 			console.log('Story Update Subscription Hit:', e);
@@ -92,19 +80,6 @@ export async function setStoryStatus(storyId: string, story_status: StoryStatus)
 		console.log(`Set story ${storyId} status to ${status}`, record);
 	} catch (err) {
 		console.error('Failed to set story status', err);
-		throw err;
-	}
-}
-
-export async function setStoryCompleted(storyId: string, completed: boolean) {
-	try {
-		const storyData = await getStoryById(storyId);
-		const record = await pb
-			.collection('stories')
-			.update(storyId, { ...storyData, completed: completed });
-		console.log(`Set story ${storyId} completed to ${completed}`, record);
-	} catch (err) {
-		console.error('Failed to set active story in room', err);
 		throw err;
 	}
 }

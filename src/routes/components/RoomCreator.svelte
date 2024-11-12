@@ -19,7 +19,7 @@
 		SelectTrigger,
 		SelectValue
 	} from '$lib/components/ui/select';
-	import { createRoom } from '$lib/room';
+	import { createRoom } from '$lib/scrum/room';
 
 	interface SelectionState {
 		value: string;

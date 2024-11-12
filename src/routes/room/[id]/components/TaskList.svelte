@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import type { Story, StoryAction } from '$lib/story';
-	import { Check, CornerDownLeft, PlayCircle, SkipForward } from 'lucide-svelte';
+	import { CornerDownLeft, PlayCircle, SkipForward } from 'lucide-svelte';
+	import type { StoryAction, StorySummary } from '$lib/scrum/types';
 
 	let {
 		tasks,
 		onTaskAction,
 		currentStatus
 	}: {
-		tasks: Story[];
+		tasks: StorySummary[];
 		onVote: any;
 		votingEnabled: any;
 		onTaskAction: (taskId: string, taskAction: StoryAction) => void;

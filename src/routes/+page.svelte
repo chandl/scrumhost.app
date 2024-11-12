@@ -1,13 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { user, validateLogin } from '$lib/user';
-	import {
-		getUserRooms,
-		joinRoomWithCode,
-		type ParticipantRoomDetails,
-		type Room,
-		type RoomDetails
-	} from '$lib/room';
+	import { user, validateLogin } from '$lib/scrum/user';
+	import { getUserRooms, joinRoomWithCode } from '$lib/scrum/room';
 	import type { AuthModel } from 'pocketbase';
 	import { onMount } from 'svelte';
 	import {
@@ -22,6 +16,7 @@
 	import { goto } from '$app/navigation';
 	import RoomCreator from './components/RoomCreator.svelte';
 	import { User, Clock2 } from 'lucide-svelte';
+	import type { ParticipantRoomDetails } from '$lib/scrum/types';
 
 	let currentUser: AuthModel;
 	user.subscribe((value) => {

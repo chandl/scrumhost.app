@@ -1,5 +1,11 @@
 import { goto } from '$app/navigation';
-import pb from '$lib/pocketbase';
+import pb from '$lib/pb/pocketbase';
+import type {
+	Participant,
+	ParticipantRoomDetails,
+	RoomDetails,
+	RoomSummary
+} from '$lib/scrum/types';
 
 export async function joinRoomWithCode(roomCode: string) {
 	try {
@@ -75,66 +81,32 @@ export async function createRoom(room_name: string, point_values: string) {
 	}
 }
 
-export interface Room {
-	id: string;
-	created: string;
-	room_name: string;
-	room_code: string;
-}
-
-export type RoomState = 'IDLE' | 'VOTING' | 'REVIEWING';
-
-export interface RoomDetails extends Room {
-	active_story_id: string;
-	room_status: RoomState;
-	point_values: string;
-	stories: string[];
-	participants: string[];
-}
-
-export interface ParticipantRoomDetails extends RoomDetails {
-	time_joined: string;
-}
-
-export interface Participant {
-	id: string;
-	userId: string;
-	name: string;
-}
-
-export function subscribeToRoomUpdates(roomId: string, callback: (record: RoomDetails) => void) {
-	pb.collection('rooms').subscribe(roomId, function (e) {
-		if (e.action == 'update') {
-			callback({
-				id: e.record.id,
-				created: e.record.created,
-				room_name: e.record.room_name,
-				room_code: e.record.room_code,
-				active_story_id: e.record.active_story,
-				room_status: e.record.room_status,
-				point_values: e.record.point_values,
-				stories: e.record.stories,
-				participants: e.record.participants
-			});
+export function subscribeToRoomUpdates(roomId: string, callback: (record: RoomSummary) => void) {
+	pb.collection('rooms').subscribe(
+		roomId,
+		function (e) {
+			if (e.action == 'update') {
+				callback({
+					id: e.record.id,
+					created: e.record.created,
+					room_name: e.record.room_name,
+					room_code: e.record.room_code,
+					active_story_id: e.record.active_story,
+					room_status: e.record.room_status,
+					point_values: e.record.point_values,
+					stories: e.record.expand?.stories,
+					participants: e.record.expand?.participants
+				});
+			}
+		},
+		{
+			expand: 'stories,participants',
+			fields:
+				'id,created,room_name,room_code,active_story,' +
+				'room_status,point_values,participants,expand.stories.id,expand.stories.details,expand.stories.story_status,' +
+				'expand.participants.id,expand.participants.user_id,expand.participants.name'
 		}
-	});
-}
-
-export function subscribeToNewParticipants(
-	roomId: string,
-	callback: (record: Participant) => void
-) {
-	// TODO utilize room's 'participants' relation instead
-	pb.collection('participants').subscribe('*', function (e) {
-		if (e.action === 'create' && e.record.room == roomId) {
-			console.log('Participant Subscription Hit:', e);
-			callback({
-				id: e.record.id,
-				userId: e.record.user,
-				name: e.record.name
-			});
-		}
-	});
+	);
 }
 
 export async function setVotingFlag(roomId: string, enableVoting: boolean) {
@@ -176,6 +148,34 @@ export async function getRoom(roomId: string): Promise<RoomDetails> {
 			point_values: room.point_values,
 			stories: room.stories,
 			participants: room.participants
+		};
+	} catch (err) {
+		console.error('Failed to get room with id:', roomId);
+		throw err;
+	}
+}
+
+export async function getRoomSummary(roomId: string): Promise<RoomSummary> {
+	try {
+		const room = await pb.collection('rooms').getOne(roomId, {
+			expand: 'stories,participants',
+			fields:
+				'id,created,room_name,room_code,active_story,' +
+				'room_status,point_values,participants,expand.stories.id,' +
+				'expand.stories.details,expand.stories.story_status,' +
+				'expand.participants.id,expand.participants.user_id,expand.participants.name'
+		});
+
+		return {
+			id: room.id,
+			created: room.created,
+			room_name: room.room_name,
+			room_code: room.room_code,
+			active_story_id: room.active_story,
+			room_status: room.room_status,
+			point_values: room.point_values,
+			stories: room.expand?.stories,
+			participants: room.expand?.participants
 		};
 	} catch (err) {
 		console.error('Failed to get room with id:', roomId);

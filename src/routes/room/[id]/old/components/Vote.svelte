@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { createOrUpdateEstimate } from '$lib/estimates';
+	import { createOrUpdateEstimate } from '$lib/scrum/estimates';
 
 	let { pointValues, currentStory }: { pointValues: string; currentStory: string } = $props();
 	let pointOptions = $derived(pointValues?.split(','));

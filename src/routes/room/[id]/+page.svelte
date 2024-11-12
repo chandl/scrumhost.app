@@ -10,42 +10,39 @@
 	import TaskList from './components/TaskList.svelte';
 	import Progress from '$lib/components/ui/progress/progress.svelte';
 	import {
-		getRoom,
-		getRoomParticipants,
+		getRoomSummary,
 		joinRoom,
 		setActiveStory,
 		setVotingFlag,
-		subscribeToNewParticipants,
-		subscribeToRoomUpdates,
-		type Participant,
-		type RoomDetails
-	} from '$lib/room';
+		subscribeToRoomUpdates
+	} from '$lib/scrum/room';
 	import { onMount } from 'svelte';
-	import {
-		createStory,
-		getStoriesInRoom,
-		getStoryById,
-		setStoryStatus,
-		type Story,
-		type StoryAction
-	} from '$lib/story';
-	import { validateLogin } from '$lib/user';
+	import { createStory, setStoryStatus } from '$lib/scrum/story';
+	import { validateLogin } from '$lib/scrum/user';
+	import type { Participant, RoomSummary, StoryAction, StorySummary } from '$lib/scrum/types';
 
 	const roomId = $page.params.id;
-	let room: RoomDetails | undefined = $state();
-	let participants: Participant[] = $state([]);
-	let stories: Story[] = $state([]);
-	let activeStoryDetails: Story | undefined = $state();
+	let room: RoomSummary | undefined = $state();
+	let participants: Participant[] = $derived.by(() => room?.participants || []);
+	let stories: StorySummary[] = $derived.by(() => room?.stories || []);
+	let activeStoryDetails: StorySummary | undefined = $derived.by(() => {
+		if (!room?.active_story_id) {
+			return undefined;
+		}
 
-	let queuedTasks: Story[] | undefined = $derived.by(() =>
+		// Don't set active details if we can't find the story
+		return stories.find((story) => story.id == room?.active_story_id);
+	});
+
+	let queuedTasks: StorySummary[] | undefined = $derived.by(() =>
 		stories?.filter((story) => story.story_status == 'QUEUED' && story.id != room?.active_story_id)
 	);
 
-	let reviewedTasks: Story[] | undefined = $derived.by(() =>
+	let reviewedTasks: StorySummary[] | undefined = $derived.by(() =>
 		stories?.filter((story) => story.story_status == 'REVIEWED')
 	);
 
-	let skippedTasks: Story[] | undefined = $derived.by(() =>
+	let skippedTasks: StorySummary[] | undefined = $derived.by(() =>
 		stories?.filter((story) => story.story_status == 'SKIPPED')
 	);
 
@@ -55,54 +52,22 @@
 		// Get the room details
 		try {
 			if (!room) {
-				room = await getRoom(roomId);
+				room = await getRoomSummary(roomId);
 
 				// Attempt to join the room. Will fail if already in it, but that's fine
 				await joinRoom(roomId);
 			}
 		} catch (err) {
-			console.error('Could not find room with id', roomId);
+			console.error('Could not find room with id', roomId, err);
 			// TODO go to 404 page
 			return;
 		}
 
-		// Get the participants and listen for new ones
-		participants = await getRoomParticipants(roomId);
-		subscribeToNewParticipants(roomId, (participant) => {
-			console.log('New Participant Joined:', participant);
-			participants = [participant, ...participants];
-		});
-
-		stories = await getStoriesInRoom(roomId);
-		setActiveStoryDetails(room);
-
 		subscribeToRoomUpdates(roomId, (record) => {
 			console.log('Room Update Received', record);
 			room = record;
-			setActiveStoryDetails(room);
-
-			// Check if any new stories
-			room.stories.forEach(async (story) => {
-				if (!stories.find((s) => s.id == story)) {
-					console.log('Adding new story', story);
-					const newStory = await getStoryById(story);
-					stories = [newStory, ...stories];
-				}
-			});
 		});
 	});
-
-	function setActiveStoryDetails(room: RoomDetails) {
-		if (!room.active_story_id) {
-			return;
-		}
-
-		// Don't set active details if we can't find the story
-		let details = stories.find((story) => story.id == room.active_story_id);
-		if (details) {
-			activeStoryDetails = details;
-		}
-	}
 
 	async function handleCreateTask() {
 		await createStory(newTaskDescription, roomId);
@@ -119,19 +84,20 @@
 		if (taskAction == 'START_VOTING') {
 			// TODO check if voting enabled
 			await setActiveStory(roomId, taskId);
-			setVotingFlag(roomId, true);
-		} else if (taskAction == 'REQUEUE') {
+			await setVotingFlag(roomId, true);
+		} else if (taskAction === 'REQUEUE') {
 			// TODO only allow this if it's not in QUEUED state
+			await setStoryStatus(taskId, 'QUEUED');
 
 			if (room?.active_story_id == taskId) {
-				await setActiveStory(roomId, null);
-
 				// Stop voting
+				await setActiveStory(roomId, null);
 				await setVotingFlag(roomId, false);
+			} else {
+				// Trigger room refresh if re-queueing 'skipped' task
+				await setActiveStory(roomId, room?.active_story_id || null);
 			}
-
-			await setStoryStatus(taskId, 'QUEUED');
-		} else if (taskAction == 'MARK_REVIEWED') {
+		} else if (taskAction === 'MARK_REVIEWED') {
 			if (room?.active_story_id == taskId) {
 				// Stop voting
 				await setActiveStory(roomId, null);
@@ -139,14 +105,17 @@
 
 				await setStoryStatus(taskId, 'REVIEWED');
 			}
-		} else if (taskAction == 'SKIP') {
+		} else if (taskAction === 'SKIP') {
+			await setStoryStatus(taskId, 'SKIPPED');
+
 			if (room?.active_story_id == taskId) {
 				// Stop voting
 				await setActiveStory(roomId, null);
 				await setVotingFlag(roomId, false);
+			} else {
+				// Trigger room refresh if skipping 'queued' task
+				await setActiveStory(roomId, room?.active_story_id || null);
 			}
-
-			await setStoryStatus(taskId, 'SKIPPED');
 		}
 	}
 
@@ -159,7 +128,7 @@
 
 		<div class="grid grid-cols-1 gap-8 md:grid-cols-3">
 			<div class="space-y-8 md:col-span-2">
-				{#if room?.room_status == 'REVIEWING'}
+				{#if room?.room_status === 'REVIEWING'}
 					<!-- New Section: Voting Summary -->
 					<Card class="rounded-lg border border-gray-200 shadow-lg">
 						<CardHeader class="rounded-t-lg border-b border-gray-300 bg-gray-100 pb-4">
@@ -187,7 +156,7 @@
 							{/each}
 						</CardContent>
 					</Card>
-				{:else if room?.room_status == 'VOTING'}
+				{:else if room?.room_status === 'VOTING'}
 					<!-- Section for Current Task Being Voted On -->
 					<Card class="mt-6 rounded-lg border border-gray-200 shadow-lg">
 						<!-- Card Header (Toolbar style) -->
