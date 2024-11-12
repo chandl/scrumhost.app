@@ -64,6 +64,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>scrum.host - home</title>
+</svelte:head>
+
 <div
 	class="flex min-h-screen flex-col items-center justify-center space-y-8 bg-gradient-to-b from-blue-100 to-white p-4"
 >

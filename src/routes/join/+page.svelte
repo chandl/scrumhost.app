@@ -48,6 +48,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>scrum.host - join</title>
+</svelte:head>
+
 <div
 	class="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-blue-100 to-white p-4"
 >

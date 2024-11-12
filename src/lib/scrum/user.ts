@@ -61,7 +61,7 @@ export function validateLogin() {
 		if (!user) {
 			console.log('Current page url', get(page).url);
 			const currentUrl = get(page).url.pathname;
-			const loginUrl = `/login?target=${encodeURIComponent(currentUrl)}`;
+			const loginUrl = `/join?target=${encodeURIComponent(currentUrl)}`;
 
 			console.log('Redirect', loginUrl);
 			goto(loginUrl); // Redirect to login page
@@ -74,7 +74,7 @@ export function validateLogin() {
 		};
 	} catch (error) {
 		console.error('Error checking authentication:', error);
-		goto('/login'); // Redirect to login page if there’s an error
+		goto('/join'); // Redirect to login page if there’s an error
 	}
 }
 

@@ -72,6 +72,10 @@
 	);
 	let userParticipant: Participant | undefined = $state();
 
+	let pageTitle = $derived(
+		`${room?.room_name} [${room?.room_code}] - scrum.host backlog refinement`
+	);
+
 	$effect(async () => {
 		if (activeStoryDetails == undefined) {
 			console.log('Unsubscribing to all story updates');
@@ -178,6 +182,10 @@
 
 	const pointValues: string[] = $derived(room?.point_values.split(',') || []);
 </script>
+
+<svelte:head>
+	<title>{pageTitle}</title>
+</svelte:head>
 
 <div class="min-h-screen bg-gradient-to-b from-blue-100 to-white p-8">
 	<div class="mx-auto max-w-6xl space-y-8">

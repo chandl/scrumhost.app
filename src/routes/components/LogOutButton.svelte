@@ -27,7 +27,7 @@
 
 	async function handleLogout() {
 		logout();
-		goto('/login');
+		goto('/join');
 	}
 </script>
 

@@ -1,40 +1,6 @@
 import pb from '$lib/pb/pocketbase';
 import type { Estimate } from '$lib/scrum/types';
 
-export async function getEstimateById(estimateId: string): Promise<Estimate> {
-	const estimate = await pb.collection('story_estimates').getOne(estimateId);
-	console.log('Got estimate by id', estimateId, estimate);
-	return {
-		id: estimate.id,
-		storyId: estimate.story,
-		estimate: estimate.estimate,
-		user: estimate.user,
-		participant: estimate.participant
-	};
-}
-
-export async function getEstimatesByStory(storyId: string): Promise<Estimate[]> {
-	// you can also fetch all records at once via getFullList
-	try {
-		const storyEstimates = await pb.collection('story_estimates').getFullList({
-			filter: `story = "${storyId}"`,
-			sort: '-created'
-		});
-		return storyEstimates.map((estimate) => {
-			return {
-				id: estimate.id,
-				storyId: estimate.story,
-				estimate: estimate.estimate,
-				user: estimate.user,
-				participant: estimate.participant
-			};
-		});
-	} catch (err) {
-		console.warn('Unable to find any story estimates', err);
-		throw err;
-	}
-}
-
 export async function getEstimateByStoryAndUser(storyId: string, userId: string) {
 	// you can also fetch all records at once via getFullList
 	try {
