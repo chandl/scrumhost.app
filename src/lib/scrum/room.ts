@@ -51,7 +51,12 @@ export async function joinRoomAndGetParticipantDetails(roomId: string): Promise<
 		await pb.collection('rooms').update(roomId, {
 			'participants+': newParticipant.id
 		});
-		return newParticipant.record;
+
+		return {
+			id: newParticipant.id,
+			userId: newParticipant.user,
+			name: newParticipant.name
+		};
 	} catch (err) {
 		console.warn('Failed to join room', err);
 		throw err;

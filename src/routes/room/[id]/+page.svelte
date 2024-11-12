@@ -109,7 +109,6 @@
 			}
 			// Attempt to join the room. Will fail if already in it, but that's fine
 			userParticipant = await joinRoomAndGetParticipantDetails(roomId);
-
 		} catch (err) {
 			console.error('Could not find room with id', roomId, err);
 			// TODO go to 404 page
