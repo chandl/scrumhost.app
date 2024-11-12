@@ -1,5 +1,5 @@
 import { get, writable } from 'svelte/store';
-import pb, { COLLECTIONS } from '../pb/pocketbase';
+import pb, { COLLECTIONS } from '../pocketbase/pocketbase';
 import { goto } from '$app/navigation';
 import { page } from '$app/stores';
 

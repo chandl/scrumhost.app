@@ -1,4 +1,4 @@
-import pb from '$lib/pb/pocketbase';
+import pb from '$lib/pocketbase/pocketbase';
 import type { StoryDetails, StoryStatus, StoryWithEstimates } from '$lib/scrum/types';
 
 export async function createStory(details: string, roomId: string) {

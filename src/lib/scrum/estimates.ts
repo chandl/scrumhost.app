@@ -1,4 +1,4 @@
-import pb from '$lib/pb/pocketbase';
+import pb from '$lib/pocketbase/pocketbase';
 import type { Estimate } from '$lib/scrum/types';
 
 export async function getEstimateByStoryAndUser(storyId: string, userId: string) {
