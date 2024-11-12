@@ -8,7 +8,8 @@ export async function getEstimateById(estimateId: string): Promise<Estimate> {
 		id: estimate.id,
 		storyId: estimate.story,
 		estimate: estimate.estimate,
-		user: estimate.user
+		user: estimate.user,
+		participant: estimate.participant
 	};
 }
 
@@ -24,7 +25,8 @@ export async function getEstimatesByStory(storyId: string): Promise<Estimate[]> 
 				id: estimate.id,
 				storyId: estimate.story,
 				estimate: estimate.estimate,
-				user: estimate.user
+				user: estimate.user,
+				participant: estimate.participant
 			};
 		});
 	} catch (err) {
@@ -45,7 +47,11 @@ export async function getEstimateByStoryAndUser(storyId: string, userId: string)
 	}
 }
 
-export async function createOrUpdateEstimate(storyId: string, vote: string): Promise<Estimate> {
+export async function createOrUpdateEstimate(
+	participantId: string,
+	storyId: string,
+	vote: string
+): Promise<Estimate> {
 	try {
 		const userId = pb.authStore.model?.id;
 
@@ -59,18 +65,14 @@ export async function createOrUpdateEstimate(storyId: string, vote: string): Pro
 				estimate: vote
 			});
 
-			// TODO this causes bugs
-			// Remove the estimate for a sec to force refresh on the client
-			await pb.collection('stories').update(storyId, {
-				'story_estimates-': newEstimate.id
-			});
 			console.log('Updated existing estimate', newEstimate);
 		} else {
 			// Create new estimate
 			newEstimate = await pb.collection('story_estimates').create({
 				story: storyId,
 				estimate: vote,
-				user: userId
+				user: userId,
+				participant: participantId
 			});
 			console.log('Created new estimate:', newEstimate);
 		}
@@ -84,7 +86,8 @@ export async function createOrUpdateEstimate(storyId: string, vote: string): Pro
 			id: newEstimate.id,
 			storyId: newEstimate.expand?.story,
 			estimate: newEstimate.expand?.estimate,
-			user: newEstimate.expand?.user
+			user: newEstimate.expand?.user,
+			participant: newEstimate.expand?.participant
 		};
 	} catch (err) {
 		console.error('Could not create estimate', err);

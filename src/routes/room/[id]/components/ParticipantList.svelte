@@ -6,8 +6,13 @@
 	import TooltipContent from '$lib/components/ui/tooltip/tooltip-content.svelte';
 	import { CheckCircle, Copy, Users } from 'lucide-svelte';
 	import { onMount } from 'svelte';
+	import type { Estimate, Participant } from '$lib/scrum/types';
 
-	let { participants }: { participants: any[] } = $props();
+	let {
+		participants,
+		currentVotes,
+		hasVoted
+	}: { participants: Participant[]; currentVotes: Estimate[]; hasVoted: boolean } = $props();
 
 	let shareLink = $state(''); // Store the link to be shared
 	let linkCopied = $state(false); // Track if the link was copied
@@ -23,6 +28,14 @@
 			linkCopied = true;
 			setTimeout(() => (linkCopied = false), 2000); // Reset message after 2 seconds
 		});
+	}
+
+	function getVoteForParticipant(participant_id: string): string | undefined {
+		if (!currentVotes) {
+			return undefined;
+		}
+
+		return currentVotes.find((vote) => vote.participant === participant_id)?.estimate;
 	}
 </script>
 
@@ -61,22 +74,29 @@
 			{#each participants as participant}
 				<li class="flex items-center space-x-2">
 					<Avatar>
-						<AvatarImage src={participant.avatar} alt={participant.name} />
+						<AvatarImage alt={participant.name} />
 						<AvatarFallback>{participant.name[0]}</AvatarFallback>
 					</Avatar>
 					<span>{participant.name}</span>
 
-					<Tooltip>
-						<TooltipTrigger>
-							<div class="flex space-x-2">
-								<CheckCircle class="ml-2 h-4 w-4 text-green-500" />
-								<Badge variant="outline">Vote: {3}</Badge>
-							</div>
-						</TooltipTrigger>
-						<TooltipContent>
-							<p>Voted for current story</p>
-						</TooltipContent>
-					</Tooltip>
+					{#if getVoteForParticipant(participant.id) !== undefined}
+						<Tooltip>
+							<TooltipTrigger>
+								<div class="flex space-x-2">
+									<CheckCircle class="ml-2 h-4 w-4 text-green-500" />
+									{#if hasVoted}
+										<Badge variant="outline">Vote: {getVoteForParticipant(participant.id)}</Badge>
+									{/if}
+								</div>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>Voted for current task.</p>
+								{#if !hasVoted}
+									<p>See their vote after voting.</p>
+								{/if}
+							</TooltipContent>
+						</Tooltip>
+					{/if}
 				</li>
 			{/each}
 		</ul>

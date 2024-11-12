@@ -1,5 +1,5 @@
 import pb from '$lib/pb/pocketbase';
-import type { StoryDetails, StoryStatus } from '$lib/scrum/types';
+import type { StoryDetails, StoryStatus, StoryWithEstimates } from '$lib/scrum/types';
 
 export async function createStory(details: string, roomId: string) {
 	const data = {
@@ -55,20 +55,53 @@ export async function getStoriesInRoom(roomId: string): Promise<StoryDetails[]> 
 	}
 }
 
-export function subscribeToStoryUpdates(storyId: string, callback: (record: StoryDetails) => void) {
-	pb.collection('stories').subscribe(storyId, function (e) {
-		if (e.action === 'update') {
-			console.log('Story Update Subscription Hit:', e);
-			callback({
-				id: e.record.id,
-				room: e.record.room,
-				details: e.record.details,
-				story_status: e.record.story_status,
-				created: e.record.created,
-				story_estimates: e.record.story_estimates
-			});
+export async function getStoryWithEstimatesById(storyId: string): Promise<StoryWithEstimates> {
+	try {
+		const response = await pb.collection('stories').getOne(storyId, {
+			expand: 'story_estimates',
+			fields:
+				'id,details,story_status,' +
+				'expand.story_estimates.id,expand.story_estimates.participant,expand.story_estimates.user,' +
+				'expand.story_estimates.estimate'
+		});
+
+		return {
+			id: response.id,
+			details: response.details,
+			story_status: response.story_status,
+			story_estimates: response.expand?.story_estimates
+		};
+	} catch (err) {
+		console.error('Failed to get story with estimates', err);
+		throw err;
+	}
+}
+
+export function subscribeToStoryUpdates(
+	storyId: string,
+	callback: (record: StoryWithEstimates) => void
+) {
+	pb.collection('stories').subscribe(
+		storyId,
+		function (e) {
+			if (e.action === 'update') {
+				console.log('Story Update Subscription Hit:', e);
+				callback({
+					id: e.record.id,
+					details: e.record.details,
+					story_status: e.record.story_status,
+					story_estimates: e.record.expand?.story_estimates
+				});
+			}
+		},
+		{
+			expand: 'story_estimates',
+			fields:
+				'id,details,story_status,' +
+				'expand.story_estimates.id,expand.story_estimates.participant,expand.story_estimates.user,' +
+				'expand.story_estimates.estimate'
 		}
-	});
+	);
 }
 
 export async function setStoryStatus(storyId: string, story_status: StoryStatus) {

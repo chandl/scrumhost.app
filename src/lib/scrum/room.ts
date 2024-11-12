@@ -4,6 +4,7 @@ import type {
 	Participant,
 	ParticipantRoomDetails,
 	RoomDetails,
+	RoomState,
 	RoomSummary
 } from '$lib/scrum/types';
 
@@ -12,47 +13,47 @@ export async function joinRoomWithCode(roomCode: string) {
 		const room = await pb.collection('rooms').getFirstListItem(`room_code = "${roomCode}"`);
 		console.log('Found room with code:', roomCode, room);
 
-		await joinRoom(room.id);
+		await joinRoomAndGetParticipantDetails(room.id);
 		goto(`/room/${room.id}`);
 	} catch (err) {
 		console.error('Failed to join room', err);
 	}
 }
 
-export async function doesParticipantExistInRoom(userId: string, roomId: string): Promise<boolean> {
+export async function getParticipantInRoom(userId: string, roomId: string): Promise<Participant> {
 	try {
-		const participant = await pb
+		return await pb
 			.collection('participants')
 			.getFirstListItem(`user = "${userId}" && room = "${roomId}"`);
-		if (participant) {
-			return true;
-		}
 	} catch (err) {
 		console.warn('Could not find participant in room', userId, roomId, err);
+		throw err;
 	}
-	return false;
 }
 
-export async function joinRoom(roomId: string) {
+export async function joinRoomAndGetParticipantDetails(roomId: string): Promise<Participant> {
 	try {
 		const userId = pb.authStore.model?.id;
-		if (!(await doesParticipantExistInRoom(userId, roomId))) {
-			// Create the participant entry
-			const participantData = {
-				user: userId,
-				room: roomId,
-				name: pb.authStore.model?.name
-			};
-			const newParticipant = await pb.collection('participants').create(participantData);
-			console.log('Room Joined successfully:', newParticipant);
-
-			// Update Room with new participant
-			await pb.collection('rooms').update(roomId, {
-				'participants+': newParticipant.id
-			});
+		const existingUser = await getParticipantInRoom(userId, roomId);
+		if (existingUser) {
+			return existingUser;
 		}
+		// Create the participant entry
+		const participantData = {
+			user: userId,
+			room: roomId,
+			name: pb.authStore.model?.name
+		};
+		const newParticipant = await pb.collection('participants').create(participantData);
+		console.log('Room Joined successfully:', newParticipant);
+		// Update Room with new participant
+		await pb.collection('rooms').update(roomId, {
+			'participants+': newParticipant.id
+		});
+		return newParticipant.record;
 	} catch (err) {
 		console.warn('Failed to join room', err);
+		throw err;
 	}
 }
 
@@ -72,7 +73,7 @@ export async function createRoom(room_name: string, point_values: string) {
 		const newRoom = await pb.collection('rooms').create(roomData);
 		console.log(`Room created successfully:`, newRoom);
 
-		await joinRoom(newRoom.id);
+		await joinRoomAndGetParticipantDetails(newRoom.id);
 
 		return newRoom.id;
 	} catch (err) {
@@ -107,6 +108,19 @@ export function subscribeToRoomUpdates(roomId: string, callback: (record: RoomSu
 				'expand.participants.id,expand.participants.user_id,expand.participants.name'
 		}
 	);
+}
+
+export async function setRoomState(roomId: string, roomState: RoomState) {
+	try {
+		const currentRoomData = await getRoom(roomId);
+		const record = await pb
+			.collection('rooms')
+			.update(roomId, { ...currentRoomData, room_status: roomState });
+		console.log(`Set room ${roomId} state to ${roomState}`, record);
+	} catch (err) {
+		console.error('Failed to set room state', err);
+		throw err;
+	}
 }
 
 export async function setVotingFlag(roomId: string, enableVoting: boolean) {

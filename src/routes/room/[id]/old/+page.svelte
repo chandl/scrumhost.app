@@ -5,7 +5,7 @@
 	import {
 		getRoom,
 		getRoomParticipants,
-		joinRoom,
+		joinRoomAndGetParticipantDetails,
 		setActiveStory,
 		setVotingFlag,
 		// subscribeToNewParticipants,
@@ -64,7 +64,7 @@
 			return;
 		}
 		// Attempt to join the room. Will fail if already in it, but that's fine
-		await joinRoom(roomId);
+		await joinRoomAndGetParticipantDetails(roomId);
 
 		participants = await getRoomParticipants(roomId);
 		stories = await getStoriesInRoom(roomId);

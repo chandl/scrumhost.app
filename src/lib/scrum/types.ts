@@ -35,6 +35,7 @@ export interface Estimate {
 	storyId: string;
 	estimate: string;
 	user: string;
+	participant: string;
 }
 
 export type StoryStatus = 'QUEUED' | 'REVIEWED' | 'SKIPPED';
@@ -46,11 +47,14 @@ export interface StorySummary {
 	story_status: StoryStatus;
 }
 
-export interface StoryDetails {
-	id: string;
+export interface StoryDetails extends StorySummary {
 	room: string;
-	details: string;
-	story_status: StoryStatus;
 	created: string;
 	story_estimates: string[];
+}
+
+export interface StoryWithEstimates extends StorySummary {
+	id: string;
+	details: string;
+	story_estimates: Estimate[];
 }

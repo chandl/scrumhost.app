@@ -64,7 +64,7 @@ export function validateLogin() {
 			const loginUrl = `/login?target=${encodeURIComponent(currentUrl)}`;
 
 			console.log('Redirect', loginUrl);
-			// goto(loginUrl); // Redirect to login page
+			goto(loginUrl); // Redirect to login page
 		}
 
 		return {

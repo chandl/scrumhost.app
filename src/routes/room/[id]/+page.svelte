@@ -11,26 +11,40 @@
 	import Progress from '$lib/components/ui/progress/progress.svelte';
 	import {
 		getRoomSummary,
-		joinRoom,
+		joinRoomAndGetParticipantDetails,
 		setActiveStory,
+		setRoomState,
 		setVotingFlag,
 		subscribeToRoomUpdates
 	} from '$lib/scrum/room';
 	import { onMount } from 'svelte';
-	import { createStory, setStoryStatus } from '$lib/scrum/story';
+	import {
+		createStory,
+		getStoryWithEstimatesById,
+		setStoryStatus,
+		subscribeToStoryUpdates,
+		unsubscribeToStoryUpdates
+	} from '$lib/scrum/story';
 	import { validateLogin } from '$lib/scrum/user';
-	import type { Participant, RoomSummary, StoryAction, StorySummary } from '$lib/scrum/types';
+	import type {
+		Estimate,
+		Participant,
+		RoomState,
+		RoomSummary,
+		StoryAction,
+		StorySummary
+	} from '$lib/scrum/types';
+	import { createOrUpdateEstimate } from '$lib/scrum/estimates';
 
 	const roomId = $page.params.id;
 	let room: RoomSummary | undefined = $state();
 	let participants: Participant[] = $derived.by(() => room?.participants || []);
 	let stories: StorySummary[] = $derived.by(() => room?.stories || []);
+
 	let activeStoryDetails: StorySummary | undefined = $derived.by(() => {
 		if (!room?.active_story_id) {
 			return undefined;
 		}
-
-		// Don't set active details if we can't find the story
 		return stories.find((story) => story.id == room?.active_story_id);
 	});
 
@@ -46,6 +60,35 @@
 		stories?.filter((story) => story.story_status == 'SKIPPED')
 	);
 
+	let currentVotes: Estimate[] = $state([]);
+	let voteProgress = $derived(((currentVotes?.length || 0) / participants.length) * 100);
+	let userVoteValue: string | undefined = $derived(
+		!currentVotes
+			? undefined
+			: currentVotes.find((vote) => vote.participant === userParticipant?.id)?.estimate
+	);
+	let hasVoted: boolean = $derived(userVoteValue !== undefined);
+	let userParticipant: Participant | undefined = $state();
+
+	$effect(async () => {
+		if (activeStoryDetails == undefined) {
+			console.log('Unsubscribing to all story updates');
+			unsubscribeToStoryUpdates();
+			currentVotes = [];
+		} else {
+			let storyWithVotes = await getStoryWithEstimatesById(activeStoryDetails.id);
+			console.log('Set currentVotes to', storyWithVotes.story_estimates);
+			currentVotes = storyWithVotes.story_estimates;
+
+			// currentVotes = storyWithVotes.story_estimates;
+			console.log('Subscribing to story updates for', activeStoryDetails.id);
+			subscribeToStoryUpdates(activeStoryDetails.id, (storyWithEstimates) => {
+				currentVotes = storyWithEstimates.story_estimates;
+				console.log('Set currentVotes to', storyWithEstimates.story_estimates);
+			});
+		}
+	});
+
 	onMount(async () => {
 		validateLogin();
 
@@ -55,7 +98,7 @@
 				room = await getRoomSummary(roomId);
 
 				// Attempt to join the room. Will fail if already in it, but that's fine
-				await joinRoom(roomId);
+				userParticipant = await joinRoomAndGetParticipantDetails(roomId);
 			}
 		} catch (err) {
 			console.error('Could not find room with id', roomId, err);
@@ -78,9 +121,16 @@
 	let newTaskDescription: string = $state('');
 	let currentTab: string = $state('');
 
-	async function handleTaskAction(taskId: string, taskAction: StoryAction) {
-		console.log('HandleTaskAction', taskId, taskAction);
+	async function updateRoomState(roomState: RoomState) {
+		await setRoomState(roomId, roomState);
+	}
 
+	async function handleVote(vote: string) {
+		console.log(`Voting for story ${activeStoryDetails?.id} with vote ${vote}`);
+		createOrUpdateEstimate(userParticipant?.id || '', activeStoryDetails?.id || '', vote);
+	}
+
+	async function handleTaskAction(taskId: string, taskAction: StoryAction) {
 		if (taskAction == 'START_VOTING') {
 			// TODO check if voting enabled
 			await setActiveStory(roomId, taskId);
@@ -92,18 +142,18 @@
 			if (room?.active_story_id == taskId) {
 				// Stop voting
 				await setActiveStory(roomId, null);
-				await setVotingFlag(roomId, false);
+				await setRoomState(roomId, 'IDLE');
 			} else {
 				// Trigger room refresh if re-queueing 'skipped' task
 				await setActiveStory(roomId, room?.active_story_id || null);
 			}
 		} else if (taskAction === 'MARK_REVIEWED') {
 			if (room?.active_story_id == taskId) {
-				// Stop voting
-				await setActiveStory(roomId, null);
-				await setVotingFlag(roomId, false);
-
 				await setStoryStatus(taskId, 'REVIEWED');
+
+				// Stop voting
+				// await setActiveStory(roomId, null);
+				await setRoomState(roomId, 'REVIEWING');
 			}
 		} else if (taskAction === 'SKIP') {
 			await setStoryStatus(taskId, 'SKIPPED');
@@ -111,7 +161,7 @@
 			if (room?.active_story_id == taskId) {
 				// Stop voting
 				await setActiveStory(roomId, null);
-				await setVotingFlag(roomId, false);
+				await setRoomState(roomId, 'IDLE');
 			} else {
 				// Trigger room refresh if skipping 'queued' task
 				await setActiveStory(roomId, room?.active_story_id || null);
@@ -141,19 +191,44 @@
 							>
 								<h3 class="text-3xl font-semibold text-gray-800">{activeStoryDetails?.details}</h3>
 							</div>
-							<p class="mb-4 text-lg text-gray-600">
-								Here's how many people voted for each story point:
-							</p>
+							<p class="mb-4 text-lg text-gray-600">Vote Distribution:</p>
 
-							{#each pointValues as value}
+							{#each new Set(currentVotes.map((vote) => vote.estimate)) as value}
 								<div class="mb-4 flex w-full items-center justify-between">
-									<span class="text-lg text-gray-700">{value} Points</span>
+									<span class="text-lg text-gray-700">{value}</span>
 									<div class="mx-4 h-3 w-full max-w-xs rounded-full bg-gray-200">
-										<div class="h-full rounded-full bg-blue-500" style="width: {10}%"></div>
+										<div
+											class="h-full rounded-full bg-blue-500"
+											style="width: {(currentVotes.filter((vote) => vote.estimate === value)
+												.length /
+												currentVotes.length) *
+												100}%"
+										></div>
 									</div>
-									<span class="text-sm text-gray-500">{/* list of votes */ 0 || 0} votes</span>
+									<span class="text-sm text-gray-500"
+										>{currentVotes.filter((vote) => vote.estimate === value).length} vote(s) - {(currentVotes.filter(
+											(vote) => vote.estimate === value
+										).length /
+											currentVotes.length) *
+											100}%</span
+									>
 								</div>
 							{/each}
+
+							<!-- Side-by-Side Action Buttons Section -->
+							<div class="mt-6 flex space-x-4">
+								<!-- Mark as Reviewed Button -->
+								<Button
+									size="lg"
+									class="flex w-full items-center justify-start bg-blue-500 py-2 font-semibold text-white hover:bg-blue-600 sm:w-auto"
+									on:click={async () => {
+										await updateRoomState('IDLE');
+										await setActiveStory(roomId, null);
+									}}
+								>
+									<Check class="mr-2 h-5 w-5" />Finish Reviewing
+								</Button>
+							</div>
 						</CardContent>
 					</Card>
 				{:else if room?.room_status === 'VOTING'}
@@ -180,14 +255,12 @@
 							</p>
 
 							<!-- Voting Buttons Section -->
-							<div class="mb-8 flex flex-wrap gap-3">
+							<div class="mb-8 flex flex-wrap justify-center gap-3">
 								{#each pointValues as value}
 									<Button
-										variant={Object.values([/* list of votes */ '0']).includes(value)
-											? 'default'
-											: 'outline'}
-										class="h-12 w-20 font-medium"
-										on:click={() => console.log('vote', activeStoryDetails?.id, value)}
+										variant={userVoteValue === value ? 'default' : 'outline'}
+										class="h-12 w-40 font-medium"
+										on:click={() => handleVote(value)}
 										disabled={!votingEnabled || activeStoryDetails?.story_status !== 'QUEUED'}
 									>
 										{value}
@@ -199,9 +272,9 @@
 							<div class=" w-full">
 								<!-- Voting Progress Text -->
 								<p class="mt-2 text-xl font-semibold text-gray-700">
-									Vote Progress: <span class="text-blue-600">33%</span>
+									Vote Progress: <span class="text-blue-600">{voteProgress}%</span>
 								</p>
-								<Progress value={33} class="h-3 w-full bg-gray-200"></Progress>
+								<Progress value={voteProgress} class="h-3 w-full bg-gray-200"></Progress>
 							</div>
 
 							<!-- Side-by-Side Action Buttons Section -->
@@ -300,7 +373,7 @@
 			</div>
 
 			<div>
-				<ParticipantList {participants} />
+				<ParticipantList {participants} {currentVotes} {hasVoted} />
 			</div>
 		</div>
 	</div>

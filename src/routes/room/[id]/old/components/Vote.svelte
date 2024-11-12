@@ -9,7 +9,7 @@
 
 	function castVote(vote: string) {
 		console.log(`Voting for story ${currentStory} with vote ${vote}`);
-		createOrUpdateEstimate(currentStory, vote);
+		createOrUpdateEstimate('participant id', currentStory, vote);
 	}
 </script>
 
