@@ -39,12 +39,19 @@ export interface Estimate {
 }
 
 export type StoryStatus = 'QUEUED' | 'REVIEWED' | 'SKIPPED';
-export type StoryAction = 'START_VOTING' | 'MARK_REVIEWED' | 'SKIP' | 'REQUEUE' | 'REVIEW_RESULTS';
+export type StoryAction =
+	| 'START_VOTING'
+	| 'MARK_REVIEWED'
+	| 'SKIP'
+	| 'REQUEUE'
+	| 'REVIEW_RESULTS'
+	| 'CLEAR_VOTES';
 
 export interface StorySummary {
 	id: string;
 	details: string;
 	story_status: StoryStatus;
+	updated: string;
 }
 
 export interface StoryDetails extends StorySummary {

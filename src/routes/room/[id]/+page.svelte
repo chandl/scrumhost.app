@@ -5,7 +5,7 @@
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
-	import { Plus, Check, CornerDownLeft } from 'lucide-svelte';
+	import { Plus, Check, CornerDownLeft, ClipboardCheck, Eraser } from 'lucide-svelte';
 	import ParticipantList from './components/ParticipantList.svelte';
 	import TaskList from './components/TaskList.svelte';
 	import Progress from '$lib/components/ui/progress/progress.svelte';
@@ -14,7 +14,6 @@
 		joinRoomAndGetParticipantDetails,
 		setActiveStory,
 		setRoomState,
-		setVotingFlag,
 		subscribeToRoomUpdates
 	} from '$lib/scrum/room';
 	import { onMount } from 'svelte';
@@ -34,12 +33,20 @@
 		StoryAction,
 		StorySummary
 	} from '$lib/scrum/types';
-	import { createOrUpdateEstimate } from '$lib/scrum/estimates';
+	import { createOrUpdateEstimate, deleteEstimates } from '$lib/scrum/estimates';
 
 	const roomId = $page.params.id;
 	let room: RoomSummary | undefined = $state();
 	let participants: Participant[] = $derived.by(() => room?.participants || []);
-	let stories: StorySummary[] = $derived.by(() => room?.stories || []);
+	let stories: StorySummary[] = $derived.by(() => {
+		if (!room) {
+			return [];
+		}
+		// Sort the stories by updated time
+		return [...room.stories].sort(
+			(a, b) => new Date(b.updated).getTime() - new Date(a.updated).getTime()
+		);
+	});
 
 	let activeStoryDetails: StorySummary | undefined = $derived.by(() => {
 		if (!room?.active_story_id) {
@@ -67,9 +74,7 @@
 			? undefined
 			: currentVotes.find((vote) => vote.participant === userParticipant?.id)?.estimate
 	);
-	let hasVoted: boolean = $derived(
-		userVoteValue !== undefined || room?.room_status === 'REVIEWING'
-	);
+	let showOtherParticipantVotes: boolean = $derived(room?.room_status === 'REVIEWING');
 	let userParticipant: Participant | undefined = $state();
 
 	let pageTitle = $derived(
@@ -101,6 +106,7 @@
 		try {
 			if (!room) {
 				room = await getRoomSummary(roomId);
+				console.log('Initializing room to', room);
 
 				subscribeToRoomUpdates(roomId, (record) => {
 					console.log('Room Update Received', record);
@@ -131,14 +137,15 @@
 
 	async function handleVote(vote: string) {
 		console.log(`Voting for story ${activeStoryDetails?.id} with vote ${vote}`);
-		createOrUpdateEstimate(userParticipant?.id || '', activeStoryDetails?.id || '', vote);
+		await createOrUpdateEstimate(userParticipant?.id || '', activeStoryDetails?.id || '', vote);
 	}
 
 	async function handleTaskAction(taskId: string, taskAction: StoryAction) {
 		if (taskAction == 'START_VOTING') {
 			// TODO check if voting enabled
+			await setStoryStatus(taskId, 'QUEUED');
 			await setActiveStory(roomId, taskId);
-			await setVotingFlag(roomId, true);
+			await updateRoomState('VOTING');
 		} else if (taskAction === 'REQUEUE') {
 			// TODO only allow this if it's not in QUEUED state
 			await setStoryStatus(taskId, 'QUEUED');
@@ -172,10 +179,15 @@
 			}
 		} else if (taskAction === 'REVIEW_RESULTS') {
 			if (room?.room_status !== 'IDLE') {
-				throw new Error('Cannot review results when another task is active.');
+				throw new Error(
+					'Cannot review results when another task is active. Room status:' + room?.room_status
+				);
 			}
 			await setActiveStory(roomId, taskId);
 			await setRoomState(roomId, 'REVIEWING');
+		} else if (taskAction === 'CLEAR_VOTES') {
+			console.log('Clearing all votes for task', taskId);
+			await deleteEstimates(taskId, currentVotes);
 		}
 	}
 
@@ -207,7 +219,9 @@
 							</div>
 							<p class="mb-4 text-lg text-gray-600">Vote Distribution:</p>
 
-							{#each new Set(!currentVotes ? [] : currentVotes.map((vote) => vote.estimate)) as value}
+							{#each pointValues.filter((val) => currentVotes
+									.map((vote) => vote.estimate)
+									.includes(val)) as value}
 								<div class="mb-4 flex w-full items-center justify-between">
 									<span class="text-lg text-gray-700">{value}</span>
 									<div class="mx-4 h-3 w-full max-w-xs rounded-full bg-gray-200">
@@ -230,17 +244,27 @@
 							{/each}
 
 							<!-- Side-by-Side Action Buttons Section -->
-							<div class="mt-6 flex space-x-4">
+							<div class="mt-6 flex w-full flex-wrap space-x-2">
 								<!-- Mark as Reviewed Button -->
 								<Button
 									size="lg"
-									class="flex w-full items-center justify-start bg-blue-500 py-2 font-semibold text-white hover:bg-blue-600 sm:w-auto"
+									class="mt-2 flex w-full items-center justify-start bg-blue-500 py-2 font-semibold text-white hover:bg-blue-600 sm:w-auto"
 									on:click={async () => {
 										await updateRoomState('IDLE');
 										await setActiveStory(roomId, null);
 									}}
 								>
 									<Check class="mr-2 h-5 w-5" />Finish Reviewing
+								</Button>
+
+								<!-- Continue Voting Button -->
+								<Button
+									size="lg"
+									variant="outline"
+									class="mt-2 w-full border-gray-300 text-gray-700 hover:bg-gray-100 sm:w-auto"
+									on:click={() => handleTaskAction(activeStoryDetails?.id || '', 'START_VOTING')}
+								>
+									<CornerDownLeft class="mr-2 h-5 w-5" />Continue Voting
 								</Button>
 							</div>
 						</CardContent>
@@ -264,9 +288,7 @@
 							</div>
 
 							<!-- Instruction Paragraph -->
-							<p class="mb-8 text-lg text-gray-600">
-								Please select how many points you believe this task is worth:
-							</p>
+							<p class="mb-8 text-lg text-gray-600">Please select an estimate for this task:</p>
 
 							<!-- Voting Buttons Section -->
 							<div class="mb-8 flex flex-wrap justify-center gap-3">
@@ -292,24 +314,36 @@
 							</div>
 
 							<!-- Side-by-Side Action Buttons Section -->
-							<div class="mt-6 flex space-x-4">
+							<div class="mt-6 flex w-full flex-wrap space-x-2">
 								<!-- Mark as Reviewed Button -->
 								<Button
 									size="lg"
-									class="flex w-full items-center justify-start bg-blue-500 py-2 font-semibold text-white hover:bg-blue-600 sm:w-auto"
+									disabled={(currentVotes?.length || 0) === 0}
+									class="mt-2 bg-blue-500 py-2 font-semibold text-white hover:bg-blue-600 "
 									on:click={() => handleTaskAction(activeStoryDetails?.id || '', 'MARK_REVIEWED')}
 								>
-									<Check class="mr-2 h-5 w-5" /> Finish Voting
+									<ClipboardCheck class="mr-2 h-5 w-5" /> Start Reviewing
+								</Button>
+
+								<!-- Clear Votes Button -->
+								<Button
+									size="lg"
+									variant="outline"
+									disabled={(currentVotes?.length || 0) === 0}
+									class="mt-2 border-gray-300 text-gray-700 hover:bg-gray-100"
+									on:click={() => handleTaskAction(activeStoryDetails?.id || '', 'CLEAR_VOTES')}
+								>
+									<Eraser class="mr-2 h-5 w-5" /> Clear Votes
 								</Button>
 
 								<!-- Put Back in Queue Button -->
 								<Button
 									size="lg"
 									variant="outline"
-									class="w-full border-gray-300 text-gray-700 hover:bg-gray-100 sm:w-auto"
+									class="mt-2 border-gray-300 text-gray-700 hover:bg-gray-100"
 									on:click={() => handleTaskAction(activeStoryDetails?.id || '', 'REQUEUE')}
 								>
-									<CornerDownLeft class="mr-2 h-5 w-5" /> Put Back in Queue
+									<CornerDownLeft class="mr-2 h-5 w-5" /> Re-Queue
 								</Button>
 							</div>
 						</CardContent>
@@ -345,10 +379,8 @@
 									{/if}
 									<TaskList
 										tasks={queuedTasks}
-										onVote={() => console.log('onVote called')}
-										{votingEnabled}
 										onTaskAction={handleTaskAction}
-										currentStatus="queued"
+										currentStatus="QUEUED"
 									/>
 								</CardContent>
 							</Card>
@@ -361,10 +393,8 @@
 								<CardContent>
 									<TaskList
 										tasks={reviewedTasks}
-										onVote={() => console.log('onVote')}
-										votingEnabled={false}
 										onTaskAction={handleTaskAction}
-										currentStatus="reviewed"
+										currentStatus="REVIEWED"
 									/>
 								</CardContent>
 							</Card>
@@ -377,10 +407,8 @@
 								<CardContent>
 									<TaskList
 										tasks={skippedTasks}
-										onVote={() => console.log('Handle vote')}
-										votingEnabled={false}
 										onTaskAction={handleTaskAction}
-										currentStatus="skipped"
+										currentStatus="SKIPPED"
 									/>
 								</CardContent>
 							</Card>
@@ -390,7 +418,12 @@
 			</div>
 
 			<div>
-				<ParticipantList {participants} {currentVotes} {hasVoted} />
+				<ParticipantList
+					currentUser={userParticipant}
+					{participants}
+					{currentVotes}
+					{showOtherParticipantVotes}
+				/>
 			</div>
 		</div>
 	</div>

@@ -123,22 +123,6 @@
 		"schema": [
 			{
 				"system": false,
-				"id": "qlcmkbba",
-				"name": "host",
-				"type": "relation",
-				"required": true,
-				"presentable": false,
-				"unique": false,
-				"options": {
-					"collectionId": "_pb_users_auth_",
-					"cascadeDelete": false,
-					"minSelect": null,
-					"maxSelect": 1,
-					"displayFields": null
-				}
-			},
-			{
-				"system": false,
 				"id": "l3bhydqq",
 				"name": "room_code",
 				"type": "text",
@@ -238,6 +222,22 @@
 				"options": {
 					"maxSelect": 1,
 					"values": ["IDLE", "VOTING", "REVIEWING"]
+				}
+			},
+			{
+				"system": false,
+				"id": "delmyd8j",
+				"name": "host",
+				"type": "relation",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "_pb_users_auth_",
+					"cascadeDelete": false,
+					"minSelect": null,
+					"maxSelect": 1,
+					"displayFields": null
 				}
 			}
 		],
@@ -399,7 +399,7 @@
 		"viewRule": "@request.auth.id != \"\" ",
 		"createRule": "@request.auth.id != \"\" ",
 		"updateRule": "@request.auth.id != \"\" ",
-		"deleteRule": null,
+		"deleteRule": "@request.auth.id != \"\" ",
 		"options": {}
 	}
 ]

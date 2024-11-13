@@ -9,10 +9,16 @@
 	import type { Estimate, Participant } from '$lib/scrum/types';
 
 	let {
+		currentUser,
 		participants,
 		currentVotes,
-		hasVoted
-	}: { participants: Participant[]; currentVotes: Estimate[]; hasVoted: boolean } = $props();
+		showOtherParticipantVotes
+	}: {
+		currentUser: Participant | undefined;
+		participants: Participant[];
+		currentVotes: Estimate[];
+		showOtherParticipantVotes: boolean;
+	} = $props();
 
 	let shareLink = $state(''); // Store the link to be shared
 	let linkCopied = $state(false); // Track if the link was copied
@@ -77,22 +83,24 @@
 						<AvatarImage alt={participant.name} />
 						<AvatarFallback>{participant.name[0]}</AvatarFallback>
 					</Avatar>
-					<span>{participant.name}</span>
+					<span
+						>{participant.name}{#if participant.id === currentUser?.id}&nbsp;(You){/if}</span
+					>
 
 					{#if getVoteForParticipant(participant.id) !== undefined}
 						<Tooltip>
 							<TooltipTrigger>
 								<div class="flex space-x-2">
 									<CheckCircle class="ml-2 h-4 w-4 text-green-500" />
-									{#if hasVoted}
+									{#if showOtherParticipantVotes || participant.id === currentUser?.id}
 										<Badge variant="outline">Vote: {getVoteForParticipant(participant.id)}</Badge>
 									{/if}
 								</div>
 							</TooltipTrigger>
 							<TooltipContent>
 								<p>Voted for current task.</p>
-								{#if !hasVoted}
-									<p>See their vote after voting.</p>
+								{#if !showOtherParticipantVotes && participant.id !== currentUser?.id}
+									<p>See their vote during review phase.</p>
 								{/if}
 							</TooltipContent>
 						</Tooltip>

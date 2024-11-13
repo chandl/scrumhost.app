@@ -110,7 +110,7 @@ export function subscribeToRoomUpdates(roomId: string, callback: (record: RoomSu
 			expand: 'stories,participants',
 			fields:
 				'id,created,room_name,room_code,active_story,' +
-				'room_status,point_values,participants,expand.stories.id,expand.stories.details,expand.stories.story_status,' +
+				'room_status,point_values,participants,expand.stories.id,expand.stories.details,expand.stories.story_status,expand.stories.updated, ' +
 				'expand.participants.id,expand.participants.user_id,expand.participants.name'
 		}
 	);
@@ -182,7 +182,7 @@ export async function getRoomSummary(roomId: string): Promise<RoomSummary> {
 			fields:
 				'id,created,room_name,room_code,active_story,' +
 				'room_status,point_values,participants,expand.stories.id,' +
-				'expand.stories.details,expand.stories.story_status,' +
+				'expand.stories.details,expand.stories.story_status,expand.stories.updated,' +
 				'expand.participants.id,expand.participants.user_id,expand.participants.name'
 		});
 
@@ -199,27 +199,6 @@ export async function getRoomSummary(roomId: string): Promise<RoomSummary> {
 		};
 	} catch (err) {
 		console.error('Failed to get room with id:', roomId);
-		throw err;
-	}
-}
-
-export async function getRoomParticipants(roomId: string): Promise<Participant[]> {
-	// TODO use room's 'participants' list instead
-	try {
-		const roomParticipants = pb.collection('participants').getList(1, 50, {
-			filter: `room = "${roomId}"`,
-			sort: '-created'
-		});
-
-		return (await roomParticipants).items.map((participant) => {
-			return {
-				id: participant.id,
-				userId: participant.user,
-				name: participant.name
-			};
-		});
-	} catch (err) {
-		console.error('Failed to get participants for room ', roomId, err);
 		throw err;
 	}
 }

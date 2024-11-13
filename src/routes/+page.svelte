@@ -15,8 +15,9 @@
 	import { Input } from '$lib/components/ui/input';
 	import { goto } from '$app/navigation';
 	import RoomCreator from './components/RoomCreator.svelte';
-	import { User, Clock2 } from 'lucide-svelte';
+	import { Clock2, User } from 'lucide-svelte';
 	import type { ParticipantRoomDetails } from '$lib/scrum/types';
+	import { formatTimeAgo } from '$lib/utils';
 
 	let currentUser: AuthModel;
 	user.subscribe((value) => {
@@ -38,29 +39,6 @@
 
 	function truncate(str: string, n: number) {
 		return str.length > n ? str.slice(0, n - 1) + '…' : str;
-	}
-
-	function formatTimeAgo(date: Date): string {
-		const now = new Date();
-		const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-		const intervals: { [key: string]: number } = {
-			year: 31536000,
-			month: 2592000,
-			week: 604800,
-			day: 86400,
-			hour: 3600,
-			minute: 60,
-			second: 1
-		};
-
-		for (const [unit, secondsInUnit] of Object.entries(intervals)) {
-			const interval = Math.floor(seconds / secondsInUnit);
-			if (interval >= 1) {
-				return `${interval} ${unit}${interval > 1 ? 's' : ''} ago`;
-			}
-		}
-		return 'just now';
 	}
 </script>
 

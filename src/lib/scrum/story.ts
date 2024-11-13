@@ -27,32 +27,9 @@ export async function getStoryById(storyId: string): Promise<StoryDetails> {
 		details: story.details,
 		story_status: story.story_status,
 		created: story.created,
-		story_estimates: story.story_estimates
+		story_estimates: story.story_estimates,
+		updated: story.updated
 	};
-}
-
-export async function getStoriesInRoom(roomId: string): Promise<StoryDetails[]> {
-	// TODO just look at the 'stories' field in room
-	try {
-		const storiesInRoom = pb.collection('stories').getList(1, 50, {
-			filter: `room = "${roomId}"`,
-			sort: 'story_status,-created'
-		});
-
-		return (await storiesInRoom).items.map((record) => {
-			return {
-				id: record.id,
-				room: record.room,
-				details: record.details,
-				story_status: record.story_status,
-				created: record.created,
-				story_estimates: record.story_estimates
-			};
-		});
-	} catch (err) {
-		console.error('Failed to get stories for room ', roomId, err);
-		throw err;
-	}
 }
 
 export async function getStoryWithEstimatesById(storyId: string): Promise<StoryWithEstimates> {
@@ -69,7 +46,8 @@ export async function getStoryWithEstimatesById(storyId: string): Promise<StoryW
 			id: response.id,
 			details: response.details,
 			story_status: response.story_status,
-			story_estimates: response.expand?.story_estimates
+			story_estimates: response.expand?.story_estimates,
+			updated: response.updated
 		};
 	} catch (err) {
 		console.error('Failed to get story with estimates', err);
@@ -90,7 +68,8 @@ export function subscribeToStoryUpdates(
 					id: e.record.id,
 					details: e.record.details,
 					story_status: e.record.story_status,
-					story_estimates: e.record.expand?.story_estimates
+					story_estimates: e.record.expand?.story_estimates,
+					updated: e.record.updated
 				});
 			}
 		},

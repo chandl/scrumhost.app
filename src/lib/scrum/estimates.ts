@@ -13,6 +13,19 @@ export async function getEstimateByStoryAndUser(storyId: string, userId: string)
 	}
 }
 
+export async function deleteEstimates(storyId: string, currentEstimates: Estimate[]) {
+	for (const est of currentEstimates) {
+		console.log('Deleting estimate', est.id);
+		await pb.collection('story_estimates').delete(est.id);
+	}
+
+	const estimateIds = currentEstimates.map((est) => est.id);
+	console.log('Updating story to remove estimates', storyId);
+	await pb.collection('stories').update(storyId, {
+		'story_estimates-': estimateIds
+	});
+}
+
 export async function createOrUpdateEstimate(
 	participantId: string,
 	storyId: string,
