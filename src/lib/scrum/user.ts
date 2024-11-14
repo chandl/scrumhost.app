@@ -92,6 +92,5 @@ function generatePassword(length: number): string {
 }
 
 function generateUsername(name: string): string {
-	const randomNumber = Math.floor(Math.random() * 10000); // Random number between 0 and 9999
-	return `${name.replace(/[^a-zA-Z]/g, '')}${randomNumber}`;
+	return `${name.replace(/[^a-zA-Z]/g, '')}-${crypto.randomUUID()}`;
 }

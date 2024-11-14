@@ -4,10 +4,9 @@ import type { Estimate } from '$lib/scrum/types';
 export async function getEstimateByStoryAndUser(storyId: string, userId: string) {
 	// you can also fetch all records at once via getFullList
 	try {
-		const userStoryEstimate = await pb
+		return await pb
 			.collection('story_estimates')
 			.getFirstListItem(`story = "${storyId}" && user = "${userId}"`);
-		return userStoryEstimate;
 	} catch (err) {
 		console.warn('Unable to find current user story estimate', err);
 	}
