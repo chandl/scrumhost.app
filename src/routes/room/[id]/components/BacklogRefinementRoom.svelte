@@ -66,12 +66,10 @@
 	);
 
 	onMount(async () => {
-		console.log('PARENT ROOM:', parentRoomId);
 		refinementMetadata = await getRefinementMetadataDetails(parentRoomId);
-		console.log('REFINEMENT METADATA', refinementMetadata);
-
+		console.log('Initializing refinement metadata to', refinementMetadata);
 		subscribeToRefinementMetadataUpdates(refinementMetadataId, (updatedMetadata) => {
-			console.log('UPDATED METADATA:', updatedMetadata);
+			console.log('Received updated refinement metadata:', updatedMetadata);
 			refinementMetadata = updatedMetadata;
 		});
 	});

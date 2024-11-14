@@ -9,17 +9,28 @@
 	import { onMount } from 'svelte';
 	import { validateLogin } from '$lib/scrum/user';
 	import BacklogRefinementRoom from './components/BacklogRefinementRoom.svelte';
-	import type { Participant, RoomDetails } from '$lib/scrum/types/room';
+	import type { Participant, RoomDetails, RoomType } from '$lib/scrum/types/room';
+	import RetrospectiveRoom from './components/retrospective/RetrospectiveRoom.svelte';
 
 	const roomId = $page.params.id;
 	let room: RoomDetails | undefined = $state();
 	let participants: Participant[] = $derived.by(() => room?.participants || []);
 	let userParticipant: Participant | undefined = $state();
 
-	// TODO: determine page title based on room type
-	let pageTitle = $derived(
-		`${room?.room_name} [${room?.room_code}] - scrum.host backlog refinement`
-	);
+	let roomType: RoomType | undefined = $derived(room?.room_type);
+
+	let pageSuffix = $derived.by(() => {
+		switch (roomType) {
+			case 'REFINEMENT':
+				return 'backlog refinement';
+			case 'RETROSPECTIVE':
+				return 'team retrospective';
+			default:
+				return '';
+		}
+	});
+
+	let pageTitle = $derived(`${room?.room_name} [${room?.room_code}] - scrum.host ${pageSuffix}`);
 
 	onMount(async () => {
 		validateLogin();
@@ -53,7 +64,10 @@
 	<div class="mx-auto max-w-6xl space-y-8">
 		<h1 class="text-4xl font-bold">{room?.room_name} [{room?.room_code}]</h1>
 
-		<!-- TODO: Add support for retrospective rooms -->
-		<BacklogRefinementRoom parentRoom={room} {participants} {userParticipant} />
+		{#if roomType === 'REFINEMENT'}
+			<BacklogRefinementRoom parentRoom={room} {participants} {userParticipant} />
+		{:else if roomType === 'RETROSPECTIVE'}
+			<RetrospectiveRoom parentRoom={room} {participants} {userParticipant} />
+		{/if}
 	</div>
 </div>

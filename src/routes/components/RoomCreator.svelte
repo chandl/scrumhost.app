@@ -21,21 +21,46 @@
 	} from '$lib/components/ui/select';
 	import { createRoom } from '$lib/scrum/room';
 	import { initRefinementMetadata } from '$lib/scrum/refinement';
+	import type { RoomType } from '$lib/scrum/types/room';
+	import type { RefinementMetadata } from '$lib/scrum/types/refinement';
 
-	interface SelectionState {
+	interface PointValueSelection {
 		value: string;
 		label: string;
 	}
 
+	interface RoomTypeSelection {
+		value: RoomType;
+		label: string;
+	}
+
 	let isOpen = $state(false);
+	let roomType = $state() as RoomTypeSelection;
 	let roomName = $state('');
-	let pointValues = $state() as SelectionState;
+	let pointValues = $state() as PointValueSelection;
+
+	let enableCreateRoomButton = $derived.by(() => {
+		if (!roomType || !roomName) {
+			return false;
+		}
+
+		return !(roomType.value === 'REFINEMENT' && !pointValues);
+	});
 
 	async function handleCreateRoom() {
-		const room = await createRoom(roomName, 'REFINEMENT');
+		const room = await createRoom(roomName, roomType.value);
 		console.log('Created room: ', room);
 
-		const refinementMetadata = await initRefinementMetadata(room, pointValues.value);
+		let refinementMetadata: RefinementMetadata | undefined;
+		switch (roomType.value) {
+			case 'REFINEMENT':
+				refinementMetadata = await initRefinementMetadata(room, pointValues.value);
+				break;
+			case 'RETROSPECTIVE':
+				break;
+			default:
+				throw Error('Unknown room type, cannot create metadata');
+		}
 		console.log('Created refinementMetadata', refinementMetadata);
 
 		goto(`/room/${room.id}`);
@@ -69,28 +94,44 @@
 				/>
 			</div>
 			<div class="grid grid-cols-4 items-center gap-4">
-				<Label for="point-values" class="text-right">Point Values</Label>
-				<Select bind:selected={pointValues}>
-					<SelectTrigger class="col-span-3" id="point-values">
-						<SelectValue placeholder="Select point values" />
+				<Label for="room-type" class="text-right">Room Type</Label>
+				<Select bind:selected={roomType}>
+					<SelectTrigger class="col-span-3" id="room-type">
+						<SelectValue placeholder="Select room type" />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="0, 0.5, 1, 2, 3, 5, 8, 13, 20, ?"
-							>Scrum (0, 0.5, 1, 2, 3, 5, 8, 13, 20)</SelectItem
-						>
-						<SelectItem value="0, 1, 2, 3, 5, 8, 13, 21, ?"
-							>Fibonacci (1, 2, 3, 5, 8, 13, 21)</SelectItem
-						>
-						<SelectItem value="0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ?"
-							>Sequential (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)</SelectItem
-						>
-						<SelectItem value="XS, S, M, L, XL, XXL, ?">T-Shirt (XS, S, M, L, XL, XXL)</SelectItem>
+						<SelectItem value="REFINEMENT">Backlog Refinement</SelectItem>
+						<SelectItem value="RETROSPECTIVE">Sprint Retrospective</SelectItem>
 					</SelectContent>
 				</Select>
 			</div>
+
+			{#if roomType?.value === 'REFINEMENT'}
+				<div class="grid grid-cols-4 items-center gap-4">
+					<Label for="point-values" class="text-right">Point Values</Label>
+					<Select bind:selected={pointValues}>
+						<SelectTrigger class="col-span-3" id="point-values">
+							<SelectValue placeholder="Select point values" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="0, 0.5, 1, 2, 3, 5, 8, 13, 20, ?"
+								>Scrum (0, 0.5, 1, 2, 3, 5, 8, 13, 20)</SelectItem
+							>
+							<SelectItem value="0, 1, 2, 3, 5, 8, 13, 21, ?"
+								>Fibonacci (1, 2, 3, 5, 8, 13, 21)</SelectItem
+							>
+							<SelectItem value="0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ?"
+								>Sequential (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)</SelectItem
+							>
+							<SelectItem value="XS, S, M, L, XL, XXL, ?">T-Shirt (XS, S, M, L, XL, XXL)</SelectItem
+							>
+						</SelectContent>
+					</Select>
+				</div>
+			{/if}
 		</div>
 		<DialogFooter>
-			<Button on:click={handleCreateRoom} disabled={!roomName || !pointValues}>Create Room</Button>
+			<Button on:click={handleCreateRoom} disabled={!enableCreateRoomButton}>Create Room</Button>
 		</DialogFooter>
 	</DialogContent>
 </Dialog>

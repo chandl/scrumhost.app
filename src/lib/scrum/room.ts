@@ -94,7 +94,7 @@ export async function getRoomDetails(roomId: string): Promise<RoomDetails> {
 		const room = await pb.collection('rooms').getOne(roomId, {
 			expand: 'participants',
 			fields:
-				'id,created,room_name,room_code,' +
+				'id,created,room_name,room_code,room_type,' +
 				'expand.participants.id,expand.participants.user_id,expand.participants.name'
 		});
 		console.log('getRoomDetails', room);

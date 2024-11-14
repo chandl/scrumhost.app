@@ -17,7 +17,7 @@
 	import RoomCreator from './components/RoomCreator.svelte';
 	import { Clock2, User } from 'lucide-svelte';
 	import { formatTimeAgo } from '$lib/utils';
-	import type { ParticipantRoomDetails } from '$lib/scrum/types/room';
+	import type { ParticipantRoomDetails, RoomType } from '$lib/scrum/types/room';
 
 	let currentUser: AuthModel;
 	user.subscribe((value) => {
@@ -40,6 +40,17 @@
 	function truncate(str: string, n: number) {
 		return str.length > n ? str.slice(0, n - 1) + '…' : str;
 	}
+
+	function formatRoomType(roomType: RoomType) {
+		switch (roomType) {
+			case 'REFINEMENT':
+				return 'Backlog Refinement';
+			case 'RETROSPECTIVE':
+				return 'Sprint Retrospective';
+			default:
+				return 'Unknown Room Type';
+		}
+	}
 </script>
 
 <svelte:head>
@@ -53,7 +64,7 @@
 		<CardHeader>
 			<CardTitle class="text-center text-2xl font-bold">Welcome, {currentUser?.name}</CardTitle>
 			<CardDescription class="text-center"
-				>Create or join a room to get started refining your backlog</CardDescription
+				>Create or join a room to refine your backlog or have a retrospective.</CardDescription
 			>
 		</CardHeader>
 		<CardContent class="space-y-4">
@@ -96,11 +107,15 @@
 								<h3 class="font-semibold">{truncate(room.room_name, 25)} [{room.room_code}]</h3>
 								<div class="flex items-center space-x-4 text-sm text-gray-500">
 									<span class="flex items-center">
+										{formatRoomType(room.room_type)}
+									</span>
+								</div>
+								<div class="flex items-center space-x-4 text-sm text-gray-500">
+									<span class="flex items-center">
 										<User class="mr-1 h-4 w-4" />
 										{room.participants.length} participant(s)
 									</span>
 									<span class="flex items-center">
-										<!-- TODO clock icon -->
 										<Clock2 class="mr-1 h-4 w-4" />
 										{formatTimeAgo(new Date(room.time_joined))}
 									</span>
