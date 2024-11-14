@@ -131,7 +131,7 @@ export function subscribeToRoomUpdates(roomId: string, callback: (record: RoomDe
 		{
 			expand: 'participants',
 			fields:
-				'id,created,room_name,room_code,' +
+				'id,created,room_name,room_code,room_type,' +
 				'expand.participants.id,expand.participants.user_id,expand.participants.name'
 		}
 	);
