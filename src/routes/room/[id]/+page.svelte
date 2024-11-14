@@ -2,17 +2,17 @@
 	import { page } from '$app/stores';
 
 	import {
-		getRoomSummary,
+		getRoomDetails,
 		joinRoomAndGetParticipantDetails,
 		subscribeToRoomUpdates
 	} from '$lib/scrum/room';
 	import { onMount } from 'svelte';
 	import { validateLogin } from '$lib/scrum/user';
-	import type { Participant, RoomSummary } from '$lib/scrum/types';
 	import BacklogRefinementRoom from './components/BacklogRefinementRoom.svelte';
+	import type { Participant, RoomDetails } from '$lib/scrum/types/room';
 
 	const roomId = $page.params.id;
-	let room: RoomSummary | undefined = $state();
+	let room: RoomDetails | undefined = $state();
 	let participants: Participant[] = $derived.by(() => room?.participants || []);
 	let userParticipant: Participant | undefined = $state();
 
@@ -27,12 +27,12 @@
 		// Get the room details
 		try {
 			if (!room) {
-				room = await getRoomSummary(roomId);
+				room = await getRoomDetails(roomId);
 				console.log('Initializing room to', room);
 
-				subscribeToRoomUpdates(roomId, (record) => {
-					console.log('Room Update Received', record);
-					room = record;
+				subscribeToRoomUpdates(roomId, (roomUpdate) => {
+					console.log('Room update received', roomUpdate);
+					room = roomUpdate;
 				});
 			}
 			// Attempt to join the room. Will fail if already in it, but that's fine
@@ -54,6 +54,6 @@
 		<h1 class="text-4xl font-bold">{room?.room_name} [{room?.room_code}]</h1>
 
 		<!-- TODO: Add support for retrospective rooms -->
-		<BacklogRefinementRoom {room} {participants} {userParticipant} />
+		<BacklogRefinementRoom parentRoom={room} {participants} {userParticipant} />
 	</div>
 </div>

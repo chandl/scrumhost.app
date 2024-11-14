@@ -6,7 +6,8 @@
 	import TooltipContent from '$lib/components/ui/tooltip/tooltip-content.svelte';
 	import { CheckCircle, Copy, Users } from 'lucide-svelte';
 	import { onMount } from 'svelte';
-	import type { Estimate, Participant } from '$lib/scrum/types';
+	import type { Estimate } from '$lib/scrum/types/refinement';
+	import type { Participant } from '$lib/scrum/types/room';
 
 	let {
 		currentUser,

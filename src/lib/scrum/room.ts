@@ -3,10 +3,10 @@ import pb from '$lib/pocketbase/pocketbase';
 import type {
 	Participant,
 	ParticipantRoomDetails,
+	Room,
 	RoomDetails,
-	RoomState,
-	RoomSummary
-} from '$lib/scrum/types';
+	RoomType
+} from '$lib/scrum/types/room';
 
 export async function joinRoomWithCode(roomCode: string) {
 	try {
@@ -63,144 +63,78 @@ export async function joinRoomAndGetParticipantDetails(roomId: string): Promise<
 	}
 }
 
-export async function createRoom(room_name: string, point_values: string) {
-	// room code
-	// point values
+export async function createRoom(roomName: string, roomType: RoomType): Promise<Room> {
 	try {
 		const roomData = {
-			host: pb.authStore.model?.id,
-			room_name: room_name,
+			creator: pb.authStore.model?.id,
+			room_name: roomName,
 			room_code: createRoomCode(),
-			point_values: point_values,
-			room_status: 'IDLE',
-			active_story: null
+			room_type: roomType
 		};
 
 		const newRoom = await pb.collection('rooms').create(roomData);
 		console.log(`Room created successfully:`, newRoom);
 
-		await joinRoomAndGetParticipantDetails(newRoom.id);
-
-		return newRoom.id;
+		return {
+			id: newRoom.id,
+			created: newRoom.created,
+			room_name: newRoom.room_name,
+			room_code: newRoom.room_code,
+			room_type: newRoom.room_type,
+			participants: newRoom.participants
+		};
 	} catch (err) {
 		console.error('Error creating room:', err);
 		throw err;
 	}
 }
 
-export function subscribeToRoomUpdates(roomId: string, callback: (record: RoomSummary) => void) {
-	pb.collection('rooms').subscribe(
-		roomId,
-		function (e) {
-			if (e.action == 'update') {
-				callback({
-					id: e.record.id,
-					created: e.record.created,
-					room_name: e.record.room_name,
-					room_code: e.record.room_code,
-					active_story_id: e.record.active_story,
-					room_status: e.record.room_status,
-					point_values: e.record.point_values,
-					stories: e.record.expand?.stories,
-					participants: e.record.expand?.participants
-				});
-			}
-		},
-		{
-			expand: 'stories,participants',
-			fields:
-				'id,created,room_name,room_code,active_story,' +
-				'room_status,point_values,participants,expand.stories.id,expand.stories.details,expand.stories.story_status,expand.stories.updated, ' +
-				'expand.participants.id,expand.participants.user_id,expand.participants.name'
-		}
-	);
-}
-
-export async function setRoomState(roomId: string, roomState: RoomState) {
-	try {
-		const currentRoomData = await getRoom(roomId);
-		const record = await pb
-			.collection('rooms')
-			.update(roomId, { ...currentRoomData, room_status: roomState });
-		console.log(`Set room ${roomId} state to ${roomState}`, record);
-	} catch (err) {
-		console.error('Failed to set room state', err);
-		throw err;
-	}
-}
-
-export async function setVotingFlag(roomId: string, enableVoting: boolean) {
-	try {
-		const currentRoomData = await getRoom(roomId);
-		const record = await pb
-			.collection('rooms')
-			.update(roomId, { ...currentRoomData, room_status: enableVoting ? 'VOTING' : 'IDLE' });
-		console.log(`Set room ${roomId} voting flag to ${enableVoting}`, record);
-	} catch (err) {
-		console.error('Failed to set active story in room', err);
-		throw err;
-	}
-}
-
-export async function setActiveStory(roomId: string, storyId: string | null) {
-	try {
-		const currentRoomData = await getRoom(roomId);
-		const record = await pb
-			.collection('rooms')
-			.update(roomId, { ...currentRoomData, active_story: storyId });
-		console.log(`Set room ${roomId} active story to ${storyId}`, record);
-	} catch (err) {
-		console.error('Failed to set active story in room', err);
-		throw err;
-	}
-}
-
-export async function getRoom(roomId: string): Promise<RoomDetails> {
-	try {
-		const room = await pb.collection('rooms').getOne(roomId);
-		return {
-			id: room.id,
-			created: room.created,
-			room_name: room.room_name,
-			room_code: room.room_code,
-			active_story_id: room.active_story,
-			room_status: room.room_status,
-			point_values: room.point_values,
-			stories: room.stories,
-			participants: room.participants
-		};
-	} catch (err) {
-		console.error('Failed to get room with id:', roomId);
-		throw err;
-	}
-}
-
-export async function getRoomSummary(roomId: string): Promise<RoomSummary> {
+export async function getRoomDetails(roomId: string): Promise<RoomDetails> {
 	try {
 		const room = await pb.collection('rooms').getOne(roomId, {
-			expand: 'stories,participants',
+			expand: 'participants',
 			fields:
-				'id,created,room_name,room_code,active_story,' +
-				'room_status,point_values,participants,expand.stories.id,' +
-				'expand.stories.details,expand.stories.story_status,expand.stories.updated,' +
+				'id,created,room_name,room_code,' +
 				'expand.participants.id,expand.participants.user_id,expand.participants.name'
 		});
-
+		console.log('getRoomDetails', room);
 		return {
 			id: room.id,
 			created: room.created,
 			room_name: room.room_name,
 			room_code: room.room_code,
-			active_story_id: room.active_story,
-			room_status: room.room_status,
-			point_values: room.point_values,
-			stories: room.expand?.stories,
+			room_type: room.room_type,
 			participants: room.expand?.participants
 		};
 	} catch (err) {
 		console.error('Failed to get room with id:', roomId);
 		throw err;
 	}
+}
+
+export function subscribeToRoomUpdates(roomId: string, callback: (record: RoomDetails) => void) {
+	pb.collection('rooms').subscribe(
+		roomId,
+		function (e) {
+			if (e.action == 'update') {
+				const room = e.record;
+				callback({
+					id: room.id,
+					created: room.created,
+					room_name: room.room_name,
+					room_code: room.room_code,
+					room_type: room.room_type,
+					participants: room.expand?.participants
+				});
+			}
+		},
+		{
+			expand: 'participants',
+			fields:
+				'id,created,room_name,room_code,' +
+				'expand.participants.id,expand.participants.user_id,expand.participants.name'
+		}
+	);
 }
 
 export async function getUserRooms(): Promise<ParticipantRoomDetails[]> {

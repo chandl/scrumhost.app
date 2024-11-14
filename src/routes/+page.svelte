@@ -16,8 +16,8 @@
 	import { goto } from '$app/navigation';
 	import RoomCreator from './components/RoomCreator.svelte';
 	import { Clock2, User } from 'lucide-svelte';
-	import type { ParticipantRoomDetails } from '$lib/scrum/types';
 	import { formatTimeAgo } from '$lib/utils';
+	import type { ParticipantRoomDetails } from '$lib/scrum/types/room';
 
 	let currentUser: AuthModel;
 	user.subscribe((value) => {

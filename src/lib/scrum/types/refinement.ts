@@ -1,35 +1,3 @@
-export interface Room {
-	id: string;
-	created: string;
-	room_name: string;
-	room_code: string;
-	active_story_id: string;
-	room_status: RoomState;
-	point_values: string;
-}
-
-export type RoomState = 'IDLE' | 'VOTING' | 'REVIEWING';
-
-export interface RoomDetails extends Room {
-	stories: string[];
-	participants: string[];
-}
-
-export interface RoomSummary extends Room {
-	stories: StorySummary[];
-	participants: Participant[];
-}
-
-export interface ParticipantRoomDetails extends RoomDetails {
-	time_joined: string;
-}
-
-export interface Participant {
-	id: string;
-	userId: string;
-	name: string;
-}
-
 export interface Estimate {
 	id: string;
 	storyId: string;
@@ -55,7 +23,7 @@ export interface StorySummary {
 }
 
 export interface StoryDetails extends StorySummary {
-	room: string;
+	refinement_metadata: string;
 	created: string;
 	story_estimates: string[];
 }
@@ -65,3 +33,19 @@ export interface StoryWithEstimates extends StorySummary {
 	details: string;
 	story_estimates: Estimate[];
 }
+
+export interface RefinementMetadata {
+	id: string;
+	point_values: string;
+	active_story: string;
+	room_status: RefinementRoomStatus;
+	parent_room: string;
+	host: string;
+	stories: StorySummary[];
+}
+
+export interface RefinementMetadataDetails extends Omit<RefinementMetadata, 'stories'> {
+	stories: StorySummary[];
+}
+
+export type RefinementRoomStatus = 'IDLE' | 'VOTING' | 'REVIEWING';

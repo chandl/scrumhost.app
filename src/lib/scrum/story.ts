@@ -1,9 +1,10 @@
 import pb from '$lib/pocketbase/pocketbase';
-import type { StoryDetails, StoryStatus, StoryWithEstimates } from '$lib/scrum/types';
 
-export async function createStory(details: string, roomId: string) {
+import type { StoryStatus, StoryWithEstimates } from '$lib/scrum/types/refinement';
+
+export async function createStory(details: string, refinementMetadataId: string) {
 	const data = {
-		room: roomId,
+		refinement_metadata: refinementMetadataId,
 		details: details,
 		story_status: 'QUEUED'
 	};
@@ -12,24 +13,10 @@ export async function createStory(details: string, roomId: string) {
 	console.log('Created story:', record);
 
 	// add to room record
-	await pb.collection('rooms').update(roomId, {
+	await pb.collection('refinement_metadata').update(refinementMetadataId, {
 		'stories+': record.id
 	});
 	return record;
-}
-
-export async function getStoryById(storyId: string): Promise<StoryDetails> {
-	const story = await pb.collection('stories').getOne(storyId);
-	console.log('Got story by id', storyId, story);
-	return {
-		id: story.id,
-		room: story.room,
-		details: story.details,
-		story_status: story.story_status,
-		created: story.created,
-		story_estimates: story.story_estimates,
-		updated: story.updated
-	};
 }
 
 export async function getStoryWithEstimatesById(storyId: string): Promise<StoryWithEstimates> {
@@ -85,10 +72,7 @@ export function subscribeToStoryUpdates(
 
 export async function setStoryStatus(storyId: string, story_status: StoryStatus) {
 	try {
-		const storyData = await getStoryById(storyId);
-		const record = await pb
-			.collection('stories')
-			.update(storyId, { ...storyData, story_status: story_status });
+		const record = await pb.collection('stories').update(storyId, { story_status: story_status });
 		console.log(`Set story ${storyId} status to ${status}`, record);
 	} catch (err) {
 		console.error('Failed to set story status', err);

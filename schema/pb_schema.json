@@ -116,6 +116,112 @@
 		"options": {}
 	},
 	{
+		"id": "qh7uccnfi3gtzal",
+		"name": "refinement_metadata",
+		"type": "base",
+		"system": false,
+		"schema": [
+			{
+				"system": false,
+				"id": "yuvotvmb",
+				"name": "point_values",
+				"type": "text",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"min": null,
+					"max": null,
+					"pattern": ""
+				}
+			},
+			{
+				"system": false,
+				"id": "jr0jldfc",
+				"name": "active_story",
+				"type": "relation",
+				"required": false,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "zgom9t2qtmagpd4",
+					"cascadeDelete": false,
+					"minSelect": null,
+					"maxSelect": 1,
+					"displayFields": null
+				}
+			},
+			{
+				"system": false,
+				"id": "b8w9q5bp",
+				"name": "stories",
+				"type": "relation",
+				"required": false,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "zgom9t2qtmagpd4",
+					"cascadeDelete": false,
+					"minSelect": null,
+					"maxSelect": null,
+					"displayFields": null
+				}
+			},
+			{
+				"system": false,
+				"id": "itixcxrs",
+				"name": "room_status",
+				"type": "select",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"maxSelect": 1,
+					"values": ["IDLE", "VOTING", "REVIEWING"]
+				}
+			},
+			{
+				"system": false,
+				"id": "ai0b8h6c",
+				"name": "host",
+				"type": "relation",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "qrc65jr3edr9tjz",
+					"cascadeDelete": false,
+					"minSelect": null,
+					"maxSelect": 1,
+					"displayFields": null
+				}
+			},
+			{
+				"system": false,
+				"id": "rs5sfxgn",
+				"name": "parent_room",
+				"type": "relation",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "1jtwasjfr2bq5q9",
+					"cascadeDelete": false,
+					"minSelect": null,
+					"maxSelect": 1,
+					"displayFields": null
+				}
+			}
+		],
+		"indexes": [],
+		"listRule": "@request.auth.id != \"\" ",
+		"viewRule": "@request.auth.id != \"\" ",
+		"createRule": "@request.auth.id != \"\" ",
+		"updateRule": "@request.auth.id != \"\" ",
+		"deleteRule": null,
+		"options": {}
+	},
+	{
 		"id": "1jtwasjfr2bq5q9",
 		"name": "rooms",
 		"type": "base",
@@ -137,36 +243,6 @@
 			},
 			{
 				"system": false,
-				"id": "2t38q0re",
-				"name": "point_values",
-				"type": "text",
-				"required": true,
-				"presentable": false,
-				"unique": false,
-				"options": {
-					"min": null,
-					"max": null,
-					"pattern": ""
-				}
-			},
-			{
-				"system": false,
-				"id": "lczj8fjz",
-				"name": "active_story",
-				"type": "relation",
-				"required": false,
-				"presentable": false,
-				"unique": false,
-				"options": {
-					"collectionId": "zgom9t2qtmagpd4",
-					"cascadeDelete": false,
-					"minSelect": null,
-					"maxSelect": 1,
-					"displayFields": null
-				}
-			},
-			{
-				"system": false,
 				"id": "63dzsqtm",
 				"name": "room_name",
 				"type": "text",
@@ -177,22 +253,6 @@
 					"min": null,
 					"max": 128,
 					"pattern": ""
-				}
-			},
-			{
-				"system": false,
-				"id": "xvzyqbfa",
-				"name": "stories",
-				"type": "relation",
-				"required": false,
-				"presentable": false,
-				"unique": false,
-				"options": {
-					"collectionId": "zgom9t2qtmagpd4",
-					"cascadeDelete": false,
-					"minSelect": null,
-					"maxSelect": null,
-					"displayFields": null
 				}
 			},
 			{
@@ -213,21 +273,8 @@
 			},
 			{
 				"system": false,
-				"id": "aq88xf3w",
-				"name": "room_status",
-				"type": "select",
-				"required": true,
-				"presentable": false,
-				"unique": false,
-				"options": {
-					"maxSelect": 1,
-					"values": ["IDLE", "VOTING", "REVIEWING"]
-				}
-			},
-			{
-				"system": false,
 				"id": "delmyd8j",
-				"name": "host",
+				"name": "creator",
 				"type": "relation",
 				"required": true,
 				"presentable": false,
@@ -238,6 +285,19 @@
 					"minSelect": null,
 					"maxSelect": 1,
 					"displayFields": null
+				}
+			},
+			{
+				"system": false,
+				"id": "vywqpynk",
+				"name": "room_type",
+				"type": "select",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"maxSelect": 1,
+					"values": ["REFINEMENT", "RETROSPECTIVE"]
 				}
 			}
 		],
@@ -255,22 +315,6 @@
 		"type": "base",
 		"system": false,
 		"schema": [
-			{
-				"system": false,
-				"id": "qbb3jkbc",
-				"name": "room",
-				"type": "relation",
-				"required": true,
-				"presentable": false,
-				"unique": false,
-				"options": {
-					"collectionId": "1jtwasjfr2bq5q9",
-					"cascadeDelete": true,
-					"minSelect": null,
-					"maxSelect": 1,
-					"displayFields": null
-				}
-			},
 			{
 				"system": false,
 				"id": "l7dutq6p",
@@ -312,6 +356,22 @@
 				"options": {
 					"maxSelect": 1,
 					"values": ["QUEUED", "REVIEWED", "SKIPPED"]
+				}
+			},
+			{
+				"system": false,
+				"id": "m7mtuhiq",
+				"name": "refinement_metadata",
+				"type": "relation",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "qh7uccnfi3gtzal",
+					"cascadeDelete": false,
+					"minSelect": null,
+					"maxSelect": 1,
+					"displayFields": null
 				}
 			}
 		],

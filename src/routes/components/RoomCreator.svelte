@@ -20,6 +20,7 @@
 		SelectValue
 	} from '$lib/components/ui/select';
 	import { createRoom } from '$lib/scrum/room';
+	import { initRefinementMetadata } from '$lib/scrum/refinement';
 
 	interface SelectionState {
 		value: string;
@@ -31,10 +32,13 @@
 	let pointValues = $state() as SelectionState;
 
 	async function handleCreateRoom() {
-		console.log('Create Room', roomName, pointValues);
-		const roomId = await createRoom(roomName, pointValues.value);
+		const room = await createRoom(roomName, 'REFINEMENT');
+		console.log('Created room: ', room);
 
-		goto(`/room/${roomId}`);
+		const refinementMetadata = await initRefinementMetadata(room, pointValues.value);
+		console.log('Created refinementMetadata', refinementMetadata);
+
+		goto(`/room/${room.id}`);
 	}
 </script>
 

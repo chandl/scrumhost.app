@@ -2,7 +2,7 @@
 	import { Check, CornerDownLeft } from 'lucide-svelte';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import type { Estimate, StoryAction, StorySummary } from '$lib/scrum/types';
+	import type { Estimate, StoryAction, StorySummary } from '$lib/scrum/types/refinement';
 
 	let {
 		activeStoryDetails,

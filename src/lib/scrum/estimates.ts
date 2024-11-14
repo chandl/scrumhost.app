@@ -1,5 +1,6 @@
 import pb from '$lib/pocketbase/pocketbase';
-import type { Estimate } from '$lib/scrum/types';
+
+import type { Estimate } from '$lib/scrum/types/refinement';
 
 export async function getEstimateByStoryAndUser(storyId: string, userId: string) {
 	// you can also fetch all records at once via getFullList

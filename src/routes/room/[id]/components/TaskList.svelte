@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { CornerDownLeft, Eye, PlayCircle, SkipForward } from 'lucide-svelte';
-	import type { StoryAction, StoryStatus, StorySummary } from '$lib/scrum/types';
 	import { formatTimeAgo } from '$lib/utils';
+	import type { StoryAction, StoryStatus, StorySummary } from '$lib/scrum/types/refinement';
 
 	let {
 		tasks,

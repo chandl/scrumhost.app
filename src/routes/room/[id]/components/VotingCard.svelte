@@ -3,14 +3,14 @@
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card/index.js';
 	import Progress from '../../../../lib/components/ui/progress/progress.svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import { createOrUpdateEstimate } from '$lib/scrum/estimates';
 	import type {
 		Estimate,
-		Participant,
-		RoomState,
+		RefinementRoomStatus,
 		StoryAction,
 		StorySummary
-	} from '$lib/scrum/types';
-	import { createOrUpdateEstimate } from '$lib/scrum/estimates';
+	} from '$lib/scrum/types/refinement';
+	import type { Participant } from '$lib/scrum/types/room';
 
 	let {
 		roomStatus,
@@ -21,7 +21,7 @@
 		pointValues,
 		onTaskAction
 	}: {
-		roomStatus: RoomState;
+		roomStatus: RefinementRoomStatus;
 		activeStoryDetails: StorySummary | undefined;
 		currentVotes: Estimate[];
 		participants: Participant[];

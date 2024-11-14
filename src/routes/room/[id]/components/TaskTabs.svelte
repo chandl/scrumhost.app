@@ -2,7 +2,7 @@
 	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs/index.js';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card/index.js';
 	import TaskList from './TaskList.svelte';
-	import type { StoryAction, StorySummary } from '$lib/scrum/types';
+	import type { StoryAction, StorySummary } from '$lib/scrum/types/refinement';
 
 	let {
 		stories,

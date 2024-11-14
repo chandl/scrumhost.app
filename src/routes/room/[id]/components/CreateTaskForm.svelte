@@ -5,11 +5,11 @@
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { createStory } from '$lib/scrum/story';
 
-	let { roomId }: { roomId: string } = $props();
+	let { refinementMetadataId }: { refinementMetadataId: string } = $props();
 
 	let newTaskDescription = $state('');
 	async function handleCreateTask() {
-		await createStory(newTaskDescription, roomId);
+		await createStory(newTaskDescription, refinementMetadataId);
 		newTaskDescription = '';
 	}
 </script>
