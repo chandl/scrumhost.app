@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { PUBLIC_ENABLE_BACKLOG_ROOMS } from '$env/static/public';
+
 	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
 	import {
@@ -101,7 +103,9 @@
 					</SelectTrigger>
 					<SelectContent>
 						<SelectItem value="REFINEMENT">Backlog Refinement</SelectItem>
+						{#if PUBLIC_ENABLE_BACKLOG_ROOMS === true}
 						<SelectItem value="RETROSPECTIVE">Sprint Retrospective</SelectItem>
+						{/if}
 					</SelectContent>
 				</Select>
 			</div>
