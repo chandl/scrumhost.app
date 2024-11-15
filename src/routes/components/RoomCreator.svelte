@@ -104,7 +104,7 @@
 					<SelectContent>
 						<SelectItem value="REFINEMENT">Backlog Refinement</SelectItem>
 						{#if PUBLIC_ENABLE_BACKLOG_ROOMS === true}
-						<SelectItem value="RETROSPECTIVE">Sprint Retrospective</SelectItem>
+							<SelectItem value="RETROSPECTIVE">Sprint Retrospective</SelectItem>
 						{/if}
 					</SelectContent>
 				</Select>

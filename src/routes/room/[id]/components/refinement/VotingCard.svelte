@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { ClipboardCheck, CornerDownLeft, Eraser } from 'lucide-svelte';
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card/index.js';
-	import Progress from '../../../../lib/components/ui/progress/progress.svelte';
-	import { Button } from '$lib/components/ui/button/index.js';
+	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
+	import Progress from '../../../../../lib/components/ui/progress/progress.svelte';
+	import { Button } from '$lib/components/ui/button';
 	import { createOrUpdateEstimate } from '$lib/scrum/estimates';
 	import type {
 		Estimate,

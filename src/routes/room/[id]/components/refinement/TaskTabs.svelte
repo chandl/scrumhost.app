@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs/index.js';
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card/index.js';
+	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
+	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import TaskList from './TaskList.svelte';
 	import type { StoryAction, StorySummary } from '$lib/scrum/types/refinement';
 

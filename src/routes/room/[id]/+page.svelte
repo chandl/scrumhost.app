@@ -8,7 +8,7 @@
 	} from '$lib/scrum/room';
 	import { onMount } from 'svelte';
 	import { validateLogin } from '$lib/scrum/user';
-	import BacklogRefinementRoom from './components/BacklogRefinementRoom.svelte';
+	import BacklogRefinementRoom from './components/refinement/BacklogRefinementRoom.svelte';
 	import type { Participant, RoomDetails, RoomType } from '$lib/scrum/types/room';
 	import RetrospectiveRoom from './components/retrospective/RetrospectiveRoom.svelte';
 

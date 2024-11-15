@@ -3,7 +3,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Tooltip, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import TooltipContent from '$lib/components/ui/tooltip/tooltip-content.svelte';
+	import TooltipContent from '../../../../../lib/components/ui/tooltip/tooltip-content.svelte';
 	import { CheckCircle, Copy, Users } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import type { Estimate } from '$lib/scrum/types/refinement';
