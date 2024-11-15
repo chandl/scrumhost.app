@@ -96,7 +96,7 @@
 </script>
 
 <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
-	<div class="space-y-8 md:col-span-2">
+	<div class="space-y-4 md:col-span-2">
 		<RetroLane
 			title="What Went Well"
 			items={wentWellItems}

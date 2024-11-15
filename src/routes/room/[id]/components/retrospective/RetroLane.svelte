@@ -5,6 +5,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import type { RetroItem } from '$lib/scrum/types/retro_types';
 	import RetroItemCard from './RetroItemCard.svelte';
+	import type { ComponentType } from 'svelte';
 
 	let {
 		title,
@@ -20,7 +21,7 @@
 		onDeleteComment
 	}: {
 		title: string;
-		icon: any;
+		icon: ComponentType<Icon>;
 		items: RetroItem[];
 		participantId: string;
 
@@ -69,7 +70,7 @@
 	<CardHeader class="pb-2">
 		<CardTitle class="flex items-center justify-between text-lg">
 			<div class="flex items-center">
-				<Icon class="mr-2 h-5 w-5"><svelte:component this={icon}></svelte:component></Icon>
+				<Icon class="mr-2 h-5 w-5"><svelte:component this={icon}/></Icon>
 				{title}
 			</div>
 
