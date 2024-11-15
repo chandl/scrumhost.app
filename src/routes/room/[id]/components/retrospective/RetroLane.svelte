@@ -14,10 +14,11 @@
 		onUpvote,
 		onDelete,
 		onMerge,
-		onAddComment
+		onAddComment,
+		onDeleteComment
 	}: {
 		title: string;
-		icon: Icon;
+		icon: any;
 		items: RetroItem[];
 
 		onAddItem: (content: string) => void;
@@ -25,6 +26,7 @@
 		onDelete: (id: string) => void;
 		onMerge: (ids: string[]) => void;
 		onAddComment: (id: string, content: string) => void;
+		onDeleteComment: (id: string) => void;
 	} = $props();
 
 	let newItem: string = $state('');
@@ -80,6 +82,7 @@
 					onSelect={handleSelectItem}
 					isSelected={selectedItems.includes(item.id)}
 					{onAddComment}
+					{onDeleteComment}
 				/>
 			{/each}
 		</div>

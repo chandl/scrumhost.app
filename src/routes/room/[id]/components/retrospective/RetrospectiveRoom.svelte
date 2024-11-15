@@ -108,6 +108,8 @@
 
 	const addComment = (id: string) => {};
 
+	const deleteComment = (id: string) => {};
+
 	const mergeItems = (category: RetroItem['category']) => (ids: string[]) => {
 		const itemsToMerge = retroItems.filter((item) => ids.includes(item.id));
 		const mergedContent = itemsToMerge.map((item) => item.content).join(' | ');
@@ -140,6 +142,7 @@
 			onDelete={deleteItem}
 			onMerge={mergeItems('WENT_WELL')}
 			onAddComment={addComment}
+			onDeleteComment={deleteComment}
 		/>
 		<RetroLane
 			title="What Could Be Improved"
@@ -150,6 +153,7 @@
 			onDelete={deleteItem}
 			onMerge={mergeItems('TO_IMPROVE')}
 			onAddComment={addComment}
+			onDeleteComment={deleteComment}
 		/>
 		<RetroLane
 			title="Action Items"
@@ -160,6 +164,7 @@
 			onDelete={deleteItem}
 			onMerge={mergeItems('ACTION_ITEMS')}
 			onAddComment={addComment}
+			onDeleteComment={deleteComment}
 		/>
 	</div>
 

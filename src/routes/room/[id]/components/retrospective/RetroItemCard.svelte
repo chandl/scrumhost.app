@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { PUBLIC_ENABLE_BACKLOG_MERGE_TASKS } from '$env/static/public';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Button } from '$lib/components/ui/button';
@@ -13,7 +14,8 @@
 		onSelect,
 		onUpvote,
 		onDelete,
-		onAddComment
+		onAddComment,
+		onDeleteComment
 	}: {
 		item: RetroItem;
 		isSelected: boolean;
@@ -21,6 +23,7 @@
 		onUpvote: (id: string) => void;
 		onDelete: (id: string) => void;
 		onAddComment: (id: string, content: string) => void;
+		onDeleteComment: (id: string) => void;
 	} = $props();
 
 	let showComments = $state(false);
@@ -30,11 +33,13 @@
 	<CardContent class="space-y-2 p-3">
 		<div class="flex items-center justify-between">
 			<div class="mr-2 flex flex-grow items-center space-x-2">
-				<Checkbox
-					id={`select-${item.id}`}
-					checked={isSelected}
-					onCheckedChange={() => onSelect(item.id)}
-				/>
+				{#if PUBLIC_ENABLE_BACKLOG_MERGE_TASKS === 'true'}
+					<Checkbox
+						id={`select-${item.id}`}
+						checked={isSelected}
+						onCheckedChange={() => onSelect(item.id)}
+					/>
+				{/if}
 				<label for={`select-${item.id}`} class="text-sm">{item.content}</label>
 			</div>
 			<div class="flex items-center space-x-1">
@@ -62,7 +67,11 @@
 			</div>
 		</div>
 		{#if showComments}
-			<CommentSection retroItem={item} onAddComment={(content) => onAddComment(item.id, content)} />
+			<CommentSection
+				retroItem={item}
+				onAddComment={(content) => onAddComment(item.id, content)}
+				{onDeleteComment}
+			/>
 		{/if}
 	</CardContent>
 </Card>
