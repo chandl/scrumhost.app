@@ -1,83 +1,37 @@
 <script lang="ts">
-	import type { Participant, RoomDetails } from '$lib/scrum/types/room';
-	import RetroParticipantList from './RetroParticipantList.svelte';
+	import type { Participant } from '$lib/scrum/types/room';
+	import { page } from '$app/stores';
+
 	import RetroLane from './RetroLane.svelte';
 	import { ArrowUpCircle, ListTodo, ThumbsUp } from 'lucide-svelte';
-	import type { RetroItem, RetroItemCategory } from '$lib/scrum/types/retrospective';
+	import type { RetroItem, RetroItemCategory, RetroMetadata } from '$lib/scrum/types/retro_types';
 	import ParticipantList from '../refinement/ParticipantList.svelte';
+	import {
+		createRetroItem,
+		createRetroItemComment,
+		deleteRetroItem,
+		deleteRetroItemComment,
+		deleteRetroItemUpvote,
+		getRetroMetadata,
+		subscribeToRetroMetadata,
+		triggerMetadataRefresh,
+		upvoteRetroItem
+	} from '$lib/scrum/retro';
+	import { onMount } from 'svelte';
 
 	let {
-		parentRoom,
 		participants,
 		userParticipant
 	}: {
-		parentRoom: RoomDetails | undefined;
 		participants: Participant[];
 		userParticipant: Participant | undefined;
 	} = $props();
 
-	let retroItems: RetroItem[] = $state(
-		[
-			{
-				id: '123',
-				content: 'string',
-				category: 'WENT_WELL',
-				votes: [],
-				comments: [
-					{
-						id: 'string',
-						content: 'string',
-						author: 'string'
-					}
-				]
-			},
-			{
-				id: '1234',
-				content: 'string2',
-				category: 'WENT_WELL',
-				votes: ['up1', 'up2', 'up3'],
-				comments: [
-					{
-						id: 'string',
-						content: 'string',
-						author: 'author'
-					},
-					{
-						id: 'string',
-						content: 'strin2g',
-						author: 'author'
-					}
-				]
-			},
-			{
-				id: '12345',
-				content: 'string3',
-				category: 'WENT_WELL',
-				votes: [],
-				comments: [
-					{
-						id: 'string',
-						content: 'string',
-						author: 'string'
-					}
-				]
-			},
-			{
-				id: '123456',
-				content:
-					'We should do something during the sprint because when we do not then things happen',
-				category: 'WENT_WELL',
-				votes: ['up1', 'up2'],
-				comments: [
-					{
-						id: 'string',
-						content: 'string',
-						author: 'author'
-					}
-				]
-			}
-		].sort((a, b) => b.votes.length - a.votes.length)
-	);
+	const parentRoomId = $page.params.id;
+	let participantId: string = $derived(userParticipant?.id || 'UNKNOWN');
+	let retroMetadata: RetroMetadata | undefined = $state();
+	let metadataId: string = $derived(retroMetadata?.id || 'UNKNOWN');
+	let retroItems: RetroItem[] = $derived(retroMetadata?.items || []);
 
 	let wentWellItems: RetroItem[] = $derived(
 		retroItems.filter((item) => item.category === 'WENT_WELL')
@@ -89,46 +43,56 @@
 		retroItems.filter((item) => item.category === 'ACTION_ITEMS')
 	);
 
-	const addRetroItem = (category: RetroItemCategory) => (content: string) => {
+	const addRetroItem = (category: RetroItemCategory) => async (content: string) => {
 		console.log('Adding new item to category', category, content);
-		const newItem: RetroItem = {
-			id: Date.now().toString(),
-			content,
-			category,
-			votes: [],
-			comments: []
-		};
-		// TODO create retroItem in DB
-		console.log('newItem', newItem);
+		const item = await createRetroItem(metadataId, content, category, participantId);
+		console.log('Created new item', item, 'in category', category);
 	};
 
-	const upvoteItem = (id: string) => {};
+	const upvoteItem = async (id: string) => {
+		console.log('Upvoting retro item with id', id);
+		await upvoteRetroItem(id, participantId);
+		await triggerMetadataRefresh(metadataId);
+	};
 
-	const deleteItem = (id: string) => {};
+	const deleteUpvote = async (itemId: string, voteId: string) => {
+		console.log('Deleting upvote on retro item with id', voteId);
 
-	const addComment = (id: string) => {};
+		await deleteRetroItemUpvote(itemId, voteId);
+		await triggerMetadataRefresh(metadataId);
+	};
 
-	const deleteComment = (id: string) => {};
+	const deleteItem = async (id: string) => {
+		console.log('Deleting retro item with id', id);
+		await deleteRetroItem(id);
+	};
+
+	const addComment = async (id: string, content: string) => {
+		console.log('Creating new comment', content, id);
+		await createRetroItemComment(id, content, userParticipant?.id || 'UNKNOWN');
+		await triggerMetadataRefresh(metadataId);
+	};
+
+	const deleteComment = async (itemId: string, commentId: string) => {
+		console.log('Deleting comment', commentId, 'on item', itemId);
+		await deleteRetroItemComment(itemId, commentId);
+		await triggerMetadataRefresh(metadataId);
+	};
 
 	const mergeItems = (category: RetroItem['category']) => (ids: string[]) => {
-		const itemsToMerge = retroItems.filter((item) => ids.includes(item.id));
-		const mergedContent = itemsToMerge.map((item) => item.content).join(' | ');
-
-		//const totalVotes = itemsToMerge.reduce((sum, item) => sum + item.votes.length, 0)
-		const allComments = itemsToMerge.flatMap((item) => item.comments);
-
-		const newItem: RetroItem = {
-			id: Date.now().toString(),
-			content: mergedContent,
-			category,
-			votes: [],
-			comments: allComments
-		};
-
-		console.log('Merged item: ', newItem);
-
-		// TODO update merge item
+		// TODO implement
+		console.log('onMerge called', category, ids);
 	};
+
+	onMount(async () => {
+		retroMetadata = await getRetroMetadata(parentRoomId);
+		console.log('Initialized room with retro metadata', retroMetadata);
+
+		subscribeToRetroMetadata(retroMetadata.id, (updatedMetadata) => {
+			console.log('Received metadata update', updatedMetadata);
+			retroMetadata = updatedMetadata;
+		});
+	});
 </script>
 
 <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
@@ -139,10 +103,12 @@
 			icon={ThumbsUp}
 			onAddItem={addRetroItem('WENT_WELL')}
 			onUpvote={upvoteItem}
+			onDeleteUpvote={deleteUpvote}
 			onDelete={deleteItem}
 			onMerge={mergeItems('WENT_WELL')}
 			onAddComment={addComment}
 			onDeleteComment={deleteComment}
+			{participantId}
 		/>
 		<RetroLane
 			title="What Could Be Improved"
@@ -150,10 +116,12 @@
 			icon={ArrowUpCircle}
 			onAddItem={addRetroItem('TO_IMPROVE')}
 			onUpvote={upvoteItem}
+			onDeleteUpvote={deleteUpvote}
 			onDelete={deleteItem}
 			onMerge={mergeItems('TO_IMPROVE')}
 			onAddComment={addComment}
 			onDeleteComment={deleteComment}
+			{participantId}
 		/>
 		<RetroLane
 			title="Action Items"
@@ -161,10 +129,12 @@
 			icon={ListTodo}
 			onAddItem={addRetroItem('ACTION_ITEMS')}
 			onUpvote={upvoteItem}
+			onDeleteUpvote={deleteUpvote}
 			onDelete={deleteItem}
 			onMerge={mergeItems('ACTION_ITEMS')}
 			onAddComment={addComment}
 			onDeleteComment={deleteComment}
+			{participantId}
 		/>
 	</div>
 

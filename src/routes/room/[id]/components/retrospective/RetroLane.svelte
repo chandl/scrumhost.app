@@ -1,17 +1,19 @@
 <script lang="ts">
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import { Icon, Merge } from 'lucide-svelte';
+	import { Icon, Merge, SortAsc, SortDesc } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
-	import type { RetroItem } from '$lib/scrum/types/retrospective';
+	import type { RetroItem } from '$lib/scrum/types/retro_types';
 	import RetroItemCard from './RetroItemCard.svelte';
 
 	let {
 		title,
 		icon,
 		items,
+		participantId,
 		onAddItem,
 		onUpvote,
+		onDeleteUpvote,
 		onDelete,
 		onMerge,
 		onAddComment,
@@ -20,17 +22,27 @@
 		title: string;
 		icon: any;
 		items: RetroItem[];
+		participantId: string;
 
 		onAddItem: (content: string) => void;
 		onUpvote: (id: string) => void;
+		onDeleteUpvote: (itemId: string, voteId: string) => void;
 		onDelete: (id: string) => void;
 		onMerge: (ids: string[]) => void;
 		onAddComment: (id: string, content: string) => void;
-		onDeleteComment: (id: string) => void;
+		onDeleteComment: (itemId: string, commentId: string) => void;
 	} = $props();
 
 	let newItem: string = $state('');
 	let selectedItems: string[] = $state([]);
+	let sortItemsByVote: boolean = $state(false);
+
+	let sortedItems = $derived.by(() => {
+		if (sortItemsByVote) {
+			return [...items].sort((a, b) => b.votes.length - a.votes.length);
+		}
+		return [...items];
+	});
 
 	const handleAddItem = () => {
 		if (newItem.trim()) {
@@ -60,29 +72,47 @@
 				<Icon class="mr-2 h-5 w-5"><svelte:component this={icon}></svelte:component></Icon>
 				{title}
 			</div>
-			{#if selectedItems.length > 1}
-				<Button size="sm" on:click={handleMerge}>
-					<Merge class="mr-2 h-4 w-4" />
-					Merge ({selectedItems.length})
-				</Button>
-			{/if}
+
+			<div class="ml-auto flex items-center">
+				{#if selectedItems.length > 1}
+					<Button size="sm" on:click={handleMerge}>
+						<Merge class="mr-2 h-4 w-4" />
+						Merge ({selectedItems.length})
+					</Button>
+				{/if}
+				<SortDesc
+					onclick={() => (sortItemsByVote = !sortItemsByVote)}
+					class={`ml-2 transition-colors duration-200 ${
+						sortItemsByVote ? 'text-blue-500 hover:text-red-500' : 'text-black hover:text-blue-500'
+					}`}
+					style="color: ${sortItemsByVote ? 'rgb(59, 130, 246)' : 'black'};"
+				/>
+			</div>
 		</CardTitle>
 	</CardHeader>
 	<CardContent class="flex flex-grow flex-col space-y-2 pt-0">
-		<form class="mt-2 flex space-x-2" onsubmit={handleAddItem}>
+		<form
+			class="mt-2 flex space-x-2"
+			onsubmit={(event) => {
+				event.preventDefault();
+				handleAddItem();
+			}}
+		>
 			<Input placeholder="Enter new item" bind:value={newItem} class="text-sm" />
 			<Button size="sm" on:click={handleAddItem}>Add</Button>
 		</form>
 		<div class="flex-grow overflow-auto">
-			{#each items as item}
+			{#each sortedItems as item}
 				<RetroItemCard
 					{item}
 					{onUpvote}
+					{onDeleteUpvote}
 					{onDelete}
 					onSelect={handleSelectItem}
 					isSelected={selectedItems.includes(item.id)}
 					{onAddComment}
 					{onDeleteComment}
+					{participantId}
 				/>
 			{/each}
 		</div>

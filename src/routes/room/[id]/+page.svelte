@@ -67,7 +67,7 @@
 		{#if roomType === 'REFINEMENT'}
 			<BacklogRefinementRoom parentRoom={room} {participants} {userParticipant} />
 		{:else if roomType === 'RETROSPECTIVE'}
-			<RetrospectiveRoom parentRoom={room} {participants} {userParticipant} />
+			<RetrospectiveRoom {participants} {userParticipant} />
 		{/if}
 	</div>
 </div>

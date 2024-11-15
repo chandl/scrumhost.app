@@ -23,8 +23,9 @@
 	} from '$lib/components/ui/select';
 	import { createRoom } from '$lib/scrum/room';
 	import { initRefinementMetadata } from '$lib/scrum/refinement';
+	import { initRetroMetadata } from '$lib/scrum/retro';
+
 	import type { RoomType } from '$lib/scrum/types/room';
-	import type { RefinementMetadata } from '$lib/scrum/types/refinement';
 
 	interface PointValueSelection {
 		value: string;
@@ -53,17 +54,19 @@
 		const room = await createRoom(roomName, roomType.value);
 		console.log('Created room: ', room);
 
-		let refinementMetadata: RefinementMetadata | undefined;
 		switch (roomType.value) {
 			case 'REFINEMENT':
-				refinementMetadata = await initRefinementMetadata(room, pointValues.value);
+				console.log(
+					'Created refinementMetadata',
+					await initRefinementMetadata(room, pointValues.value)
+				);
 				break;
 			case 'RETROSPECTIVE':
+				console.log('Created retrospectiveMetadata', await initRetroMetadata(room));
 				break;
 			default:
 				throw Error('Unknown room type, cannot create metadata');
 		}
-		console.log('Created refinementMetadata', refinementMetadata);
 
 		goto(`/room/${room.id}`);
 	}
@@ -103,7 +106,7 @@
 					</SelectTrigger>
 					<SelectContent>
 						<SelectItem value="REFINEMENT">Backlog Refinement</SelectItem>
-						{#if PUBLIC_ENABLE_BACKLOG_ROOMS === true}
+						{#if PUBLIC_ENABLE_BACKLOG_ROOMS === 'true'}
 							<SelectItem value="RETROSPECTIVE">Sprint Retrospective</SelectItem>
 						{/if}
 					</SelectContent>
