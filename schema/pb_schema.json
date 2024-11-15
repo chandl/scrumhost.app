@@ -28,13 +28,7 @@
 				"presentable": false,
 				"unique": false,
 				"options": {
-					"mimeTypes": [
-						"image/jpeg",
-						"image/png",
-						"image/svg+xml",
-						"image/gif",
-						"image/webp"
-					],
+					"mimeTypes": ["image/jpeg", "image/png", "image/svg+xml", "image/gif", "image/webp"],
 					"thumbs": null,
 					"maxSelect": 1,
 					"maxSize": 5242880,
@@ -113,9 +107,7 @@
 				}
 			}
 		],
-		"indexes": [
-			"CREATE UNIQUE INDEX `idx_cVgl1nI` ON `participants` (\n  `user`,\n  `room`\n)"
-		],
+		"indexes": ["CREATE UNIQUE INDEX `idx_cVgl1nI` ON `participants` (\n  `user`,\n  `room`\n)"],
 		"listRule": "@request.auth.id != \"\" ",
 		"viewRule": "@request.auth.id != \"\" ",
 		"createRule": "@request.auth.id != \"\"",
@@ -185,11 +177,7 @@
 				"unique": false,
 				"options": {
 					"maxSelect": 1,
-					"values": [
-						"IDLE",
-						"VOTING",
-						"REVIEWING"
-					]
+					"values": ["IDLE", "VOTING", "REVIEWING"]
 				}
 			},
 			{
@@ -225,9 +213,7 @@
 				}
 			}
 		],
-		"indexes": [
-			"CREATE UNIQUE INDEX `idx_SvoRC2e` ON `refinement_metadata` (`parent_room`)"
-		],
+		"indexes": ["CREATE UNIQUE INDEX `idx_SvoRC2e` ON `refinement_metadata` (`parent_room`)"],
 		"listRule": "@request.auth.id != \"\" ",
 		"viewRule": "@request.auth.id != \"\" ",
 		"createRule": "@request.auth.id != \"\" ",
@@ -326,11 +312,7 @@
 				"unique": false,
 				"options": {
 					"maxSelect": 1,
-					"values": [
-						"WENT_WELL",
-						"TO_IMPROVE",
-						"ACTION_ITEMS"
-					]
+					"values": ["WENT_WELL", "TO_IMPROVE", "ACTION_ITEMS"]
 				}
 			},
 			{
@@ -445,9 +427,7 @@
 				}
 			}
 		],
-		"indexes": [
-			"CREATE UNIQUE INDEX `idx_Hv8RBLj` ON `retro_metadata` (`parent_room`)"
-		],
+		"indexes": ["CREATE UNIQUE INDEX `idx_Hv8RBLj` ON `retro_metadata` (`parent_room`)"],
 		"listRule": "@request.auth.id != \"\" ",
 		"viewRule": "@request.auth.id != \"\" ",
 		"createRule": "@request.auth.id != \"\" ",
@@ -494,9 +474,7 @@
 				}
 			}
 		],
-		"indexes": [
-			"CREATE UNIQUE INDEX `idx_bhKExzX` ON `retro_votes` (\n  `item`,\n  `voter`\n)"
-		],
+		"indexes": ["CREATE UNIQUE INDEX `idx_bhKExzX` ON `retro_votes` (\n  `item`,\n  `voter`\n)"],
 		"listRule": "@request.auth.id != \"\" ",
 		"viewRule": "@request.auth.id != \"\" ",
 		"createRule": "@request.auth.id != \"\" ",
@@ -580,16 +558,11 @@
 				"unique": false,
 				"options": {
 					"maxSelect": 1,
-					"values": [
-						"REFINEMENT",
-						"RETROSPECTIVE"
-					]
+					"values": ["REFINEMENT", "RETROSPECTIVE"]
 				}
 			}
 		],
-		"indexes": [
-			"CREATE UNIQUE INDEX `idx_3igflSm` ON `rooms` (`room_code`)"
-		],
+		"indexes": ["CREATE UNIQUE INDEX `idx_3igflSm` ON `rooms` (`room_code`)"],
 		"listRule": "@request.auth.id != \"\"",
 		"viewRule": "@request.auth.id != \"\"",
 		"createRule": "@request.auth.id != \"\"",
@@ -643,11 +616,7 @@
 				"unique": false,
 				"options": {
 					"maxSelect": 1,
-					"values": [
-						"QUEUED",
-						"REVIEWED",
-						"SKIPPED"
-					]
+					"values": ["QUEUED", "REVIEWED", "SKIPPED"]
 				}
 			},
 			{
