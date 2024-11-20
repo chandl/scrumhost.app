@@ -52,9 +52,7 @@
 	<title>scrum.host - join</title>
 </svelte:head>
 
-<div
-	class="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-blue-100 to-white p-4"
->
+<div class="flex min-h-screen flex-col items-center justify-center p-4">
 	<Card class="w-full max-w-md">
 		<CardHeader>
 			<CardTitle class="text-center text-2xl font-bold">scrum.host</CardTitle>

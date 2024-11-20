@@ -19,6 +19,7 @@
 	let showConfirmDialog = $state(false);
 
 	let isNotRootPage = $derived($page.url.pathname !== '/');
+	let isNotHomePage = $derived($page.url.pathname !== '/home');
 
 	let currentUser: AuthModel = $state(null);
 	user.subscribe((value) => {
@@ -27,18 +28,18 @@
 
 	async function handleLogout() {
 		logout();
-		goto('/join');
+		goto('/');
 	}
 </script>
 
-{#if currentUser != null}
+{#if currentUser != null && isNotRootPage}
 	<div>
-		{#if isNotRootPage}
+		{#if isNotHomePage}
 			<Button
 				variant="outline"
 				size="icon"
 				class="fixed right-16 top-4 rounded-full bg-background p-2 text-foreground shadow-md transition-all duration-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50"
-				on:click={() => goto('/')}
+				on:click={() => goto('/home')}
 				aria-label="Home"
 			>
 				<Home class="h-5 w-5" />

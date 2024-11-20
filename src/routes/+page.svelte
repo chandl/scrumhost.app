@@ -1,133 +1,98 @@
 <script lang="ts">
-	import Button from '$lib/components/ui/button/button.svelte';
-	import { user, validateLogin } from '$lib/scrum/user';
-	import { getUserRooms, joinRoomWithCode } from '$lib/scrum/room';
-	import type { AuthModel } from 'pocketbase';
-	import { onMount } from 'svelte';
+	import { Button } from '$lib/components/ui/button';
+	import FeatureCard from './components/FeatureCard.svelte';
 	import {
-		Card,
-		CardContent,
-		CardDescription,
-		CardFooter,
-		CardHeader,
-		CardTitle
-	} from '$lib/components/ui/card';
-	import { Input } from '$lib/components/ui/input';
-	import { goto } from '$app/navigation';
-	import RoomCreator from './components/RoomCreator.svelte';
-	import { Clock2, User } from 'lucide-svelte';
-	import { formatTimeAgo } from '$lib/utils';
-	import type { ParticipantRoomDetails, RoomType } from '$lib/scrum/types/room';
+		ArrowUpCircle,
+		GitMerge,
+		ListTodo,
+		MessageSquare,
+		ThumbsUp,
+		VoteIcon
+	} from 'lucide-svelte';
+	import Typewriter from './components/Typewriter.svelte';
+	import SocialIcon from './components/SocialIcon.svelte';
 
-	let currentUser: AuthModel;
-	user.subscribe((value) => {
-		currentUser = value;
-	});
-
-	let rooms: ParticipantRoomDetails[];
-	onMount(async () => {
-		validateLogin();
-		rooms = await getUserRooms();
-		console.log('Found rooms:', rooms);
-	});
-
-	let joinRoomCode: string;
-	function handleJoinRoom() {
-		console.log('handleJoinRoom', joinRoomCode);
-		joinRoomWithCode(joinRoomCode);
-	}
-
-	function truncate(str: string, n: number) {
-		return str.length > n ? str.slice(0, n - 1) + '…' : str;
-	}
-
-	function formatRoomType(roomType: RoomType) {
-		switch (roomType) {
-			case 'REFINEMENT':
-				return 'Backlog Refinement';
-			case 'RETROSPECTIVE':
-				return 'Sprint Retrospective';
-			default:
-				return 'Unknown Room Type';
-		}
-	}
+	let currentYear = new Date().getFullYear();
 </script>
 
 <svelte:head>
 	<title>scrum.host - home</title>
 </svelte:head>
 
-<div
-	class="flex min-h-screen flex-col items-center justify-center space-y-8 bg-gradient-to-b from-blue-100 to-white p-4"
->
-	<Card class="w-full max-w-md">
-		<CardHeader>
-			<CardTitle class="text-center text-2xl font-bold">Welcome, {currentUser?.name}</CardTitle>
-			<CardDescription class="text-center"
-				>Create or join a room to refine your backlog or have a retrospective.</CardDescription
-			>
-		</CardHeader>
-		<CardContent class="space-y-4">
-			<RoomCreator />
-			<div class="relative">
-				<div class="absolute inset-0 flex items-center">
-					<span class="w-full border-t"></span>
-				</div>
-				<div class="relative flex justify-center text-xs uppercase">
-					<span class="bg-background px-2 text-muted-foreground">Or</span>
-				</div>
-			</div>
-			<Input
-				type="text"
-				placeholder="Enter Room Code"
-				bind:value={joinRoomCode}
-				class="py-6 text-lg"
-			/>
-		</CardContent>
-		<CardFooter>
-			<Button class="w-full py-6 text-lg" disabled={!joinRoomCode} on:click={handleJoinRoom}>
-				Join Room
-			</Button>
-		</CardFooter>
-	</Card>
+<div class="flex min-h-screen flex-col bg-gradient-to-br from-blue-50 to-indigo-100">
+	<header class="px-4 py-6 sm:px-6 lg:px-8">
+		<div class="mx-auto flex max-w-7xl items-center justify-between">
+			<p></p>
+			<a href="/home">
+				<Button variant="outline">Join a Room</Button>
+			</a>
+		</div>
+	</header>
 
-	<!-- Recently Joined Rooms  -->
-	{#if rooms?.length > 0}
-		<Card class="w-full max-w-md">
-			<CardHeader>
-				<CardTitle class="text-xl font-bold">Recently Joined Rooms</CardTitle>
-			</CardHeader>
-			<CardContent>
-				<ul class="space-y-4">
-					{#each rooms as room}
-						<li
-							class="flex items-center justify-between rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100"
-						>
-							<div>
-								<h3 class="font-semibold">{truncate(room.room_name, 25)} [{room.room_code}]</h3>
-								<div class="flex items-center space-x-4 text-sm text-gray-500">
-									<span class="flex items-center">
-										{formatRoomType(room.room_type)}
-									</span>
-								</div>
-								<div class="flex items-center space-x-4 text-sm text-gray-500">
-									<span class="flex items-center">
-										<User class="mr-1 h-4 w-4" />
-										{room.participants.length} participant(s)
-									</span>
-									<span class="flex items-center">
-										<Clock2 class="mr-1 h-4 w-4" />
-										{formatTimeAgo(new Date(room.time_joined))}
-									</span>
-								</div>
-							</div>
-							<Button variant="outline" size="sm" on:click={() => goto(`/room/${room.id}`)}>
-								Rejoin
-							</Button>
-						</li>
-					{/each}
-				</ul>
-			</CardContent>
-		</Card>
-	{/if}
+	<main
+		class="mx-auto flex w-full max-w-5xl flex-grow flex-col justify-center px-4 py-12 sm:px-6 lg:px-8"
+	>
+		<div class="mb-12 text-center">
+			<h2 class="mb-4 text-4xl font-bold text-gray-900 sm:text-5xl">
+				Collaborate on Team
+				<Typewriter
+					strings={['Retrospectives', 'Sprint Planning', 'Backlog Refinement']}
+					typingSpeed={50}
+					deletingSpeed={20}
+					pause={6000}
+				/>
+			</h2>
+			<p class="mb-8 text-xl text-gray-600">
+				Realtime collaboration tool for backlog refinement and sprint retrospectives.
+			</p>
+
+			<a href="/home">
+				<Button size="lg">Host a Room</Button>
+			</a>
+		</div>
+
+		<div class="grid grid-cols-2 gap-4 md:grid-cols-3">
+			<FeatureCard icon={VoteIcon} title="Prioritize Tasks" />
+			<FeatureCard icon={ThumbsUp} title="Gather Feedback" />
+			<FeatureCard icon={ArrowUpCircle} title="Identify Improvements" />
+			<FeatureCard icon={ListTodo} title="Track Action Items" />
+			<FeatureCard icon={MessageSquare} title="Foster Discussions" />
+			<FeatureCard icon={GitMerge} title="Ship Better Products" />
+		</div>
+	</main>
+
+	<footer class="px-4 py-6 sm:px-6 lg:px-8">
+		<div class="mx-auto flex max-w-7xl flex-col items-center">
+			<div class="mb-2 flex space-x-4">
+				<a
+					href="https://discord.gg/uYY94zR6bq"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="text-gray-600 transition-colors hover:text-gray-900"
+				>
+					<SocialIcon name="discord" class="h-4 w-4" />
+				</a>
+				<a
+					href="https://www.linkedin.com/in/chandler-severson/"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="text-gray-600 transition-colors hover:text-gray-900"
+				>
+					<SocialIcon name="linkedin" class="h-4 w-4" />
+				</a>
+				<a
+					href="https://github.com/chandl"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="text-gray-600 transition-colors hover:text-gray-900"
+				>
+					<SocialIcon name="github" class="h-4 w-4" />
+				</a>
+			</div>
+			<p class="text-center text-sm text-gray-500">
+				&copy; {currentYear}
+				<a href="https://www.linkedin.com/in/chandler-severson/">chandler severson</a> - built with ☕
+			</p>
+		</div>
+	</footer>
 </div>

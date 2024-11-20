@@ -112,7 +112,7 @@
 	<title>{pageTitle}</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gradient-to-b from-blue-100 to-white p-8">
+<div class="mt-12 h-[calc(100vh-50px)] p-8">
 	<div class="mx-auto max-w-6xl space-y-4">
 		{#if !room && loadingError === '' && !requirePassword}
 			<PageLoading />
@@ -141,7 +141,7 @@
 						</div>
 					{:else}
 						<div class="flex items-center space-x-2">
-							<h2 class="text-xl">Password: <span class="blur-md">{room?.room_key}</span></h2>
+							<h2 class="text-xl">Password: <span class="blur-sm">{room?.room_key}</span></h2>
 							<Button
 								onclick={() => (showRoomPassword = true)}
 								size="icon"

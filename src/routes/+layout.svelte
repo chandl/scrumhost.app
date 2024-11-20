@@ -1,11 +1,13 @@
 <script lang="ts">
 	import '../app.css';
-	import LogOutButton from './components/LogOutButton.svelte';
+	import Header from './components/Header.svelte';
 	import { inject } from '@vercel/analytics';
 	let { children } = $props();
 
 	inject();
 </script>
 
-<LogOutButton />
-{@render children()}
+<div class="flex flex-col bg-gradient-to-b from-blue-100 to-white">
+	<Header />
+	{@render children()}
+</div>

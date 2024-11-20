@@ -56,6 +56,14 @@ const config: Config = {
 			},
 			fontFamily: {
 				sans: [...fontFamily.sans]
+			},
+			animation: {
+				blink: 'blink 1s steps(1) infinite'
+			},
+			keyframes: {
+				blink: {
+					'50%': { opacity: '0' }
+				}
 			}
 		}
 	}
