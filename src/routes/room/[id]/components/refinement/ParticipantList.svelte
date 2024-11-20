@@ -13,12 +13,14 @@
 		currentUser,
 		participants,
 		currentVotes,
-		showOtherParticipantVotes
+		showOtherParticipantVotes,
+		roomPassword
 	}: {
 		currentUser: Participant | undefined;
 		participants: Participant[];
 		currentVotes: Estimate[];
 		showOtherParticipantVotes: boolean;
+		roomPassword: string;
 	} = $props();
 
 	let shareLink = $state(''); // Store the link to be shared
@@ -26,7 +28,10 @@
 
 	// Set the share link on component mount
 	onMount(() => {
-		shareLink = window.location.href; // Current page URL
+		let currentLink = new URL(window.location.href);
+		currentLink.searchParams.set('pwd', roomPassword);
+
+		shareLink = `${currentLink}`; // Current page URL
 	});
 
 	// Function to copy link to clipboard

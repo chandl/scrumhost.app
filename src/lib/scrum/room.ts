@@ -10,9 +10,10 @@ import type {
 
 export async function joinRoomWithCode(roomCode: string) {
 	try {
-		const room = await pb.collection('rooms').getFirstListItem(`room_code = "${roomCode}"`);
+		console.log('TRY FIND ROOM', roomCode);
+		const room = await pb.collection('rooms_search').getOne(roomCode);
 		console.log('Found room with code:', roomCode, room);
-		goto(`/room/${room.id}`);
+		goto(`/room/${room.room_id}`);
 	} catch (err) {
 		console.error('Failed to join room', err);
 	}
@@ -32,7 +33,18 @@ export async function getParticipantInRoom(
 	}
 }
 
-export async function joinRoomAndGetParticipantDetails(roomId: string): Promise<Participant> {
+export async function getUserParticipant(roomId: string): Promise<Participant | undefined> {
+	const userId = pb.authStore.model?.id;
+	const existingUser = await getParticipantInRoom(userId, roomId);
+	if (existingUser) {
+		return existingUser;
+	}
+}
+
+export async function joinRoomAndGetParticipantDetails(
+	roomId: string,
+	roomKey: string
+): Promise<Participant> {
 	try {
 		const userId = pb.authStore.model?.id;
 		const existingUser = await getParticipantInRoom(userId, roomId);
@@ -45,12 +57,24 @@ export async function joinRoomAndGetParticipantDetails(roomId: string): Promise<
 			room: roomId,
 			name: pb.authStore.model?.name
 		};
-		const newParticipant = await pb.collection('participants').create(participantData);
+		const newParticipant = await pb.collection('participants').create(participantData, {
+			headers: {
+				x_room_key: roomKey
+			}
+		});
 		console.log('Room Joined successfully:', newParticipant);
 		// Update Room with new participant
-		await pb.collection('rooms').update(roomId, {
-			'participants+': newParticipant.id
-		});
+		await pb.collection('rooms').update(
+			roomId,
+			{
+				'participants+': newParticipant.id
+			},
+			{
+				headers: {
+					x_room_key: roomKey
+				}
+			}
+		);
 
 		return {
 			id: newParticipant.id,
@@ -69,7 +93,8 @@ export async function createRoom(roomName: string, roomType: RoomType): Promise<
 			creator: pb.authStore.model?.id,
 			room_name: roomName,
 			room_code: createRoomCode(),
-			room_type: roomType
+			room_type: roomType,
+			room_key: createRoomPasscode()
 		};
 
 		const newRoom = await pb.collection('rooms').create(roomData);
@@ -81,7 +106,8 @@ export async function createRoom(roomName: string, roomType: RoomType): Promise<
 			room_name: newRoom.room_name,
 			room_code: newRoom.room_code,
 			room_type: newRoom.room_type,
-			participants: newRoom.participants
+			participants: newRoom.participants,
+			room_key: newRoom.room_key
 		};
 	} catch (err) {
 		console.error('Error creating room:', err);
@@ -94,7 +120,7 @@ export async function getRoomDetails(roomId: string): Promise<RoomDetails> {
 		const room = await pb.collection('rooms').getOne(roomId, {
 			expand: 'participants',
 			fields:
-				'id,created,room_name,room_code,room_type,' +
+				'id,created,room_name,room_code,room_type,room_key,' +
 				'expand.participants.id,expand.participants.user_id,expand.participants.name'
 		});
 		console.log('getRoomDetails', room);
@@ -104,7 +130,8 @@ export async function getRoomDetails(roomId: string): Promise<RoomDetails> {
 			room_name: room.room_name,
 			room_code: room.room_code,
 			room_type: room.room_type,
-			participants: room.expand?.participants
+			participants: room.expand?.participants,
+			room_key: room.room_key
 		};
 	} catch (err) {
 		console.error('Failed to get room with id:', roomId);
@@ -124,14 +151,15 @@ export function subscribeToRoomUpdates(roomId: string, callback: (record: RoomDe
 					room_name: room.room_name,
 					room_code: room.room_code,
 					room_type: room.room_type,
-					participants: room.expand?.participants
+					participants: room.expand?.participants,
+					room_key: room.room_key
 				});
 			}
 		},
 		{
 			expand: 'participants',
 			fields:
-				'id,created,room_name,room_code,room_type,' +
+				'id,created,room_name,room_code,room_type,room_key,' +
 				'expand.participants.id,expand.participants.user_id,expand.participants.name'
 		}
 	);
@@ -156,9 +184,10 @@ export async function getUserRooms(): Promise<ParticipantRoomDetails[]> {
 	}
 }
 
-function getChars(length: number) {
+function getChars(length: number, numbersOnly: boolean = false) {
 	let result = '';
-	const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+	const characters = numbersOnly ? '0123456789' : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
 	const charactersLength = characters.length;
 	let counter = 0;
 	while (counter < length) {
@@ -169,5 +198,9 @@ function getChars(length: number) {
 }
 
 function createRoomCode() {
-	return `${getChars(3)}-${getChars(3)}`;
+	return `${getChars(3, true)}-${getChars(3, true)}-${getChars(4, true)}`;
+}
+
+function createRoomPasscode() {
+	return `${getChars(6, false)}`;
 }

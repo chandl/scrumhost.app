@@ -3,6 +3,7 @@
 
 	import {
 		getRoomDetails,
+		getUserParticipant,
 		joinRoomAndGetParticipantDetails,
 		subscribeToRoomUpdates
 	} from '$lib/scrum/room';
@@ -11,8 +12,16 @@
 	import BacklogRefinementRoom from './components/refinement/BacklogRefinementRoom.svelte';
 	import type { Participant, RoomDetails, RoomType } from '$lib/scrum/types/room';
 	import RetrospectiveRoom from './components/retrospective/RetrospectiveRoom.svelte';
+	import { Eye, EyeClosed } from 'lucide-svelte';
+	import { Button } from '$lib/components/ui/button';
+
+	import PageLoading from '../../components/PageLoading.svelte';
+	import ScrumAlert from '../../components/ScrumAlert.svelte';
+	import JoinRoomDialog from './components/JoinRoomDialog.svelte';
+	import { goto } from '$app/navigation';
 
 	const roomId = $page.params.id;
+	const preSetPwd = $page.url.searchParams.get('pwd');
 	let room: RoomDetails | undefined = $state();
 	let participants: Participant[] = $derived.by(() => room?.participants || []);
 	let userParticipant: Participant | undefined = $state();
@@ -30,11 +39,16 @@
 		}
 	});
 
-	let pageTitle = $derived(`${room?.room_name} [${room?.room_code}] - scrum.host ${pageSuffix}`);
+	let pageTitle = $derived(
+		room
+			? `${room.room_name} [${room.room_code}] - scrum.host ${pageSuffix}`
+			: `scrum.host ${pageSuffix}`
+	);
+	let loadingError: string = $state('');
 
-	onMount(async () => {
-		validateLogin();
+	let requirePassword = $state(false);
 
+	async function loadRoom() {
 		// Get the room details
 		try {
 			if (!room) {
@@ -46,14 +60,52 @@
 					room = roomUpdate;
 				});
 			}
-			// Attempt to join the room. Will fail if already in it, but that's fine
-			userParticipant = await joinRoomAndGetParticipantDetails(roomId);
 		} catch (err) {
-			console.error('Could not find room with id', roomId, err);
 			// TODO go to 404 page
-			return;
+			loadingError = `${err}`;
+		}
+	}
+
+	async function joinRoomWithPwd(password: string) {
+		userParticipant = await joinRoomAndGetParticipantDetails(roomId, password);
+	}
+
+	onMount(async () => {
+		validateLogin();
+
+		try {
+			userParticipant = await getUserParticipant(roomId);
+		} catch (err) {
+			console.warn('User not in this room', err);
+		}
+		if (!userParticipant && preSetPwd) {
+			console.log('Try joining room with password from URL param', preSetPwd);
+			// Attempt to join the room. Will fail if already in it, but that's fine
+			await joinRoomWithPwd(preSetPwd);
+		}
+
+		if (userParticipant) {
+			let currentLink = new URL(window.location.href);
+			currentLink.searchParams.delete('pwd');
+			await goto(currentLink);
+		}
+
+		if (!userParticipant && !preSetPwd) {
+			requirePassword = true;
+		} else {
+			await loadRoom();
 		}
 	});
+
+	async function rejoinWithPwd(password: string) {
+		await joinRoomWithPwd(password);
+		if (userParticipant) {
+			requirePassword = false;
+			await loadRoom();
+		}
+	}
+
+	let showRoomPassword = $state(false);
 </script>
 
 <svelte:head>
@@ -61,13 +113,57 @@
 </svelte:head>
 
 <div class="min-h-screen bg-gradient-to-b from-blue-100 to-white p-8">
-	<div class="mx-auto max-w-6xl space-y-8">
-		<h1 class="text-4xl font-bold">{room?.room_name} [{room?.room_code}]</h1>
+	<div class="mx-auto max-w-6xl space-y-4">
+		{#if !room && loadingError === '' && !requirePassword}
+			<PageLoading />
+		{:else if loadingError !== ''}
+			<ScrumAlert title="Error Loading Room" body={loadingError} duration={-1} onClose={() => {}} />
+		{:else if requirePassword}
+			<JoinRoomDialog handleJoinRoom={(password) => rejoinWithPwd(password)} />
+		{:else}
+			<div class="items-center">
+				<h1 class="text-4xl font-bold">{room?.room_name}</h1>
 
-		{#if roomType === 'REFINEMENT'}
-			<BacklogRefinementRoom parentRoom={room} {participants} {userParticipant} />
-		{:else if roomType === 'RETROSPECTIVE'}
-			<RetrospectiveRoom {participants} {userParticipant} />
+				<div class="sm:grid sm:grid-cols-1 md:flex md:flex-auto md:items-center">
+					<h2 class="text-xl">Room Code: {room?.room_code}</h2>
+					<span class="ml-4 mr-4 hidden text-2xl md:block">&bull;</span>
+					{#if showRoomPassword}
+						<div class="flex items-center space-x-2">
+							<h2 class="text-xl">Password: <span class="blur-none">{room?.room_key}</span></h2>
+							<Button
+								onclick={() => (showRoomPassword = false)}
+								size="icon"
+								variant="outline"
+								class="opacity-50"
+							>
+								<EyeClosed />
+							</Button>
+						</div>
+					{:else}
+						<div class="flex items-center space-x-2">
+							<h2 class="text-xl">Password: <span class="blur-md">{room?.room_key}</span></h2>
+							<Button
+								onclick={() => (showRoomPassword = true)}
+								size="icon"
+								variant="outline"
+								class="opacity-50"
+							>
+								<Eye />
+							</Button>
+						</div>
+					{/if}
+				</div>
+			</div>
+			{#if roomType === 'REFINEMENT'}
+				<BacklogRefinementRoom
+					parentRoom={room}
+					{participants}
+					{userParticipant}
+					roomPassword={room?.room_key || ''}
+				/>
+			{:else if roomType === 'RETROSPECTIVE'}
+				<RetrospectiveRoom {participants} {userParticipant} roomPassword={room?.room_key || ''} />
+			{/if}
 		{/if}
 	</div>
 </div>

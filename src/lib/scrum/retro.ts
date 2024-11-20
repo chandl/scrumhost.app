@@ -14,7 +14,7 @@ export async function triggerMetadataRefresh(metadataId: string) {
 }
 
 export async function initRetroMetadata(parentRoom: Room): Promise<RetroMetadata> {
-	const participant = await joinRoomAndGetParticipantDetails(parentRoom.id);
+	const participant = await joinRoomAndGetParticipantDetails(parentRoom.id, parentRoom.room_key);
 
 	const metadata = await pb.collection('retro_metadata').create({
 		parent_room: parentRoom.id,

@@ -21,13 +21,16 @@
 
 	let {
 		participants,
-		userParticipant
+		userParticipant,
+		roomPassword
 	}: {
 		participants: Participant[];
 		userParticipant: Participant | undefined;
+		roomPassword: string;
 	} = $props();
 
 	const parentRoomId = $page.params.id;
+
 	let participantId: string = $derived(userParticipant?.id || 'UNKNOWN');
 	let retroMetadata: RetroMetadata | undefined = $state();
 	let metadataId: string = $derived(retroMetadata?.id || 'UNKNOWN');
@@ -144,6 +147,7 @@
 			{participants}
 			showOtherParticipantVotes={false}
 			currentVotes={[]}
+			{roomPassword}
 		/>
 	</div>
 </div>

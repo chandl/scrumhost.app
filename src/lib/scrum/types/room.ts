@@ -4,6 +4,7 @@ export interface Room {
 	room_name: string;
 	room_code: string;
 	room_type: RoomType;
+	room_key: string;
 	participants: string[];
 }
 

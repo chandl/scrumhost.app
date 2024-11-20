@@ -90,15 +90,6 @@
 		</DialogHeader>
 		<div class="grid gap-4 py-4">
 			<div class="grid grid-cols-4 items-center gap-4">
-				<Label for="room-name" class="text-right">Room Name</Label>
-				<Input
-					id="room-name"
-					bind:value={roomName}
-					class="col-span-3"
-					placeholder="Enter room name"
-				/>
-			</div>
-			<div class="grid grid-cols-4 items-center gap-4">
 				<Label for="room-type" class="text-right">Room Type</Label>
 				<Select bind:selected={roomType}>
 					<SelectTrigger class="col-span-3" id="room-type">
@@ -113,6 +104,15 @@
 				</Select>
 			</div>
 
+			<div class="grid grid-cols-4 items-center gap-4">
+				<Label for="room-name" class="text-right">Room Name</Label>
+				<Input
+					id="room-name"
+					bind:value={roomName}
+					class="col-span-3"
+					placeholder="Enter room name"
+				/>
+			</div>
 			{#if roomType?.value === 'REFINEMENT'}
 				<div class="grid grid-cols-4 items-center gap-4">
 					<Label for="point-values" class="text-right">Point Values</Label>

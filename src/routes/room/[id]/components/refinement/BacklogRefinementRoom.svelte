@@ -31,11 +31,13 @@
 	let {
 		parentRoom,
 		participants,
-		userParticipant
+		userParticipant,
+		roomPassword
 	}: {
 		parentRoom: RoomDetails | undefined;
 		participants: Participant[];
 		userParticipant: Participant | undefined;
+		roomPassword: string;
 	} = $props();
 
 	const parentRoomId = $page.params.id;
@@ -145,7 +147,7 @@
 </script>
 
 <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
-	<div class="space-y-8 md:col-span-2">
+	<div class=" md:col-span-2">
 		<!-- Vote and Review Votes -->
 		<div>
 			{#if refinementMetadata?.room_status === 'REVIEWING'}
@@ -176,12 +178,13 @@
 		</div>
 	</div>
 
-	<div class="mt-6">
+	<div>
 		<ParticipantList
 			currentUser={userParticipant}
 			{participants}
 			{currentVotes}
 			{showOtherParticipantVotes}
+			{roomPassword}
 		/>
 	</div>
 </div>

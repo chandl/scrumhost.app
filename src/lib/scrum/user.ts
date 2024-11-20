@@ -60,8 +60,7 @@ export function validateLogin() {
 		// If user is not logged in, redirect to the login page
 		if (!user) {
 			console.log('Current page url', get(page).url);
-			const currentUrl = get(page).url.pathname;
-			const loginUrl = `/join?target=${encodeURIComponent(currentUrl)}`;
+			const loginUrl = `/join?target=${encodeURIComponent(window.location.href)}`;
 
 			console.log('Redirect', loginUrl);
 			goto(loginUrl); // Redirect to login page
@@ -78,7 +77,7 @@ export function validateLogin() {
 	}
 }
 
-function generatePassword(length: number): string {
+export function generatePassword(length: number): string {
 	const chars =
 		'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=';
 	let password = '';
