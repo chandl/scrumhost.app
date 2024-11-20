@@ -28,7 +28,13 @@
 				"presentable": false,
 				"unique": false,
 				"options": {
-					"mimeTypes": ["image/jpeg", "image/png", "image/svg+xml", "image/gif", "image/webp"],
+					"mimeTypes": [
+						"image/jpeg",
+						"image/png",
+						"image/svg+xml",
+						"image/gif",
+						"image/webp"
+					],
 					"thumbs": null,
 					"maxSelect": 1,
 					"maxSize": 5242880,
@@ -107,10 +113,12 @@
 				}
 			}
 		],
-		"indexes": ["CREATE UNIQUE INDEX `idx_cVgl1nI` ON `participants` (\n  `user`,\n  `room`\n)"],
-		"listRule": "@request.auth.id != \"\" ",
-		"viewRule": "@request.auth.id != \"\" ",
-		"createRule": "@request.auth.id != \"\"",
+		"indexes": [
+			"CREATE UNIQUE INDEX `idx_cVgl1nI` ON `participants` (\n  `user`,\n  `room`\n)"
+		],
+		"listRule": "@request.auth.id != \"\" && room.participants.user.id ?= @request.auth.id",
+		"viewRule": "@request.auth.id != \"\" && room.participants.user.id ?= @request.auth.id",
+		"createRule": "@request.auth.id != \"\" && \n@request.headers.x_room_key = @request.data.room.room_key",
 		"updateRule": null,
 		"deleteRule": null,
 		"options": {}
@@ -177,7 +185,11 @@
 				"unique": false,
 				"options": {
 					"maxSelect": 1,
-					"values": ["IDLE", "VOTING", "REVIEWING"]
+					"values": [
+						"IDLE",
+						"VOTING",
+						"REVIEWING"
+					]
 				}
 			},
 			{
@@ -213,11 +225,13 @@
 				}
 			}
 		],
-		"indexes": ["CREATE UNIQUE INDEX `idx_SvoRC2e` ON `refinement_metadata` (`parent_room`)"],
-		"listRule": "@request.auth.id != \"\" ",
-		"viewRule": "@request.auth.id != \"\" ",
-		"createRule": "@request.auth.id != \"\" ",
-		"updateRule": "@request.auth.id != \"\" ",
+		"indexes": [
+			"CREATE UNIQUE INDEX `idx_SvoRC2e` ON `refinement_metadata` (`parent_room`)"
+		],
+		"listRule": "@request.auth.id != \"\" && parent_room.participants.user.id ?= @request.auth.id",
+		"viewRule": "@request.auth.id != \"\" && parent_room.participants.user.id ?= @request.auth.id",
+		"createRule": "@request.auth.id != \"\" && @request.data.parent_room.creator = @request.auth.id",
+		"updateRule": "@request.auth.id != \"\" && parent_room.participants.user.id ?= @request.auth.id",
 		"deleteRule": null,
 		"options": {}
 	},
@@ -275,11 +289,11 @@
 			}
 		],
 		"indexes": [],
-		"listRule": "@request.auth.id != \"\" ",
-		"viewRule": "@request.auth.id != \"\" ",
-		"createRule": "@request.auth.id != \"\" ",
+		"listRule": "@request.auth.id != \"\" \n// Must be in room to view comment\n&& item.retro_metadata.parent_room.participants.user ?= @request.auth.id",
+		"viewRule": "@request.auth.id != \"\" \n// Must be in room to view comment\n&& item.retro_metadata.parent_room.participants.user ?= @request.auth.id",
+		"createRule": "@request.auth.id != \"\" \n// Must be in room to create\n&& item.retro_metadata.parent_room.participants.user ?= @request.auth.id\n// Can only create comment as yourself\n&& author.user.id = @request.auth.id",
 		"updateRule": null,
-		"deleteRule": "@request.auth.id != \"\" ",
+		"deleteRule": "@request.auth.id != \"\" && author.user.id = @request.auth.id",
 		"options": {}
 	},
 	{
@@ -312,7 +326,11 @@
 				"unique": false,
 				"options": {
 					"maxSelect": 1,
-					"values": ["WENT_WELL", "TO_IMPROVE", "ACTION_ITEMS"]
+					"values": [
+						"WENT_WELL",
+						"TO_IMPROVE",
+						"ACTION_ITEMS"
+					]
 				}
 			},
 			{
@@ -362,14 +380,30 @@
 					"maxSelect": null,
 					"displayFields": null
 				}
+			},
+			{
+				"system": false,
+				"id": "zwobfotm",
+				"name": "retro_metadata",
+				"type": "relation",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "r5v3s65j8elw2vo",
+					"cascadeDelete": false,
+					"minSelect": null,
+					"maxSelect": 1,
+					"displayFields": null
+				}
 			}
 		],
 		"indexes": [],
-		"listRule": "@request.auth.id != \"\" ",
-		"viewRule": "@request.auth.id != \"\" ",
-		"createRule": "@request.auth.id != \"\" ",
-		"updateRule": "@request.auth.id != \"\" ",
-		"deleteRule": "@request.auth.id != \"\" ",
+		"listRule": "@request.auth.id != \"\" \n// User must be a participant in the room to interact with item\n&& retro_metadata.parent_room.participants.user ?= @request.auth.id",
+		"viewRule": "@request.auth.id != \"\" \n// User must be a participant in the room to interact with item\n&& retro_metadata.parent_room.participants.user ?= @request.auth.id",
+		"createRule": "@request.auth.id != \"\" \n// User must be a participant in the room to interact with item\n&& retro_metadata.parent_room.participants.user ?= @request.auth.id\n// Correct author must be set\n&& @request.data.author.user.id = @request.auth.id",
+		"updateRule": "@request.auth.id != \"\" \n// User must be a participant in the room to interact with item\n&& retro_metadata.parent_room.participants.user ?= @request.auth.id",
+		"deleteRule": "@request.auth.id != \"\" \n// Must create the item to delete it\n&& author.user.id = @request.auth.id",
 		"options": {}
 	},
 	{
@@ -427,11 +461,13 @@
 				}
 			}
 		],
-		"indexes": ["CREATE UNIQUE INDEX `idx_Hv8RBLj` ON `retro_metadata` (`parent_room`)"],
-		"listRule": "@request.auth.id != \"\" ",
-		"viewRule": "@request.auth.id != \"\" ",
-		"createRule": "@request.auth.id != \"\" ",
-		"updateRule": "@request.auth.id != \"\" ",
+		"indexes": [
+			"CREATE UNIQUE INDEX `idx_Hv8RBLj` ON `retro_metadata` (`parent_room`)"
+		],
+		"listRule": "@request.auth.id != \"\" && parent_room.participants.user.id ?= @request.auth.id",
+		"viewRule": "@request.auth.id != \"\" && parent_room.participants.user.id ?= @request.auth.id",
+		"createRule": "@request.auth.id != \"\" && @request.data.parent_room.creator = @request.auth.id",
+		"updateRule": "@request.auth.id != \"\" && parent_room.participants.user.id ?= @request.auth.id",
 		"deleteRule": null,
 		"options": {}
 	},
@@ -474,12 +510,14 @@
 				}
 			}
 		],
-		"indexes": ["CREATE UNIQUE INDEX `idx_bhKExzX` ON `retro_votes` (\n  `item`,\n  `voter`\n)"],
-		"listRule": "@request.auth.id != \"\" ",
-		"viewRule": "@request.auth.id != \"\" ",
-		"createRule": "@request.auth.id != \"\" ",
+		"indexes": [
+			"CREATE UNIQUE INDEX `idx_bhKExzX` ON `retro_votes` (\n  `item`,\n  `voter`\n)"
+		],
+		"listRule": "@request.auth.id != \"\" \n// Must be in the room to see votes\n&& item.retro_metadata.parent_room.participants.user ?= @request.auth.id",
+		"viewRule": "@request.auth.id != \"\" \n// Must be in the room to see votes\n&& item.retro_metadata.parent_room.participants.user ?= @request.auth.id",
+		"createRule": "@request.auth.id != \"\" \n// Must be in the room to see votes\n&& item.retro_metadata.parent_room.participants.user ?= @request.auth.id\n&& voter.user.id = @request.auth.id",
 		"updateRule": null,
-		"deleteRule": "@request.auth.id != \"\" ",
+		"deleteRule": "@request.auth.id != \"\" \n// Must create to be able to delete it\n&& voter.user.id = @request.auth.id",
 		"options": {}
 	},
 	{
@@ -497,8 +535,8 @@
 				"presentable": false,
 				"unique": false,
 				"options": {
-					"min": 6,
-					"max": 8,
+					"min": 7,
+					"max": 24,
 					"pattern": ""
 				}
 			},
@@ -558,15 +596,34 @@
 				"unique": false,
 				"options": {
 					"maxSelect": 1,
-					"values": ["REFINEMENT", "RETROSPECTIVE"]
+					"values": [
+						"REFINEMENT",
+						"RETROSPECTIVE"
+					]
+				}
+			},
+			{
+				"system": false,
+				"id": "xsbtjnnl",
+				"name": "room_key",
+				"type": "text",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"min": null,
+					"max": 256,
+					"pattern": ""
 				}
 			}
 		],
-		"indexes": ["CREATE UNIQUE INDEX `idx_3igflSm` ON `rooms` (`room_code`)"],
-		"listRule": "@request.auth.id != \"\"",
-		"viewRule": "@request.auth.id != \"\"",
-		"createRule": "@request.auth.id != \"\"",
-		"updateRule": "@request.auth.id != \"\"",
+		"indexes": [
+			"CREATE UNIQUE INDEX `idx_3igflSm` ON `rooms` (`room_code`)"
+		],
+		"listRule": "@request.auth.id != \"\" && participants.user.id ?= @request.auth.id",
+		"viewRule": "@request.auth.id != \"\" && participants.user.id ?= @request.auth.id",
+		"createRule": "@request.auth.id != \"\" && @request.data.creator = @request.auth.id",
+		"updateRule": "@request.auth.id != \"\"  && \n// Allow users to update room to add themselves as participant if they specify room key\n(participants.user.id ?= @request.auth.id || @request.headers.x_room_key = room_key)",
 		"deleteRule": null,
 		"options": {}
 	},
@@ -616,7 +673,11 @@
 				"unique": false,
 				"options": {
 					"maxSelect": 1,
-					"values": ["QUEUED", "REVIEWED", "SKIPPED"]
+					"values": [
+						"QUEUED",
+						"REVIEWED",
+						"SKIPPED"
+					]
 				}
 			},
 			{
@@ -634,13 +695,29 @@
 					"maxSelect": 1,
 					"displayFields": null
 				}
+			},
+			{
+				"system": false,
+				"id": "jflcmtg9",
+				"name": "author",
+				"type": "relation",
+				"required": true,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "_pb_users_auth_",
+					"cascadeDelete": false,
+					"minSelect": null,
+					"maxSelect": 1,
+					"displayFields": null
+				}
 			}
 		],
 		"indexes": [],
-		"listRule": "@request.auth.id != \"\" ",
-		"viewRule": "@request.auth.id != \"\" ",
-		"createRule": "@request.auth.id != \"\" ",
-		"updateRule": "@request.auth.id != \"\" ",
+		"listRule": "@request.auth.id != \"\" && \n// Can only see stories for rooms you are a part of\nrefinement_metadata.parent_room.participants.user ?= @request.auth.id",
+		"viewRule": "@request.auth.id != \"\" && \n// Can only see stories for rooms you are a part of\nrefinement_metadata.parent_room.participants.user ?= @request.auth.id",
+		"createRule": "@request.auth.id != \"\" && \n// Can only create stories for rooms you are a part of\nrefinement_metadata.parent_room.participants.user ?= @request.auth.id",
+		"updateRule": "@request.auth.id != \"\" && \n// Can only update stories for rooms you are a part of\nrefinement_metadata.parent_room.participants.user ?= @request.auth.id",
 		"deleteRule": null,
 		"options": {}
 	},
@@ -716,11 +793,44 @@
 		"indexes": [
 			"CREATE UNIQUE INDEX `idx_JPeLEUG` ON `story_estimates` (\n  `story`,\n  `user`\n)"
 		],
-		"listRule": "@request.auth.id != \"\" ",
-		"viewRule": "@request.auth.id != \"\" ",
-		"createRule": "@request.auth.id != \"\" ",
-		"updateRule": "@request.auth.id != \"\" ",
-		"deleteRule": "@request.auth.id != \"\" ",
+		"listRule": "@request.auth.id != \"\" && \n// Can only see story votes for rooms you are a part of\nstory.refinement_metadata.parent_room.participants.user ?= @request.auth.id",
+		"viewRule": "@request.auth.id != \"\" && \n// Can only see story votes for rooms you are a part of\nstory.refinement_metadata.parent_room.participants.user ?= @request.auth.id",
+		"createRule": "@request.auth.id != \"\" && \n// Can only see story votes for rooms you are a part of\nstory.refinement_metadata.parent_room.participants.user ?= @request.auth.id\n// Can only vote on active stories\n&& story.refinement_metadata.active_story = story.id",
+		"updateRule": "@request.auth.id != \"\" && \n// Can only see story votes for rooms you are a part of\nstory.refinement_metadata.parent_room.participants.user ?= @request.auth.id\n// Can update votes on active stories\n&& story.refinement_metadata.active_story = story.id",
+		"deleteRule": "@request.auth.id != \"\" && \n// Can only delete story votes for rooms you are a part of\nstory.refinement_metadata.parent_room.participants.user ?= @request.auth.id\n// Can only delete votes on active stories\n&& story.refinement_metadata.active_story = story.id",
 		"options": {}
+	},
+	{
+		"id": "w14gir1fvmni0nf",
+		"name": "rooms_search",
+		"type": "view",
+		"system": false,
+		"schema": [
+			{
+				"system": false,
+				"id": "dadxuj7k",
+				"name": "room_id",
+				"type": "relation",
+				"required": false,
+				"presentable": false,
+				"unique": false,
+				"options": {
+					"collectionId": "1jtwasjfr2bq5q9",
+					"cascadeDelete": false,
+					"minSelect": null,
+					"maxSelect": 1,
+					"displayFields": null
+				}
+			}
+		],
+		"indexes": [],
+		"listRule": null,
+		"viewRule": "@request.auth.id != \"\"",
+		"createRule": null,
+		"updateRule": null,
+		"deleteRule": null,
+		"options": {
+			"query": "select id as room_id, room_code as id from rooms;"
+		}
 	}
 ]

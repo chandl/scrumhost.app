@@ -6,7 +6,8 @@ export async function createStory(details: string, refinementMetadataId: string)
 	const data = {
 		refinement_metadata: refinementMetadataId,
 		details: details,
-		story_status: 'QUEUED'
+		story_status: 'QUEUED',
+		author: pb.authStore.model?.id
 	};
 
 	const record = await pb.collection('stories').create(data);

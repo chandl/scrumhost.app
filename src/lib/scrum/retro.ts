@@ -113,7 +113,8 @@ export async function createRetroItem(
 	const createdItem = await pb.collection('retro_items').create({
 		content: content,
 		category: category,
-		author: author
+		author: author,
+		retro_metadata: metadataId
 	});
 
 	await pb.collection('retro_metadata').update(metadataId, {
