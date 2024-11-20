@@ -43,7 +43,7 @@
 				/>
 			</h2>
 			<p class="mb-8 text-xl text-gray-600">
-				Realtime collaboration tool for backlog refinement and sprint retrospectives.
+				Realtime collaboration tool for backlog refinement and sprint retrospectives <span class="text-sm">(No account necessary)</span>.
 			</p>
 
 			<a href="/home">
