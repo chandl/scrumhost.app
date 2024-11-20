@@ -22,7 +22,7 @@
 <div class="flex min-h-screen flex-col bg-gradient-to-br from-blue-50 to-indigo-100">
 	<header class="px-4 py-6 sm:px-6 lg:px-8">
 		<div class="mx-auto flex max-w-7xl items-center justify-between">
-			<p></p>
+			<h1 class="text-2xl font-bold text-gray-900">scrum.host</h1>
 			<a href="/home">
 				<Button variant="outline">Join a Room</Button>
 			</a>
@@ -43,7 +43,9 @@
 				/>
 			</h2>
 			<p class="mb-8 text-xl text-gray-600">
-				Realtime collaboration tool for backlog refinement and sprint retrospectives <span class="text-sm">(No account necessary)</span>.
+				Realtime collaboration tool for backlog refinement and sprint retrospectives <span
+					class="text-sm">(No account necessary)</span
+				>.
 			</p>
 
 			<a href="/home">
