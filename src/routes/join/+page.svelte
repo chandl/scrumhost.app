@@ -23,7 +23,7 @@
 		currentUser = value;
 	});
 
-	let targetPath: string = '/';
+	let targetPath: string = '/home';
 
 	function handleRedirect() {
 		console.log('Redirect to target path', targetPath);

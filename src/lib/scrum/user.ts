@@ -55,12 +55,10 @@ export async function signup(name: string) {
 export async function validateLogin() {
 	// Check if the user is logged in by trying to get the current user
 	try {
-
-
 		try {
-			await pb.collection("users").authRefresh();
+			await pb.collection('users').authRefresh();
 		} catch (err) {
-			console.error("Failed to refresh auth token", err);
+			console.error('Failed to refresh auth token', err);
 			pb.authStore.clear();
 		}
 
@@ -74,7 +72,6 @@ export async function validateLogin() {
 			console.log('Redirect', loginUrl);
 			goto(loginUrl); // Redirect to login page
 		}
-
 
 		return {
 			props: {

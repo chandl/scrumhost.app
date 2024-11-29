@@ -23,7 +23,7 @@
 	<header class="px-4 py-6 sm:px-6 lg:px-8">
 		<div class="mx-auto flex max-w-7xl items-center justify-between">
 			<h1 class="text-2xl font-bold text-gray-900">scrum.host</h1>
-			<a href="/home">
+			<a href="/join">
 				<Button variant="outline">Join a Room</Button>
 			</a>
 		</div>
@@ -48,7 +48,7 @@
 				>.
 			</p>
 
-			<a href="/home">
+			<a href="/join">
 				<Button size="lg">Host a Room</Button>
 			</a>
 		</div>
