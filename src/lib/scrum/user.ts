@@ -55,8 +55,6 @@ export async function signup(name: string) {
 export async function validateLogin() {
 	// Check if the user is logged in by trying to get the current user
 	try {
-
-
 		try {
 			await pb.collection("users").authRefresh();
 		} catch (err) {
