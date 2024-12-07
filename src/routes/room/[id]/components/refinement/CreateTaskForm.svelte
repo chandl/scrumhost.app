@@ -4,12 +4,17 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { createStory } from '$lib/scrum/story';
+	import { encryptString } from '$lib/crypto';
 
-	let { refinementMetadataId }: { refinementMetadataId: string } = $props();
+	let {
+		refinementMetadataId,
+		roomPassword
+	}: { refinementMetadataId: string; roomPassword: string } = $props();
 
 	let newTaskDescription = $state('');
 	async function handleCreateTask() {
-		await createStory(newTaskDescription, refinementMetadataId);
+		const encryptedTask = await encryptString(roomPassword, newTaskDescription);
+		await createStory(encryptedTask, refinementMetadataId);
 		newTaskDescription = '';
 	}
 </script>

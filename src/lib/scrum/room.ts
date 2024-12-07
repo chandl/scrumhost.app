@@ -100,7 +100,6 @@ export async function createRoom(roomName: string, roomType: RoomType): Promise<
 			room_name: roomName,
 			room_code: createRoomCode(),
 			room_type: roomType,
-			// room_key: passcode,
 			room_key_hash: await hashString(passcode)
 		};
 
@@ -118,7 +117,7 @@ export async function createRoom(roomName: string, roomType: RoomType): Promise<
 			room_code: newRoom.room_code,
 			room_type: newRoom.room_type,
 			participants: newRoom.participants,
-			room_key_hash: newRoom.room_key_hash,
+			room_key_hash: newRoom.room_key_hash
 		};
 	} catch (err) {
 		console.error('Error creating room:', err);
@@ -131,7 +130,7 @@ export async function getRoomDetails(roomId: string): Promise<RoomDetails> {
 		const room = await pb.collection('rooms').getOne(roomId, {
 			expand: 'participants',
 			fields:
-				'id,created,room_name,room_code,room_type,room_key,' +
+				'id,created,room_name,room_code,room_type,' +
 				'expand.participants.id,expand.participants.user_id,expand.participants.name'
 		});
 		console.log('getRoomDetails', room);
@@ -170,7 +169,7 @@ export function subscribeToRoomUpdates(roomId: string, callback: (record: RoomDe
 		{
 			expand: 'participants',
 			fields:
-				'id,created,room_name,room_code,room_type,room_key,' +
+				'id,created,room_name,room_code,room_type,' +
 				'expand.participants.id,expand.participants.user_id,expand.participants.name'
 		}
 	);

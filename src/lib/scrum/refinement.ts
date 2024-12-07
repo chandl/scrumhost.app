@@ -13,7 +13,10 @@ export async function initRefinementMetadata(
 	pointValues: string
 ): Promise<RefinementMetadata> {
 	try {
-		const participant = await joinRoomAndGetParticipantDetails(parentRoom.id, getRoomKeyCookie(parentRoom.id));
+		const participant = await joinRoomAndGetParticipantDetails(
+			parentRoom.id,
+			getRoomKeyCookie(parentRoom.id)
+		);
 		const refinementRoomData = {
 			point_values: pointValues,
 			active_story: null,

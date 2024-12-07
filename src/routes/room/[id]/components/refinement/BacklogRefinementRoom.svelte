@@ -27,6 +27,7 @@
 		StorySummary
 	} from '$lib/scrum/types/refinement';
 	import type { Participant, RoomDetails } from '$lib/scrum/types/room';
+	import { decryptString } from '$lib/crypto';
 
 	let {
 		parentRoom,
@@ -44,16 +45,26 @@
 	let refinementMetadata: RefinementMetadataDetails | undefined = $state();
 	let refinementMetadataId: string = $derived(refinementMetadata?.id || 'UNKNOWN');
 
-	let stories: StorySummary[] = $derived.by(() => {
+	let stories: StorySummary[] = $state([]);
+
+	$effect(async () => {
 		if (!parentRoom || !refinementMetadata?.stories) {
 			return [];
 		}
 		// Sort the stories by updated time
-		return [...refinementMetadata.stories].sort(
+		const sorted = [...refinementMetadata.stories].sort(
 			(a, b) => new Date(b.updated).getTime() - new Date(a.updated).getTime()
 		);
+		const decryptedStories: StorySummary[] = [];
+		for (const story of sorted) {
+			const decryptedDetails = await decryptString(roomPassword, story.details);
+			decryptedStories.push({
+				...story,
+				details: decryptedDetails
+			});
+		}
+		stories = decryptedStories;
 	});
-
 	let activeStoryDetails: StorySummary | undefined = $derived.by(() => {
 		if (!refinementMetadata?.active_story) {
 			return undefined;
@@ -173,7 +184,7 @@
 
 		<!-- Create and List Tasks -->
 		<div>
-			<CreateTaskForm {refinementMetadataId} />
+			<CreateTaskForm {refinementMetadataId} {roomPassword} />
 			<TaskTabs {stories} activeStoryId={activeStoryDetails?.id} onTaskAction={handleTaskAction} />
 		</div>
 	</div>
