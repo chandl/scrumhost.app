@@ -57,7 +57,9 @@
 	<title>scrum.host - home</title>
 </svelte:head>
 
-<div class="flex min-h-screen grow flex-col items-center justify-center space-y-8 p-4">
+<div
+	class="mt-20 flex min-h-screen grow flex-col items-center justify-center space-y-8 p-4 md:mt-0"
+>
 	<Card class="w-full max-w-md">
 		<CardHeader>
 			<CardTitle class="text-center text-2xl font-bold">Welcome, {currentUser?.name}</CardTitle>

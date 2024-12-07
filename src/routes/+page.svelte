@@ -34,7 +34,7 @@
 	>
 		<div class="mb-12 text-center">
 			<h2 class="mb-4 text-4xl font-bold text-gray-900 sm:text-5xl">
-				Collaborate on Team
+				Securely Collaborate on Team
 				<Typewriter
 					strings={['Retrospectives', 'Sprint Planning', 'Backlog Refinement']}
 					typingSpeed={50}
@@ -44,7 +44,7 @@
 			</h2>
 			<p class="mb-8 text-xl text-gray-600">
 				Realtime collaboration tool for backlog refinement and sprint retrospectives <span
-					class="text-sm">(No account necessary)</span
+					class="text-sm">(No account necessary, E2E Encrypted)</span
 				>.
 			</p>
 
