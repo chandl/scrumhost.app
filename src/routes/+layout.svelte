@@ -7,7 +7,7 @@
 	inject();
 </script>
 
-<div class="flex flex-col bg-slate-100">
+<div class="flex flex-col">
 	<Header />
 	{@render children()}
 </div>

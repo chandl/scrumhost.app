@@ -6,7 +6,7 @@
 	import { Card, CardContent } from '$lib/components/ui/card';
 </script>
 
-<Card class="border-none bg-white/50 backdrop-blur-sm">
+<Card class="border-none  drop-shadow-md">
 	<CardContent class="flex flex-col items-center justify-center p-6">
 		<div class="mb-4 text-blue-500">
 			<Icon class="h-8 w-8"><svelte:component this={icon} /></Icon>

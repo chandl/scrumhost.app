@@ -19,7 +19,7 @@
 	<title>scrum.host - home</title>
 </svelte:head>
 
-<div class="flex min-h-screen flex-col bg-slate-100">
+<div class="flex min-h-screen flex-col">
 	<header class="px-4 py-6 sm:px-6 lg:px-8">
 		<div class="mx-auto flex max-w-7xl items-center justify-between">
 			<h1 class="text-2xl font-bold text-gray-900">scrum.host</h1>
@@ -43,9 +43,9 @@
 				/>
 			</h2>
 			<p class="mb-8 text-xl text-gray-600">
-				Realtime collaboration tool for backlog refinement and sprint retrospectives <span
+				Realtime collaboration tool for backlog refinement and sprint retrospectives <br /><span
 					class="text-sm">(No account necessary, E2E Encrypted)</span
-				>.
+				>
 			</p>
 
 			<a href="/join">
