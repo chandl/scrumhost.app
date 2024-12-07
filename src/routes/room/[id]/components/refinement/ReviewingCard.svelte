@@ -38,10 +38,13 @@
 		for (const [vote, count] of voteResults.entries()) {
 			if (isNaN(Number(vote))) {
 				// Can't average votes if the vote is non-numeric (e.g. T-Shirt Size)
-				return undefined;
+				continue;
 			}
 			sum += vote * count;
 			voteCount += count;
+		}
+		if (voteCount == 0) {
+			return 0;
 		}
 		return sum / voteCount;
 	});
@@ -64,7 +67,7 @@
 			}
 		}
 
-		return topVotes;
+		return topVotes.sort((a: any, b: any) => a - b);
 	});
 </script>
 
