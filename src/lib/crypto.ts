@@ -62,8 +62,17 @@ export async function encryptString(passphrase: string, plaintext: string): Prom
 	return arrayBufferToBase64(combined);
 }
 
+// Maintain an in-memory decryption cache. Every time there is an update to the page,
+// all tasks/items are re-decrypted. Cache to avoid the overhead.
+const DECRYPT_CACHE = new Map();
+
 // Decrypt data using AES-GCM
 export async function decryptString(passphrase: string, encryptedData: string): Promise<string> {
+	const cacheKey = passphrase + encryptedData;
+	if (DECRYPT_CACHE.has(cacheKey)) {
+		return Promise.resolve(DECRYPT_CACHE.get(cacheKey));
+	}
+
 	const decoder = new TextDecoder();
 
 	// Decode the combined salt, IV, and ciphertext from Base64
@@ -99,5 +108,9 @@ export async function decryptString(passphrase: string, encryptedData: string): 
 		ciphertext
 	);
 
-	return decoder.decode(decryptedData);
+	const decoded = decoder.decode(decryptedData);
+
+	DECRYPT_CACHE.set(cacheKey, decoded);
+
+	return decoded;
 }
