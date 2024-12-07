@@ -58,7 +58,7 @@
 </svelte:head>
 
 <div
-	class="mt-20 flex min-h-screen grow flex-col items-center justify-center space-y-8 p-4 md:mt-0"
+	class="flex min-h-screen grow flex-col items-center justify-center space-y-8 p-4"
 >
 	<Card class="w-full max-w-md">
 		<CardHeader>
