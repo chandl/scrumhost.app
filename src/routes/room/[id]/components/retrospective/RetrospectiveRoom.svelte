@@ -18,6 +18,8 @@
 		upvoteRetroItem
 	} from '$lib/scrum/retro';
 	import { onMount } from 'svelte';
+	import { decryptString, encryptString } from '$lib/crypto';
+	import type { StorySummary } from '$lib/scrum/types/refinement';
 
 	let {
 		participants,
@@ -34,7 +36,37 @@
 	let participantId: string = $derived(userParticipant?.id || 'UNKNOWN');
 	let retroMetadata: RetroMetadata | undefined = $state();
 	let metadataId: string = $derived(retroMetadata?.id || 'UNKNOWN');
-	let retroItems: RetroItem[] = $derived(retroMetadata?.items || []);
+	let retroItems: RetroItem[] = $state([]);
+
+	// eslint-disable-next-line
+	// @ts-ignore
+	$effect(async () => {
+		if (!retroMetadata || !retroMetadata?.items) {
+			return [];
+		}
+		const decryptedItems: RetroItem[] = [];
+
+		for (const item of retroMetadata.items) {
+			const decryptedDetails = await decryptString(roomPassword, item.content);
+
+			const decryptedComments = [];
+
+			for (const comment of item.comments) {
+				const decryptedComment = await decryptString(roomPassword, comment.content);
+				decryptedComments.push({
+					...comment,
+					content: decryptedComment
+				});
+			}
+
+			decryptedItems.push({
+				...item,
+				content: decryptedDetails,
+				comments: decryptedComments
+			});
+		}
+		retroItems = decryptedItems;
+	});
 
 	let wentWellItems: RetroItem[] = $derived(
 		retroItems.filter((item) => item.category === 'WENT_WELL')
@@ -48,7 +80,8 @@
 
 	const addRetroItem = (category: RetroItemCategory) => async (content: string) => {
 		console.log('Adding new item to category', category, content);
-		const item = await createRetroItem(metadataId, content, category, participantId);
+		const encryptedContent = await encryptString(roomPassword, content);
+		const item = await createRetroItem(metadataId, encryptedContent, category, participantId);
 		console.log('Created new item', item, 'in category', category);
 	};
 
@@ -72,7 +105,8 @@
 
 	const addComment = async (id: string, content: string) => {
 		console.log('Creating new comment', content, id);
-		await createRetroItemComment(id, content, userParticipant?.id || 'UNKNOWN');
+		const encryptedComment = await encryptString(roomPassword, content);
+		await createRetroItemComment(id, encryptedComment, userParticipant?.id || 'UNKNOWN');
 		await triggerMetadataRefresh(metadataId);
 	};
 

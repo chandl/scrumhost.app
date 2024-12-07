@@ -47,6 +47,8 @@
 
 	let stories: StorySummary[] = $state([]);
 
+	// eslint-disable-next-line
+	// @ts-ignore
 	$effect(async () => {
 		if (!parentRoom || !refinementMetadata?.stories) {
 			return [];
@@ -87,6 +89,8 @@
 		});
 	});
 
+	// eslint-disable-next-line
+	// @ts-ignore
 	$effect(async () => {
 		if (activeStoryDetails == undefined) {
 			console.log('Unsubscribing to all story updates');

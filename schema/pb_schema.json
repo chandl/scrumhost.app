@@ -110,7 +110,7 @@
 		"indexes": ["CREATE UNIQUE INDEX `idx_cVgl1nI` ON `participants` (\n  `user`,\n  `room`\n)"],
 		"listRule": "@request.auth.id != \"\" && room.participants.user.id ?= @request.auth.id",
 		"viewRule": "@request.auth.id != \"\" && room.participants.user.id ?= @request.auth.id",
-		"createRule": "@request.auth.id != \"\" && \n@request.headers.x_room_key = @request.data.room.room_key",
+		"createRule": "@request.auth.id != \"\" && \n@request.headers.x_room_key = @request.data.room.room_key_hash",
 		"updateRule": null,
 		"deleteRule": null,
 		"options": {}
@@ -237,7 +237,7 @@
 				"unique": false,
 				"options": {
 					"min": null,
-					"max": 512,
+					"max": 8192,
 					"pattern": ""
 				}
 			},
@@ -294,11 +294,11 @@
 				"name": "content",
 				"type": "text",
 				"required": true,
-				"presentable": true,
+				"presentable": false,
 				"unique": false,
 				"options": {
 					"min": null,
-					"max": 512,
+					"max": 8192,
 					"pattern": ""
 				}
 			},
@@ -579,15 +579,15 @@
 			},
 			{
 				"system": false,
-				"id": "xsbtjnnl",
-				"name": "room_key",
+				"id": "teomcmhp",
+				"name": "room_key_hash",
 				"type": "text",
 				"required": true,
 				"presentable": false,
 				"unique": false,
 				"options": {
 					"min": null,
-					"max": 256,
+					"max": null,
 					"pattern": ""
 				}
 			}
@@ -596,7 +596,7 @@
 		"listRule": "@request.auth.id != \"\" && participants.user.id ?= @request.auth.id",
 		"viewRule": "@request.auth.id != \"\" && participants.user.id ?= @request.auth.id",
 		"createRule": "@request.auth.id != \"\" && @request.data.creator = @request.auth.id",
-		"updateRule": "@request.auth.id != \"\"  && \n// Allow users to update room to add themselves as participant if they specify room key\n(participants.user.id ?= @request.auth.id || @request.headers.x_room_key = room_key)",
+		"updateRule": "@request.auth.id != \"\"  && \n// Allow users to update room to add themselves as participant if they specify room key\n(participants.user.id ?= @request.auth.id || @request.headers.x_room_key = room_key_hash)",
 		"deleteRule": null,
 		"options": {}
 	},
