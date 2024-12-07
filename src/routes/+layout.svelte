@@ -7,7 +7,7 @@
 	inject();
 </script>
 
-<div class="flex flex-col bg-gradient-to-b from-blue-100 to-white">
+<div class="flex flex-col bg-slate-100">
 	<Header />
 	{@render children()}
 </div>
