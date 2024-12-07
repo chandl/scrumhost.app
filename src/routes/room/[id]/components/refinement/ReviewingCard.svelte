@@ -3,6 +3,7 @@
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import type { Estimate, StoryAction, StorySummary } from '$lib/scrum/types/refinement';
+	import VoteSummary from './VoteSummary.svelte';
 
 	let {
 		activeStoryDetails,
@@ -12,10 +13,59 @@
 	}: {
 		activeStoryDetails: StorySummary | undefined;
 		currentVotes: Estimate[];
-
 		pointValues: string[];
 		onTaskAction: (taskId: string, taskAction: StoryAction) => void;
 	} = $props();
+
+	// { value, votes }
+	let voteResults = $derived.by(() => {
+		let results = new Map();
+		currentVotes.forEach((vote) => {
+			if (!results.has(vote.estimate)) {
+				results.set(vote.estimate, 0);
+			}
+
+			results.set(vote.estimate, results.get(vote.estimate) + 1);
+		});
+
+		return results;
+	});
+
+	let averageVote = $derived.by(() => {
+		let sum = 0;
+		let voteCount = 0;
+
+		for (const [vote, count] of voteResults.entries()) {
+			if (isNaN(Number(vote))) {
+				// Can't average votes if the vote is non-numeric (e.g. T-Shirt Size)
+				return undefined;
+			}
+			sum += vote * count;
+			voteCount += count;
+		}
+		return sum / voteCount;
+	});
+
+	let mostVotes = $derived.by(() => {
+		if (voteResults.size === 0) {
+			return []; // Return an empty array if the map is empty
+		}
+
+		let maxCount = -Infinity;
+		const topVotes: string[] = [];
+
+		for (const [vote, count] of voteResults) {
+			if (count > maxCount) {
+				maxCount = count;
+				topVotes.length = 0; // Clear the array for new max count
+				topVotes.push(vote);
+			} else if (count === maxCount) {
+				topVotes.push(vote);
+			}
+		}
+
+		return topVotes;
+	});
 </script>
 
 <Card class="rounded-lg border border-gray-200 shadow-lg">
@@ -27,6 +77,7 @@
 		<div class="mb-6 w-full rounded-lg border-l-4 border-blue-500 bg-gray-50 p-4 shadow-md">
 			<h3 class="text-3xl font-semibold text-gray-800">{activeStoryDetails?.details}</h3>
 		</div>
+		<VoteSummary topVote={mostVotes} {averageVote} />
 		<p class="mb-4 text-lg text-gray-600">Vote Distribution:</p>
 
 		{#each pointValues.filter((val) => currentVotes
