@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { PUBLIC_ENABLE_BACKLOG_ROOMS } from '$env/static/public';
-
 	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
 	import {
@@ -26,35 +24,55 @@
 	import { initRetroMetadata } from '$lib/scrum/retro';
 
 	import type { RoomType } from '$lib/scrum/types/room';
+	import { RadioGroup, RadioGroupItem } from '$lib/components/ui/radio-group';
 
 	interface PointValueSelection {
 		value: string;
 		label: string;
 	}
+	type CreationStep = 'SELECT_ROOM_TYPE' | 'SET_ROOM_PROPERTIES';
 
-	interface RoomTypeSelection {
-		value: RoomType;
-		label: string;
-	}
+	const REFINEMENT_POINT_VALUES: PointValueSelection[] = [
+		{
+			value: '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ?',
+			label: 'Sequential (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)'
+		},
+		{
+			value: 'XS, S, M, L, XL, XXL, ?',
+			label: 'T-Shirt (XS, S, M, L, XL, XXL)'
+		},
+		{
+			value: '0, 1, 2, 3, 5, 8, 13, 21, ?',
+			label: 'Fibonacci (1, 2, 3, 5, 8, 13, 21)'
+		},
+		{
+			value: '0, 0.5, 1, 2, 3, 5, 8, 13, 20, ?',
+			label: 'Scrum (0, 0.5, 1, 2, 3, 5, 8, 13, 20)'
+		}
+	];
 
+	let roomCreationStepState = $state('SELECT_ROOM_TYPE') as CreationStep;
 	let isOpen = $state(false);
-	let roomType = $state() as RoomTypeSelection;
+	let roomType = $state() as RoomType | undefined;
 	let roomName = $state('');
-	let pointValues = $state() as PointValueSelection;
+	let pointValues = $state(REFINEMENT_POINT_VALUES[0]) as PointValueSelection;
 
 	let enableCreateRoomButton = $derived.by(() => {
 		if (!roomType || !roomName) {
 			return false;
 		}
 
-		return !(roomType.value === 'REFINEMENT' && !pointValues);
+		return !(roomType === 'REFINEMENT' && !pointValues);
 	});
 
 	async function handleCreateRoom() {
-		const room = await createRoom(roomName, roomType.value);
+		if (!roomType) {
+			throw new Error("Can't create room with undefined type");
+		}
+		const room = await createRoom(roomName, roomType);
 		console.log('Created room: ', room);
 
-		switch (roomType.value) {
+		switch (roomType) {
 			case 'REFINEMENT':
 				console.log(
 					'Created refinementMetadata',
@@ -76,6 +94,9 @@
 	open={isOpen}
 	onOpenChange={(open) => {
 		isOpen = open;
+		roomType = undefined;
+		roomCreationStepState = 'SELECT_ROOM_TYPE';
+		roomName = '';
 	}}
 >
 	<DialogTrigger asChild>
@@ -85,60 +106,64 @@
 		<DialogHeader>
 			<DialogTitle>Create a New Room</DialogTitle>
 			<DialogDescription>
-				Set up your room details here. Click create when you're done.
+				{#if roomCreationStepState === 'SELECT_ROOM_TYPE'}
+					Select the type of room to create.
+				{:else}
+					Set up your <strong>{roomType?.toLowerCase()}</strong> room details here. Click create when
+					you're done.
+				{/if}
 			</DialogDescription>
 		</DialogHeader>
-		<div class="grid gap-4 py-4">
-			<div class="grid grid-cols-4 items-center gap-4">
-				<Label for="room-type" class="text-right">Room Type</Label>
-				<Select bind:selected={roomType}>
-					<SelectTrigger class="col-span-3" id="room-type">
-						<SelectValue placeholder="Select room type" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="REFINEMENT">Backlog Refinement</SelectItem>
-						{#if PUBLIC_ENABLE_BACKLOG_ROOMS === 'true'}
-							<SelectItem value="RETROSPECTIVE">Sprint Retrospective</SelectItem>
-						{/if}
-					</SelectContent>
-				</Select>
-			</div>
 
-			<div class="grid grid-cols-4 items-center gap-4">
-				<Label for="room-name" class="text-right">Room Name</Label>
-				<Input
-					id="room-name"
-					bind:value={roomName}
-					class="col-span-3"
-					placeholder="Enter room name"
-				/>
-			</div>
-			{#if roomType?.value === 'REFINEMENT'}
+		<div class="grid gap-4 py-4">
+			{#if roomCreationStepState === 'SELECT_ROOM_TYPE'}
+				<RadioGroup bind:value={roomType}>
+					<div class="flex items-center space-x-2">
+						<RadioGroupItem value="REFINEMENT" id="refinement" />
+						<Label for="refinement">Backlog Refinement (Planning Poker)</Label>
+					</div>
+					<div class="flex items-center space-x-2">
+						<RadioGroupItem value="RETROSPECTIVE" id="retrospective" />
+						<Label for="retrospective">Sprint Retrospective</Label>
+					</div>
+				</RadioGroup>
+			{:else}
 				<div class="grid grid-cols-4 items-center gap-4">
-					<Label for="point-values" class="text-right">Point Values</Label>
-					<Select bind:selected={pointValues}>
-						<SelectTrigger class="col-span-3" id="point-values">
-							<SelectValue placeholder="Select point values" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="0, 0.5, 1, 2, 3, 5, 8, 13, 20, ?"
-								>Scrum (0, 0.5, 1, 2, 3, 5, 8, 13, 20)</SelectItem
-							>
-							<SelectItem value="0, 1, 2, 3, 5, 8, 13, 21, ?"
-								>Fibonacci (1, 2, 3, 5, 8, 13, 21)</SelectItem
-							>
-							<SelectItem value="0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ?"
-								>Sequential (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)</SelectItem
-							>
-							<SelectItem value="XS, S, M, L, XL, XXL, ?">T-Shirt (XS, S, M, L, XL, XXL)</SelectItem
-							>
-						</SelectContent>
-					</Select>
+					<Label for="room-name" class="text-right">Room Name</Label>
+					<Input
+						id="room-name"
+						bind:value={roomName}
+						class="col-span-3"
+						placeholder="Enter room name"
+						autofocus
+					/>
 				</div>
+				{#if roomType === 'REFINEMENT'}
+					<div class="grid grid-cols-4 items-center gap-4">
+						<Label for="point-values" class="text-right">Point Values</Label>
+						<Select bind:selected={pointValues}>
+							<SelectTrigger class="col-span-3" id="point-values">
+								<SelectValue placeholder="Select point values" />
+							</SelectTrigger>
+							<SelectContent>
+								{#each REFINEMENT_POINT_VALUES as items}
+									<SelectItem value={items.value}>{items.label}</SelectItem>
+								{/each}
+							</SelectContent>
+						</Select>
+					</div>
+				{/if}
 			{/if}
 		</div>
 		<DialogFooter>
-			<Button on:click={handleCreateRoom} disabled={!enableCreateRoomButton}>Create Room</Button>
+			{#if roomCreationStepState === 'SELECT_ROOM_TYPE'}
+				<Button
+					on:click={() => (roomCreationStepState = 'SET_ROOM_PROPERTIES')}
+					disabled={!roomType}>Next</Button
+				>
+			{:else}
+				<Button on:click={handleCreateRoom} disabled={!enableCreateRoomButton}>Create Room</Button>
+			{/if}
 		</DialogFooter>
 	</DialogContent>
 </Dialog>
