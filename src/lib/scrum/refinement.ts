@@ -6,13 +6,14 @@ import type {
 	RefinementRoomStatus
 } from '$lib/scrum/types/refinement';
 import type { Room } from '$lib/scrum/types/room';
+import { getRoomKeyCookie } from '$lib/utils';
 
 export async function initRefinementMetadata(
 	parentRoom: Room,
 	pointValues: string
 ): Promise<RefinementMetadata> {
 	try {
-		const participant = await joinRoomAndGetParticipantDetails(parentRoom.id, parentRoom.room_key);
+		const participant = await joinRoomAndGetParticipantDetails(parentRoom.id, getRoomKeyCookie(parentRoom.id));
 		const refinementRoomData = {
 			point_values: pointValues,
 			active_story: null,

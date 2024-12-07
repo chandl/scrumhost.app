@@ -19,6 +19,7 @@
 	import ScrumAlert from '../../components/ScrumAlert.svelte';
 	import JoinRoomDialog from './components/JoinRoomDialog.svelte';
 	import { goto } from '$app/navigation';
+	import { getRoomKeyCookie } from '$lib/utils';
 
 	const roomId = $page.params.id;
 	const preSetPwd = $page.url.searchParams.get('pwd');
@@ -106,6 +107,17 @@
 	}
 
 	let showRoomPassword = $state(false);
+
+	let roomKey = $derived.by(() => {
+		if (room) {
+			try {
+				return getRoomKeyCookie(room.id);
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			} catch (_) {
+				return undefined;
+			}
+		}
+	});
 </script>
 
 <svelte:head>
@@ -129,7 +141,7 @@
 					<span class="ml-4 mr-4 hidden text-2xl md:block">&bull;</span>
 					{#if showRoomPassword}
 						<div class="flex items-center space-x-2">
-							<h2 class="text-xl">Password: <span class="blur-none">{room?.room_key}</span></h2>
+							<h2 class="text-xl">Password: <span class="blur-none">{roomKey}</span></h2>
 							<Button
 								onclick={() => (showRoomPassword = false)}
 								size="icon"
@@ -141,7 +153,7 @@
 						</div>
 					{:else}
 						<div class="flex items-center space-x-2">
-							<h2 class="text-xl">Password: <span class="blur-sm">{room?.room_key}</span></h2>
+							<h2 class="text-xl">Password: <span class="blur-sm">{roomKey}</span></h2>
 							<Button
 								onclick={() => (showRoomPassword = true)}
 								size="icon"
@@ -159,10 +171,10 @@
 					parentRoom={room}
 					{participants}
 					{userParticipant}
-					roomPassword={room?.room_key || ''}
+					roomPassword={roomKey || ''}
 				/>
 			{:else if roomType === 'RETROSPECTIVE'}
-				<RetrospectiveRoom {participants} {userParticipant} roomPassword={room?.room_key || ''} />
+				<RetrospectiveRoom {participants} {userParticipant} roomPassword={roomKey || ''} />
 			{/if}
 		{/if}
 	</div>

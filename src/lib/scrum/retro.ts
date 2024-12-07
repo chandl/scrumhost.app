@@ -8,13 +8,15 @@ import type {
 	RetroMetadata,
 	RetroVote
 } from '$lib/scrum/types/retro_types';
+import { getRoomKeyCookie } from '$lib/utils';
 
 export async function triggerMetadataRefresh(metadataId: string) {
 	await pb.collection('retro_metadata').update(metadataId, {});
 }
 
 export async function initRetroMetadata(parentRoom: Room): Promise<RetroMetadata> {
-	const participant = await joinRoomAndGetParticipantDetails(parentRoom.id, parentRoom.room_key);
+	const roomKey = getRoomKeyCookie(parentRoom.id);
+	const participant = await joinRoomAndGetParticipantDetails(parentRoom.id, roomKey);
 
 	const metadata = await pb.collection('retro_metadata').create({
 		parent_room: parentRoom.id,
@@ -72,6 +74,7 @@ export function subscribeToRetroMetadata(
 	);
 }
 
+// eslint-disable-next-line
 function parseItemsResponse(itemsResponse: any[]): RetroItem[] {
 	return itemsResponse.map((item) => {
 		return {
@@ -85,6 +88,7 @@ function parseItemsResponse(itemsResponse: any[]): RetroItem[] {
 	});
 }
 
+// eslint-disable-next-line
 function parseVotesResponse(votesResponse: any[]): RetroVote[] {
 	return votesResponse.map((vote) => {
 		return {
@@ -94,6 +98,7 @@ function parseVotesResponse(votesResponse: any[]): RetroVote[] {
 	});
 }
 
+// eslint-disable-next-line
 function parseCommentsResponse(commentsResponse: any[]): RetroComment[] {
 	return commentsResponse.map((comment) => {
 		return {

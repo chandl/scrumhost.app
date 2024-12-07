@@ -76,3 +76,27 @@ export function formatTimeAgo(date: Date): string {
 	}
 	return 'just now';
 }
+
+export function setRoomKeyCookie(name: string, val: string) {
+	const date = new Date();
+	const value = val;
+
+	// Set it expire in 1000 days
+	date.setTime(date.getTime() + (1000 * 24 * 60 * 60 * 1000));
+
+	// Set it
+	document.cookie = name+"-RoomKey="+value+"; expires="+date.toUTCString()+"; path=/; Secure; SameSite=Strict";
+}
+
+export function getRoomKeyCookie(name: string): string {
+	const value = "; " + document.cookie;
+	const parts = value.split("; " + name + "-RoomKey=");
+
+	if (parts.length == 2) {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-expect-error
+		return parts.pop().split(";").shift();
+	}
+
+	throw new Error("Could not find cookie for room " + name);
+}

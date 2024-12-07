@@ -7,10 +7,11 @@ import type {
 	RoomDetails,
 	RoomType
 } from '$lib/scrum/types/room';
+import { hashString } from '$lib/crypto';
+import { setRoomKeyCookie } from '$lib/utils';
 
 export async function joinRoomWithCode(roomCode: string) {
 	try {
-		console.log('TRY FIND ROOM', roomCode);
 		const room = await pb.collection('rooms_search').getOne(roomCode);
 		console.log('Found room with code:', roomCode, room);
 		goto(`/room/${room.room_id}`);
@@ -51,6 +52,9 @@ export async function joinRoomAndGetParticipantDetails(
 		if (existingUser) {
 			return existingUser;
 		}
+
+		const roomKeyHash = await hashString(roomKey);
+
 		// Create the participant entry
 		const participantData = {
 			user: userId,
@@ -59,10 +63,11 @@ export async function joinRoomAndGetParticipantDetails(
 		};
 		const newParticipant = await pb.collection('participants').create(participantData, {
 			headers: {
-				x_room_key: roomKey
+				x_room_key: roomKeyHash
 			}
 		});
 		console.log('Room Joined successfully:', newParticipant);
+		setRoomKeyCookie(roomId, roomKey);
 		// Update Room with new participant
 		await pb.collection('rooms').update(
 			roomId,
@@ -71,7 +76,7 @@ export async function joinRoomAndGetParticipantDetails(
 			},
 			{
 				headers: {
-					x_room_key: roomKey
+					x_room_key: roomKeyHash
 				}
 			}
 		);
@@ -89,16 +94,22 @@ export async function joinRoomAndGetParticipantDetails(
 
 export async function createRoom(roomName: string, roomType: RoomType): Promise<Room> {
 	try {
+		const passcode = createRoomPasscode();
 		const roomData = {
 			creator: pb.authStore.model?.id,
 			room_name: roomName,
 			room_code: createRoomCode(),
 			room_type: roomType,
-			room_key: createRoomPasscode()
+			// room_key: passcode,
+			room_key_hash: await hashString(passcode)
 		};
 
 		const newRoom = await pb.collection('rooms').create(roomData);
 		console.log(`Room created successfully:`, newRoom);
+
+		// Save the password locally so it can be shared to other users.
+		// Just want to keep it away from the server to preserve E2E encryption
+		setRoomKeyCookie(newRoom.id, passcode);
 
 		return {
 			id: newRoom.id,
@@ -107,7 +118,7 @@ export async function createRoom(roomName: string, roomType: RoomType): Promise<
 			room_code: newRoom.room_code,
 			room_type: newRoom.room_type,
 			participants: newRoom.participants,
-			room_key: newRoom.room_key
+			room_key_hash: newRoom.room_key_hash,
 		};
 	} catch (err) {
 		console.error('Error creating room:', err);
@@ -131,7 +142,7 @@ export async function getRoomDetails(roomId: string): Promise<RoomDetails> {
 			room_code: room.room_code,
 			room_type: room.room_type,
 			participants: room.expand?.participants,
-			room_key: room.room_key
+			room_key_hash: room.room_key_hash
 		};
 	} catch (err) {
 		console.error('Failed to get room with id:', roomId);
@@ -152,7 +163,7 @@ export function subscribeToRoomUpdates(roomId: string, callback: (record: RoomDe
 					room_code: room.room_code,
 					room_type: room.room_type,
 					participants: room.expand?.participants,
-					room_key: room.room_key
+					room_key_hash: room.room_key_hash
 				});
 			}
 		},

@@ -41,6 +41,7 @@
 					bind:value={roomPassword}
 					class="col-span-3"
 					placeholder="Enter room password"
+					autofocus
 				/>
 			</form>
 		</div>

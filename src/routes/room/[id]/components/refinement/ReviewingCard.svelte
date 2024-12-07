@@ -67,7 +67,7 @@
 			}
 		}
 
-		return topVotes.sort((a: any, b: any) => a - b);
+		return topVotes.sort((a: any, b: any) => a - b); // eslint-disable-line
 	});
 </script>
 
