@@ -29,7 +29,7 @@
 	// Set the share link on component mount
 	onMount(() => {
 		let currentLink = new URL(window.location.href);
-		currentLink.searchParams.set('pwd', roomPassword);
+		currentLink.hash = `pwd=${roomPassword}`;
 
 		shareLink = `${currentLink}`; // Current page URL
 	});

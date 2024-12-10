@@ -44,7 +44,7 @@
 		}
 
 		const params = new URLSearchParams(get(page).url.search);
-		targetPath = params.get('target') || '/';
+		targetPath = params.get('target') || '/home';
 	});
 </script>
 

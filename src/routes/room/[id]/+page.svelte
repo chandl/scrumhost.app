@@ -22,7 +22,16 @@
 	import { getRoomKeyCookie } from '$lib/utils';
 
 	const roomId = $page.params.id;
-	const preSetPwd = $page.url.searchParams.get('pwd');
+	// Store the room password inside of hash so it's not sent to the server
+	const preSetPwd = $derived.by(() => {
+		const hash = $page.url.hash;
+		if (!hash || !hash.startsWith('#pwd=')) {
+			return undefined;
+		}
+
+		const pwd = hash.substring(5);
+		return pwd;
+	});
 	let room: RoomDetails | undefined = $state();
 	let participants: Participant[] = $derived.by(() => room?.participants || []);
 	let userParticipant: Participant | undefined = $state();
@@ -80,14 +89,14 @@
 			console.warn('User not in this room', err);
 		}
 		if (!userParticipant && preSetPwd) {
-			console.log('Try joining room with password from URL param', preSetPwd);
+			console.log('Try joining room with password from URL hash', preSetPwd);
 			// Attempt to join the room. Will fail if already in it, but that's fine
 			await joinRoomWithPwd(preSetPwd);
 		}
 
 		if (userParticipant) {
 			let currentLink = new URL(window.location.href);
-			currentLink.searchParams.delete('pwd');
+			currentLink.hash = '';
 			await goto(currentLink);
 		}
 
