@@ -30,7 +30,7 @@
 </script>
 
 <Tabs bind:value={currentTab}>
-	<TabsList class="grid w-full grid-cols-3">
+	<TabsList class="grid w-full grid-cols-3 dark:bg-gray-900">
 		<TabsTrigger value="queued">Queued ({queuedTasks?.length})</TabsTrigger>
 		<TabsTrigger value="reviewed">Reviewed ({reviewedTasks?.length})</TabsTrigger>
 		<TabsTrigger value="skipped">Skipped ({skippedTasks?.length})</TabsTrigger>
@@ -42,7 +42,7 @@
 			</CardHeader>
 			<CardContent>
 				{#if queuedTasks.length === 0}
-					<p class="text-sm italic text-gray-700">Create a new task above.</p>
+					<p class="text-sm italic text-gray-700 dark:text-gray-300">Create a new task above.</p>
 				{/if}
 				<TaskList tasks={queuedTasks} {onTaskAction} currentStatus="QUEUED" />
 			</CardContent>
@@ -55,7 +55,9 @@
 			</CardHeader>
 			<CardContent>
 				{#if reviewedTasks.length === 0}
-					<p class="text-sm italic text-gray-700">Previously reviewed tasks will appear here.</p>
+					<p class="text-sm italic text-gray-700 dark:text-gray-300">
+						Previously reviewed tasks will appear here.
+					</p>
 				{/if}
 				<TaskList tasks={reviewedTasks} {onTaskAction} currentStatus="REVIEWED" />
 			</CardContent>
@@ -68,7 +70,9 @@
 			</CardHeader>
 			<CardContent>
 				{#if skippedTasks.length === 0}
-					<p class="text-sm italic text-gray-700">Any skipped tasks will appear here.</p>
+					<p class="text-sm italic text-gray-700 dark:text-gray-300">
+						Any skipped tasks will appear here.
+					</p>
 				{/if}
 				<TaskList tasks={skippedTasks} {onTaskAction} currentStatus="SKIPPED" />
 			</CardContent>

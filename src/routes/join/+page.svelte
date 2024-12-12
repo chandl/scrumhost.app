@@ -56,7 +56,9 @@
 	<Card class="w-full max-w-md">
 		<CardHeader>
 			<CardTitle class="text-center text-2xl font-bold">scrum.host</CardTitle>
-			<CardDescription class="text-center">Please enter your name to continue</CardDescription>
+			<CardDescription class="text-center dark:text-gray-300"
+				>Please enter your name to continue</CardDescription
+			>
 		</CardHeader>
 		<form on:submit={handleSubmit}>
 			<CardContent class="space-y-4">

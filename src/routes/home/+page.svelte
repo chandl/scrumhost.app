@@ -60,8 +60,10 @@
 <div class="flex min-h-screen grow flex-col items-center justify-center space-y-8 p-4">
 	<Card class="w-full max-w-md">
 		<CardHeader>
-			<CardTitle class="text-center text-2xl font-bold">Welcome, {currentUser?.name}</CardTitle>
-			<CardDescription class="text-center"
+			<CardTitle class="text-center text-2xl font-bold dark:text-gray-100"
+				>Welcome, {currentUser?.name}</CardTitle
+			>
+			<CardDescription class="text-center dark:text-gray-200"
 				>Create or join a room to refine your backlog or have a retrospective.</CardDescription
 			>
 		</CardHeader>
@@ -79,7 +81,7 @@
 				type="text"
 				placeholder="Enter Room Code"
 				bind:value={joinRoomCode}
-				class="py-6 text-lg"
+				class="py-6 text-lg dark:text-gray-200"
 			/>
 		</CardContent>
 		<CardFooter>
@@ -99,21 +101,23 @@
 				<ul class="space-y-4">
 					{#each rooms as room}
 						<li
-							class="flex items-center justify-between rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100"
+							class="flex items-center justify-between rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100 dark:bg-gray-900 hover:dark:bg-gray-800"
 						>
 							<div>
-								<h3 class="font-semibold">{truncate(room.room_name, 25)} [{room.room_code}]</h3>
-								<div class="flex items-center space-x-4 text-sm text-gray-500">
+								<h3 class="font-semibold dark:text-gray-200">
+									{truncate(room.room_name, 25)} [{room.room_code}]
+								</h3>
+								<div class="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-300">
 									<span class="flex items-center">
 										{formatRoomType(room.room_type)}
 									</span>
 								</div>
-								<div class="flex items-center space-x-4 text-sm text-gray-500">
+								<div class="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-300">
 									<span class="flex items-center">
 										<User class="mr-1 h-4 w-4" />
 										{room.participants.length} participant(s)
 									</span>
-									<span class="flex items-center">
+									<span class="flex items-center dark:text-gray-300">
 										<Clock2 class="mr-1 h-4 w-4" />
 										{formatTimeAgo(new Date(room.time_joined))}
 									</span>

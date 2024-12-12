@@ -128,7 +128,14 @@
 					</div>
 				</RadioGroup>
 			{:else}
-				<div class="grid grid-cols-4 items-center gap-4">
+				<form
+					onsubmit={(e) => {
+						e.preventDefault();
+						handleCreateRoom();
+						isOpen = false;
+					}}
+					class="grid grid-cols-4 items-center gap-4"
+				>
 					<Label for="room-name" class="text-right">Room Name</Label>
 					<Input
 						id="room-name"
@@ -137,7 +144,7 @@
 						placeholder="Enter room name"
 						autofocus
 					/>
-				</div>
+				</form>
 				{#if roomType === 'REFINEMENT'}
 					<div class="grid grid-cols-4 items-center gap-4">
 						<Label for="point-values" class="text-right">Point Values</Label>

@@ -2,12 +2,16 @@
 	import '../app.css';
 	import Header from './components/Header.svelte';
 	import { inject } from '@vercel/analytics';
+	import { ModeWatcher } from 'mode-watcher';
+	import ThemeSwitchButton from './components/ThemeSwitchButton.svelte';
 	let { children } = $props();
 
 	inject();
 </script>
 
-<div class="flex flex-col">
+<ModeWatcher />
+<div class="flex flex-col dark:bg-gray-950">
 	<Header />
 	{@render children()}
+	<ThemeSwitchButton />
 </div>

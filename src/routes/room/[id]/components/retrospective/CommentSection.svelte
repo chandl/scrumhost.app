@@ -29,7 +29,7 @@
 <div class="mt-2 space-y-2">
 	<h4 class="text-sm font-semibold">Comments</h4>
 	{#each retroItem.comments as comment}
-		<div class="flex items-center rounded-md bg-muted p-2 text-sm">
+		<div class="flex items-center rounded-md bg-muted p-2 text-sm dark:bg-gray-900">
 			<div>
 				<p>{comment.content}</p>
 			</div>
@@ -39,7 +39,7 @@
 						variant="ghost"
 						size="sm"
 						on:click={() => onDeleteComment(comment.id)}
-						class="h-8 px-2 text-destructive"
+						class="h-8 px-2 text-destructive dark:text-red-500"
 					>
 						<X class="h-4 w-4" />
 					</Button>

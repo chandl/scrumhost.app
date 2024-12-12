@@ -61,7 +61,7 @@
 	<CardContent>
 		<!-- Share Link Section -->
 		<div class="mb-4">
-			<p class="text-sm text-gray-700">Share this link to invite others:</p>
+			<p class="text-sm text-gray-700 dark:text-gray-200">Share this link to invite others:</p>
 			<div class="mt-2 flex items-center space-x-2">
 				<input
 					class="w-full rounded border px-2 py-1 text-sm"

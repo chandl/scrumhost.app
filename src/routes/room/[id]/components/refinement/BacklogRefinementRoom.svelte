@@ -164,7 +164,7 @@
 <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
 	<div class=" md:col-span-2">
 		<!-- Vote and Review Votes -->
-		<div>
+		<div class="mb-4">
 			{#if refinementMetadata?.room_status === 'REVIEWING'}
 				<!-- New Section: Voting Summary -->
 				<ReviewingCard

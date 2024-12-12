@@ -44,20 +44,28 @@
 	}
 </script>
 
-<Card class="mt-6 rounded-lg border border-gray-200 shadow-lg">
+<Card class="rounded-lg border border-gray-200 shadow-lg dark:border-gray-800">
 	<!-- Card Header (Toolbar style) -->
-	<CardHeader class="rounded-t-lg border-b border-gray-300 bg-gray-100 pb-4">
-		<CardTitle class="text-lg font-semibold text-gray-800">Vote for Active Task</CardTitle>
+	<CardHeader class="rounded-t-lg border-b border-gray-300 bg-gray-100 pb-4 dark:bg-gray-900">
+		<CardTitle class="text-lg font-semibold text-gray-800 dark:text-gray-200"
+			>Vote for Active Task</CardTitle
+		>
 	</CardHeader>
 
 	<CardContent class="flex flex-col items-start px-6 py-4">
 		<!-- Task Description with Separation -->
-		<div class="mb-6 w-full rounded-lg border-l-4 border-blue-500 bg-gray-50 p-4 shadow-md">
-			<h3 class="text-3xl font-semibold text-gray-800">{activeStoryDetails?.details}</h3>
+		<div
+			class="mb-6 w-full rounded-lg border-l-4 border-blue-500 bg-gray-50 p-4 shadow-md dark:bg-gray-900"
+		>
+			<h3 class="text-3xl font-semibold text-gray-800 dark:text-gray-200">
+				{activeStoryDetails?.details}
+			</h3>
 		</div>
 
 		<!-- Instruction Paragraph -->
-		<p class="mb-8 text-lg text-gray-600">Please select an estimate for this task:</p>
+		<p class="mb-8 text-lg text-gray-600 dark:text-gray-200">
+			Please select an estimate for this task:
+		</p>
 
 		<!-- Voting Buttons Section -->
 		<div class="mb-8 flex flex-wrap justify-center gap-3">
@@ -76,10 +84,10 @@
 		<!-- Progress Bar for Voting -->
 		<div class=" w-full">
 			<!-- Voting Progress Text -->
-			<p class="mt-2 text-xl font-semibold text-gray-700">
+			<p class="mt-2 text-xl font-semibold text-gray-700 dark:text-gray-200">
 				Vote Progress: <span class="text-blue-600">{voteProgress.toFixed(0)}%</span>
 			</p>
-			<Progress value={voteProgress} class="h-3 w-full bg-gray-200"></Progress>
+			<Progress value={voteProgress} class="h-3 w-full bg-gray-200 dark:bg-gray-900"></Progress>
 		</div>
 
 		<!-- Side-by-Side Action Buttons Section -->
@@ -88,7 +96,7 @@
 			<Button
 				size="lg"
 				disabled={(currentVotes?.length || 0) === 0}
-				class="mt-2 bg-blue-500 py-2 font-semibold text-white hover:bg-blue-600 "
+				class="mt-2 bg-blue-500 py-2 font-semibold text-white hover:bg-blue-600 dark:bg-blue-700 hover:dark:bg-blue-600 "
 				on:click={() => onTaskAction(activeStoryDetails?.id || '', 'REVIEW_RESULTS')}
 			>
 				<ClipboardCheck class="mr-2 h-5 w-5" /> Start Reviewing
@@ -99,7 +107,7 @@
 				size="lg"
 				variant="outline"
 				disabled={(currentVotes?.length || 0) === 0}
-				class="mt-2 border-gray-300 text-gray-700 hover:bg-gray-100"
+				class="mt-2 border-gray-300 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
 				on:click={() => onTaskAction(activeStoryDetails?.id || '', 'CLEAR_VOTES')}
 			>
 				<Eraser class="mr-2 h-5 w-5" /> Clear Votes
@@ -109,7 +117,7 @@
 			<Button
 				size="lg"
 				variant="outline"
-				class="mt-2 border-gray-300 text-gray-700 hover:bg-gray-100"
+				class="mt-2 border-gray-300 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
 				on:click={() => onTaskAction(activeStoryDetails?.id || '', 'REQUEUE')}
 			>
 				<CornerDownLeft class="mr-2 h-5 w-5" /> Re-Queue

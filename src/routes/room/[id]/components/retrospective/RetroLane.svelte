@@ -6,6 +6,7 @@
 	import type { RetroItem } from '$lib/scrum/types/retro_types';
 	import RetroItemCard from './RetroItemCard.svelte';
 	import type { ComponentType } from 'svelte';
+	import { mode } from 'mode-watcher';
 
 	let {
 		title,
@@ -84,9 +85,17 @@
 				<SortDesc
 					onclick={() => (sortItemsByVote = !sortItemsByVote)}
 					class={`ml-2 transition-colors duration-200 ${
-						sortItemsByVote ? 'text-blue-500 hover:text-red-500' : 'text-black hover:text-blue-500'
+						sortItemsByVote
+							? 'text-blue-500 hover:text-red-500'
+							: $mode == 'light'
+								? 'text-black hover:text-blue-500'
+								: 'text-gray-200 hover:text-blue-500'
 					}`}
-					style="color: ${sortItemsByVote ? 'rgb(59, 130, 246)' : 'black'};"
+					style="color: ${sortItemsByVote
+						? 'rgb(59, 130, 246)'
+						: $mode === 'light'
+							? 'black'
+							: 'white'};"
 				/>
 			</div>
 		</CardTitle>

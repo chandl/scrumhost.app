@@ -53,7 +53,7 @@
 						variant="ghost"
 						size="sm"
 						on:click={() => onUpvote(item.id)}
-						class="h-8 px-2 transition-colors duration-200 hover:bg-blue-100"
+						class="h-8 px-2 transition-colors duration-200 hover:bg-blue-100 dark:hover:bg-blue-400"
 					>
 						<ChevronUp class="mr-1 h-4 w-4" />
 						{item.votes.length}
@@ -67,7 +67,7 @@
 								item.id,
 								item.votes.find((vote) => vote.voter === participantId)?.id || 'UNKNOWN'
 							)}
-						class="h-8 bg-blue-100 px-2 transition-colors duration-200 hover:bg-red-100"
+						class="h-8 bg-blue-100 px-2 transition-colors duration-200 hover:bg-red-100 dark:bg-blue-400 dark:hover:bg-red-400"
 					>
 						<ChevronDown class="mr-1 h-4 w-4" />
 						{item.votes.length}
@@ -87,7 +87,7 @@
 						variant="ghost"
 						size="sm"
 						on:click={() => onDelete(item.id)}
-						class="h-8 px-2 text-destructive"
+						class="h-8 px-2 text-destructive dark:text-red-500"
 					>
 						<X class="h-4 w-4" />
 					</Button>
