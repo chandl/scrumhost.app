@@ -49,13 +49,13 @@
 </script>
 
 <svelte:head>
-	<title>scrum.host - join</title>
+	<title>scrumhost.app - join</title>
 </svelte:head>
 
 <div class="flex min-h-screen flex-col items-center justify-center p-4">
 	<Card class="w-full max-w-md">
 		<CardHeader>
-			<CardTitle class="text-center text-2xl font-bold">scrum.host</CardTitle>
+			<CardTitle class="text-center text-2xl font-bold">scrumhost.app</CardTitle>
 			<CardDescription class="text-center dark:text-gray-300"
 				>Please enter your name to continue</CardDescription
 			>

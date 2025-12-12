@@ -54,7 +54,7 @@
 </script>
 
 <svelte:head>
-	<title>scrum.host - home</title>
+	<title>scrumhost.app - home</title>
 </svelte:head>
 
 <div class="flex min-h-screen grow flex-col items-center justify-center space-y-8 p-4">

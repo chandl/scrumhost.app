@@ -51,8 +51,8 @@
 
 	let pageTitle = $derived(
 		room
-			? `${room.room_name} [${room.room_code}] - scrum.host ${pageSuffix}`
-			: `scrum.host ${pageSuffix}`
+			? `${room.room_name} [${room.room_code}] - scrumhost.app ${pageSuffix}`
+			: `scrumhost.app ${pageSuffix}`
 	);
 	let loadingError: string = $state('');
 
