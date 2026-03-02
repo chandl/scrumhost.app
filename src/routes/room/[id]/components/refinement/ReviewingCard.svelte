@@ -71,7 +71,7 @@
 	});
 </script>
 
-<Card class="rounded-lg border border-gray-200 shadow-lg dark:border-gray-800">
+<Card class="rounded-lg border border-gray-200 shadow-lg dark:border-gray-800" data-testid="vote-summary">
 	<CardHeader class="rounded-t-lg border-b border-gray-300 bg-gray-100 pb-4 dark:bg-gray-900">
 		<CardTitle class="text-lg font-semibold text-gray-800 dark:text-gray-200"
 			>Vote Summary</CardTitle
