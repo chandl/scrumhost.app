@@ -135,6 +135,7 @@
 <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
 	<div class="space-y-4 md:col-span-2">
 		<RetroLane
+			testId="retro-lane-went-well"
 			title="What Went Well"
 			items={wentWellItems}
 			icon={ThumbsUp}
@@ -148,6 +149,7 @@
 			{participantId}
 		/>
 		<RetroLane
+			testId="retro-lane-to-improve"
 			title="What Could Be Improved"
 			items={toImproveItems}
 			icon={ArrowUpCircle}
@@ -161,6 +163,7 @@
 			{participantId}
 		/>
 		<RetroLane
+			testId="retro-lane-action-items"
 			title="Action Items"
 			items={actionItems}
 			icon={ListTodo}

@@ -34,7 +34,7 @@
 	let showComments = $state(false);
 </script>
 
-<Card class="mb-2">
+<Card class="mb-2" data-testid="retro-item-card">
 	<CardContent class="space-y-2 p-3">
 		<div class="flex items-center justify-between">
 			<div class="mr-2 flex flex-grow items-center space-x-2">
@@ -74,6 +74,7 @@
 					</Button>
 				{/if}
 				<Button
+					data-testid="retro-item-comment-toggle"
 					variant="ghost"
 					size="sm"
 					on:click={() => (showComments = !showComments)}

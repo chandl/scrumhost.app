@@ -54,7 +54,12 @@
 			handleAddComment();
 		}}
 	>
-		<Input placeholder="Add a comment" bind:value={newComment} class="text-sm" />
-		<Button size="sm" on:click={handleAddComment}>Add</Button>
+		<Input
+			data-testid="retro-comment-input"
+			placeholder="Add a comment"
+			bind:value={newComment}
+			class="text-sm"
+		/>
+		<Button data-testid="retro-comment-submit" size="sm" on:click={handleAddComment}>Add</Button>
 	</form>
 </div>

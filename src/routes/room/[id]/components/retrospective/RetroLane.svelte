@@ -13,6 +13,7 @@
 		icon,
 		items,
 		participantId,
+		testId,
 		onAddItem,
 		onUpvote,
 		onDeleteUpvote,
@@ -25,6 +26,7 @@
 		icon: ComponentType<Icon>;
 		items: RetroItem[];
 		participantId: string;
+		testId?: string;
 
 		onAddItem: (content: string) => void;
 		onUpvote: (id: string) => void;
@@ -67,7 +69,7 @@
 	};
 </script>
 
-<Card class="flex flex-col">
+<Card class="flex flex-col" data-testid={testId}>
 	<CardHeader class="pb-2">
 		<CardTitle class="flex items-center justify-between text-lg">
 			<div class="flex items-center">
@@ -108,8 +110,13 @@
 				handleAddItem();
 			}}
 		>
-			<Input placeholder="Enter new item" bind:value={newItem} class="text-sm" />
-			<Button size="sm" on:click={handleAddItem}>Add</Button>
+			<Input
+				data-testid="retro-lane-add-input"
+				placeholder="Enter new item"
+				bind:value={newItem}
+				class="text-sm"
+			/>
+			<Button data-testid="retro-lane-add-submit" size="sm" on:click={handleAddItem}>Add</Button>
 		</form>
 		<div class="flex-grow overflow-auto">
 			{#each sortedItems as item}
