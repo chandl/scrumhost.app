@@ -68,6 +68,17 @@ test.describe('Create / Join room', () => {
 		}
 	});
 
+	test('invalid room code: user stays on /home or sees error (no navigation to /room/[id])', async ({
+		page
+	}) => {
+		await goToHome(page);
+		await page.getByTestId('room-code-input').fill('000-000-0000');
+		await page.getByRole('button', { name: 'Join Room' }).click();
+		// Invalid code: either error is shown or we never navigate to room
+		await expect(page).toHaveURL('/home', { timeout: 5000 });
+		await expect(page).not.toHaveURL(/\/room\/[^/]+$/);
+	});
+
 	test('room URL with #pwd=<password> → join and see room UI', async ({ page, browser }) => {
 		// User A: create room, reveal password, get id and password
 		await goToHome(page);
