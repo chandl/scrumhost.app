@@ -146,11 +146,11 @@
 				<h1 class="text-4xl font-bold">{room?.room_name}</h1>
 
 				<div class="sm:grid sm:grid-cols-1 md:flex md:flex-auto md:items-center">
-					<h2 class="text-xl">Room Code: {room?.room_code}</h2>
+					<h2 class="text-xl">Room Code: <span data-testid="room-code">{room?.room_code}</span></h2>
 					<span class="ml-4 mr-4 hidden text-2xl md:block">&bull;</span>
 					{#if showRoomPassword}
 						<div class="flex items-center space-x-2">
-							<h2 class="text-xl">Password: <span class="blur-none">{roomKey}</span></h2>
+							<h2 class="text-xl">Password: <span class="blur-none" data-testid="room-password-value">{roomKey}</span></h2>
 							<Button
 								onclick={() => (showRoomPassword = false)}
 								size="icon"
@@ -164,6 +164,7 @@
 						<div class="flex items-center space-x-2">
 							<h2 class="text-xl">Password: <span class="blur-sm">{roomKey}</span></h2>
 							<Button
+								data-testid="room-password-reveal"
 								onclick={() => (showRoomPassword = true)}
 								size="icon"
 								variant="outline"

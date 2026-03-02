@@ -82,6 +82,7 @@
 				placeholder="Enter Room Code"
 				bind:value={joinRoomCode}
 				class="py-6 text-lg dark:text-gray-200"
+				data-testid="room-code-input"
 			/>
 		</CardContent>
 		<CardFooter>

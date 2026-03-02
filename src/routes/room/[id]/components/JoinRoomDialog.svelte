@@ -38,6 +38,7 @@
 			>
 				<Input
 					id="room-password"
+					data-testid="join-room-password"
 					bind:value={roomPassword}
 					class="col-span-3"
 					placeholder="Enter room password"
