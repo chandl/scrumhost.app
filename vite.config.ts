@@ -7,12 +7,14 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	resolve: {
 		alias: {
-			$lib: path.resolve('./src/lib')
+			$lib: path.resolve('./src/lib'),
+			'$env/static/public': path.resolve('./src/test/env-public.ts')
 		}
 	},
 	test: {
 		environment: 'happy-dom',
 		include: ['src/**/*.{test,spec}.{js,ts}'],
-		passWithNoTests: true
+		passWithNoTests: true,
+		setupFiles: ['./src/test/setup.ts']
 	}
 });
