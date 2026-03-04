@@ -12,7 +12,7 @@
 	import BacklogRefinementRoom from './components/refinement/BacklogRefinementRoom.svelte';
 	import type { Participant, RoomDetails, RoomType } from '$lib/scrum/types/room';
 	import RetrospectiveRoom from './components/retrospective/RetrospectiveRoom.svelte';
-	import { Eye, EyeClosed } from 'lucide-svelte';
+	import { Copy, Eye, EyeClosed } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 
 	import PageLoading from '../../components/PageLoading.svelte';
@@ -57,6 +57,7 @@
 	let loadingError: string = $state('');
 
 	let requirePassword = $state(false);
+	let joinPasswordError = $state<string | null>(null);
 
 	async function loadRoom() {
 		// Get the room details
@@ -70,9 +71,9 @@
 					room = roomUpdate;
 				});
 			}
-		} catch (err) {
-			// TODO go to 404 page
-			loadingError = `${err}`;
+		} catch {
+			await goto(`/room-not-found?id=${encodeURIComponent(roomId ?? '')}`);
+			return;
 		}
 	}
 
@@ -83,6 +84,8 @@
 	onMount(async () => {
 		await validateLogin();
 
+		// Don't call getRoomDetails here: rooms viewRule only allows read if user is already
+		// a participant, so it would 404 for users who just joined by code and need to enter password.
 		try {
 			if (roomId) userParticipant = await getUserParticipant(roomId);
 		} catch (err) {
@@ -90,7 +93,6 @@
 		}
 		if (!userParticipant && preSetPwd) {
 			console.log('Try joining room with password from URL hash', preSetPwd);
-			// Attempt to join the room. Will fail if already in it, but that's fine
 			await joinRoomWithPwd(preSetPwd);
 		}
 
@@ -108,11 +110,21 @@
 	});
 
 	async function rejoinWithPwd(password: string) {
-		await joinRoomWithPwd(password);
-		if (userParticipant) {
-			requirePassword = false;
-			await loadRoom();
+		joinPasswordError = null;
+		try {
+			await joinRoomWithPwd(password);
+			if (userParticipant) {
+				requirePassword = false;
+				await loadRoom();
+			}
+		} catch {
+			joinPasswordError = 'Invalid password. Please try again.';
 		}
+	}
+
+	function handlePasswordDialogDismiss() {
+		joinPasswordError = null;
+		goto('/home');
 	}
 
 	let showRoomPassword = $state(false);
@@ -127,6 +139,17 @@
 			}
 		}
 	});
+
+	let joinLinkCopied = $state(false);
+	function copyJoinLink() {
+		if (!room || !roomKey) return;
+		const url = new URL(window.location.href);
+		url.hash = 'pwd=' + encodeURIComponent(roomKey);
+		navigator.clipboard.writeText(url.toString()).then(() => {
+			joinLinkCopied = true;
+			setTimeout(() => (joinLinkCopied = false), 2000);
+		});
+	}
 </script>
 
 <svelte:head>
@@ -140,7 +163,11 @@
 		{:else if loadingError !== ''}
 			<ScrumAlert title="Error Loading Room" body={loadingError} duration={-1} onClose={() => {}} />
 		{:else if requirePassword}
-			<JoinRoomDialog handleJoinRoom={(password) => rejoinWithPwd(password)} />
+			<JoinRoomDialog
+				handleJoinRoom={(password) => rejoinWithPwd(password)}
+				error={joinPasswordError}
+				onDismiss={handlePasswordDialogDismiss}
+			/>
 		{:else}
 			<div class="items-center">
 				<h1 class="text-4xl font-bold">{room?.room_name}</h1>
@@ -176,6 +203,22 @@
 							</Button>
 						</div>
 					{/if}
+					<span class="ml-4 mr-4 hidden text-2xl md:block">&bull;</span>
+					<div class="flex items-center space-x-2">
+						<Button
+							data-testid="copy-join-link"
+							onclick={copyJoinLink}
+							disabled={!roomKey}
+							size="sm"
+							variant="outline"
+							title={roomKey
+								? 'Copy join link (includes password)'
+								: 'Re-enter password to share link'}
+						>
+							<Copy class="mr-1 h-4 w-4" />
+							{joinLinkCopied ? 'Copied!' : 'Copy join link'}
+						</Button>
+					</div>
 				</div>
 			</div>
 			{#if roomType === 'REFINEMENT'}

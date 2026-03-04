@@ -15,11 +15,16 @@ vi.mock('$lib/utils', async (importOriginal) => {
 	return { ...actual, setRoomKeyCookie: vi.fn() };
 });
 
+vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
+
+import { goto } from '$app/navigation';
 import {
 	getParticipantInRoom,
 	getUserParticipant,
 	getRoomDetails,
+	joinRoomWithCode,
 	joinRoomAndGetParticipantDetails,
+	getUserRooms,
 	createRoom
 } from './room';
 import { setRoomKeyCookie } from '$lib/utils';
@@ -28,6 +33,65 @@ describe('room', () => {
 	beforeEach(() => {
 		resetPocketBaseMock();
 		vi.mocked(setRoomKeyCookie).mockClear();
+		vi.mocked(goto).mockClear();
+	});
+
+	describe('joinRoomWithCode', () => {
+		it('navigates to room when code is valid', async () => {
+			const roomsSearch = mockPb.collection('rooms_search');
+			vi.mocked(roomsSearch.getOne).mockResolvedValueOnce({
+				room_id: 'room-123'
+			} as never);
+
+			await joinRoomWithCode('123-456-7890');
+
+			expect(roomsSearch.getOne).toHaveBeenCalledWith('123-456-7890');
+			expect(goto).toHaveBeenCalledWith('/room/room-123');
+		});
+
+		it('throws user-friendly message on 404 (room not found)', async () => {
+			const roomsSearch = mockPb.collection('rooms_search');
+			const err = new Error('Record not found') as Error & { status?: number };
+			err.status = 404;
+			vi.mocked(roomsSearch.getOne).mockRejectedValueOnce(err);
+
+			await expect(joinRoomWithCode('000-000-0000')).rejects.toThrow(
+				'Room not found. Check the code and try again.'
+			);
+			expect(goto).not.toHaveBeenCalled();
+		});
+
+		it('throws generic message on non-404 errors', async () => {
+			const roomsSearch = mockPb.collection('rooms_search');
+			vi.mocked(roomsSearch.getOne).mockRejectedValueOnce(new Error('Network error'));
+
+			await expect(joinRoomWithCode('111-222-3333')).rejects.toThrow(
+				'Something went wrong joining the room. Try again.'
+			);
+			expect(goto).not.toHaveBeenCalled();
+		});
+
+		it('trims room code before lookup', async () => {
+			const roomsSearch = mockPb.collection('rooms_search');
+			vi.mocked(roomsSearch.getOne).mockResolvedValueOnce({
+				room_id: 'room-456'
+			} as never);
+
+			await joinRoomWithCode('  123-456-7890  ');
+
+			expect(roomsSearch.getOne).toHaveBeenCalledWith('123-456-7890');
+			expect(goto).toHaveBeenCalledWith('/room/room-456');
+		});
+
+		it('throws when room code is empty', async () => {
+			await expect(joinRoomWithCode('')).rejects.toThrow('Enter a room code.');
+			expect(mockPb.collection('rooms_search').getOne).not.toHaveBeenCalled();
+		});
+
+		it('throws when room code is whitespace-only', async () => {
+			await expect(joinRoomWithCode('   ')).rejects.toThrow('Enter a room code.');
+			expect(mockPb.collection('rooms_search').getOne).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('getParticipantInRoom', () => {
@@ -162,6 +226,75 @@ describe('room', () => {
 				expect.any(Object)
 			);
 			expect(setRoomKeyCookie).toHaveBeenCalledWith(roomRecord.id, 'room-key');
+		});
+	});
+
+	describe('getUserRooms', () => {
+		it('returns rooms with time_joined from participants list', async () => {
+			mockPb.authStore.model = { id: 'user-1', name: 'Alice' } as never;
+			const participants = mockPb.collection('participants');
+			vi.mocked(participants.getList).mockResolvedValueOnce({
+				items: [
+					{
+						id: 'p1',
+						created: '2025-01-01T12:00:00Z',
+						user: 'user-1',
+						room: 'room-1',
+						expand: {
+							room: {
+								id: 'room-1',
+								room_name: 'My Room',
+								room_code: '123-456-7890',
+								room_type: 'REFINEMENT',
+								room_key_hash: 'h',
+								participants: ['p1']
+							}
+						}
+					}
+				],
+				totalItems: 1,
+				page: 1,
+				perPage: 5
+			} as never);
+
+			const result = await getUserRooms();
+			expect(result).toHaveLength(1);
+			expect(result[0].time_joined).toBe('2025-01-01T12:00:00Z');
+			expect(result[0].id).toBe('room-1');
+			expect(result[0].room_name).toBe('My Room');
+			expect(result[0].participants).toEqual(['p1']);
+		});
+
+		it('handles room without participants field (optional chaining in UI)', async () => {
+			mockPb.authStore.model = { id: 'user-1', name: 'Alice' } as never;
+			const participants = mockPb.collection('participants');
+			vi.mocked(participants.getList).mockResolvedValueOnce({
+				items: [
+					{
+						id: 'p1',
+						created: '2025-01-01T12:00:00Z',
+						user: 'user-1',
+						room: 'room-1',
+						expand: {
+							room: {
+								id: 'room-1',
+								room_name: 'Other Room',
+								room_code: '111-222-3333',
+								room_type: 'RETROSPECTIVE',
+								room_key_hash: 'h'
+							}
+						}
+					}
+				],
+				totalItems: 1,
+				page: 1,
+				perPage: 5
+			} as never);
+
+			const result = await getUserRooms();
+			expect(result).toHaveLength(1);
+			expect(result[0].room_name).toBe('Other Room');
+			expect(result[0].participants).toBeUndefined();
 		});
 	});
 

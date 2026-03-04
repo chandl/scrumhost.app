@@ -18,23 +18,33 @@
 	import { formatTimeAgo } from '$lib/utils';
 	import type { ParticipantRoomDetails, RoomType } from '$lib/scrum/types/room';
 	import RoomCreator from '../components/RoomCreator.svelte';
+	import ScrumAlert from '../components/ScrumAlert.svelte';
 
-	let currentUser: AuthModel;
+	let currentUser = $state<AuthModel | null>(null);
 	user.subscribe((value) => {
 		currentUser = value;
 	});
 
-	let rooms: ParticipantRoomDetails[];
+	let rooms = $state<ParticipantRoomDetails[]>([]);
 	onMount(async () => {
 		await validateLogin();
-		rooms = await getUserRooms();
-		console.log('Found rooms:', rooms);
+		try {
+			rooms = await getUserRooms();
+			console.log('Found rooms:', rooms);
+		} catch (err) {
+			console.error('Failed to load recent rooms', err);
+		}
 	});
 
-	let joinRoomCode: string;
-	function handleJoinRoom() {
-		console.log('handleJoinRoom', joinRoomCode);
-		joinRoomWithCode(joinRoomCode);
+	let joinRoomCode = $state('');
+	let joinError = $state<string | null>(null);
+	async function handleJoinRoom() {
+		joinError = null;
+		try {
+			await joinRoomWithCode(joinRoomCode.trim());
+		} catch (err) {
+			joinError = err instanceof Error ? err.message : 'Failed to join room. Try again.';
+		}
 	}
 
 	function truncate(str: string, n: number) {
@@ -58,6 +68,14 @@
 </svelte:head>
 
 <div class="flex min-h-screen grow flex-col items-center justify-center space-y-8 p-4">
+	{#if joinError}
+		<ScrumAlert
+			title="Could not join room"
+			body={joinError}
+			duration={-1}
+			onClose={() => (joinError = null)}
+		/>
+	{/if}
 	<Card class="w-full max-w-md">
 		<CardHeader>
 			<CardTitle class="text-center text-2xl font-bold dark:text-gray-100"
@@ -86,7 +104,7 @@
 			/>
 		</CardContent>
 		<CardFooter>
-			<Button class="w-full py-6 text-lg" disabled={!joinRoomCode} on:click={handleJoinRoom}>
+			<Button class="w-full py-6 text-lg" disabled={!joinRoomCode.trim()} on:click={handleJoinRoom}>
 				Join Room
 			</Button>
 		</CardFooter>
@@ -116,7 +134,7 @@
 								<div class="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-300">
 									<span class="flex items-center">
 										<User class="mr-1 h-4 w-4" />
-										{room.participants.length} participant(s)
+										{room.participants?.length ?? 0} participant(s)
 									</span>
 									<span class="flex items-center dark:text-gray-300">
 										<Clock2 class="mr-1 h-4 w-4" />

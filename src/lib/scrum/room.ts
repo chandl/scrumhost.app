@@ -10,13 +10,23 @@ import type {
 import { hashString } from '$lib/crypto';
 import { setRoomKeyCookie } from '$lib/utils';
 
-export async function joinRoomWithCode(roomCode: string) {
+export async function joinRoomWithCode(roomCode: string): Promise<void> {
+	const trimmed = roomCode.trim();
+	if (!trimmed) {
+		throw new Error('Enter a room code.');
+	}
 	try {
-		const room = await pb.collection('rooms_search').getOne(roomCode);
-		console.log('Found room with code:', roomCode, room);
+		const room = await pb.collection('rooms_search').getOne(trimmed);
+		console.log('Found room with code:', trimmed, room);
 		goto(`/room/${room.room_id}`);
-	} catch (err) {
+	} catch (err: unknown) {
 		console.error('Failed to join room', err);
+		const status = (err as { status?: number })?.status;
+		const message =
+			status === 404
+				? 'Room not found. Check the code and try again.'
+				: 'Something went wrong joining the room. Try again.';
+		throw new Error(message);
 	}
 }
 

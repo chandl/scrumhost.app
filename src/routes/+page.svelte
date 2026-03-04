@@ -36,7 +36,7 @@
 			<h2 class="mb-4 text-4xl font-bold text-gray-900 dark:text-gray-100 sm:text-5xl">
 				Securely Collaborate on Team
 				<Typewriter
-					strings={['Retrospectives', 'Sprint Planning', 'Backlog Refinement']}
+					strings={['Retrospectives', 'Sprint Planning (Coming soon)', 'Backlog Refinement']}
 					typingSpeed={50}
 					deletingSpeed={20}
 					pause={6000}
