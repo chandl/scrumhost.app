@@ -83,16 +83,14 @@ export async function validateLogin() {
 
 			console.log('Redirect', loginUrl);
 			goto(loginUrl); // Redirect to login page
+			return;
 		}
 
-		return {
-			props: {
-				user
-			}
-		};
+		return { props: { user } };
 	} catch (error) {
 		console.error('Error checking authentication:', error);
 		goto('/join'); // Redirect to login page if there’s an error
+		return;
 	}
 }
 
