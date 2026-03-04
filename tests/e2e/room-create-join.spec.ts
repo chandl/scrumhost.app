@@ -82,6 +82,15 @@ test.describe('Create / Join room', () => {
 		}
 	});
 
+	test('invalid room ID: redirect to room-not-found page', async ({ page }) => {
+		await goToHome(page);
+		await page.goto('/room/nonexistent-room-id-404');
+		await expect(page).toHaveURL(/\/room-not-found/, { timeout: 10_000 });
+		await expect(page.getByTestId('room-not-found-page')).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Room not found' })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Go to Home' })).toBeVisible();
+	});
+
 	test('invalid room code: user stays on /home and sees error alert (no navigation to /room/[id])', async ({
 		page
 	}) => {

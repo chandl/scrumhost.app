@@ -71,8 +71,8 @@
 				});
 			}
 		} catch (err) {
-			// TODO go to 404 page
-			loadingError = `${err}`;
+			await goto(`/room-not-found?id=${encodeURIComponent(roomId)}`);
+			return;
 		}
 	}
 
@@ -82,6 +82,14 @@
 
 	onMount(async () => {
 		await validateLogin();
+
+		// If room doesn't exist, redirect to room-not-found immediately
+		try {
+			if (roomId) await getRoomDetails(roomId);
+		} catch (err) {
+			await goto(`/room-not-found?id=${encodeURIComponent(roomId)}`);
+			return;
+		}
 
 		try {
 			if (roomId) userParticipant = await getUserParticipant(roomId);
