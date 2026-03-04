@@ -124,7 +124,9 @@ describe('setRoomKeyCookie and getRoomKeyCookie', () => {
 				if (eq === -1) return;
 				const name = firstPart.slice(0, eq);
 				const value = firstPart.slice(eq + 1);
-				const rest = cookieStore ? cookieStore.split('; ').filter((s) => s && !s.startsWith(name + '=')) : [];
+				const rest = cookieStore
+					? cookieStore.split('; ').filter((s) => s && !s.startsWith(name + '='))
+					: [];
 				cookieStore = [...rest, `${name}=${value}`].join('; ');
 			},
 			configurable: true
@@ -156,7 +158,9 @@ describe('setRoomKeyCookie and getRoomKeyCookie', () => {
 
 	it('getRoomKeyCookie throws when cookie for room is not found', () => {
 		cookieStore = '';
-		expect(() => getRoomKeyCookie('nonexistent')).toThrow('Could not find cookie for room nonexistent');
+		expect(() => getRoomKeyCookie('nonexistent')).toThrow(
+			'Could not find cookie for room nonexistent'
+		);
 	});
 
 	it('getRoomKeyCookie throws when document.cookie is empty', () => {

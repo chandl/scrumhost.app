@@ -14,13 +14,7 @@ vi.mock('$app/stores', () => ({
 }));
 
 import { goto } from '$app/navigation';
-import {
-	login,
-	logout,
-	signup,
-	validateLogin,
-	generatePassword
-} from './user';
+import { login, logout, signup, validateLogin, generatePassword } from './user';
 
 describe('user', () => {
 	beforeEach(() => {
@@ -35,13 +29,12 @@ describe('user', () => {
 			expect(users.create).toHaveBeenCalledTimes(1);
 			const [createArg] = vi.mocked(users.create).mock.calls[0];
 			expect(createArg.name).toBe('Alice');
-			expect(createArg.username).toMatch(/^Alice-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+			expect(createArg.username).toMatch(
+				/^Alice-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+			);
 			expect(createArg.password).toBe(createArg.passwordConfirm);
 			expect(createArg.password).toHaveLength(16);
-			expect(users.authWithPassword).toHaveBeenCalledWith(
-				createArg.username,
-				createArg.password
-			);
+			expect(users.authWithPassword).toHaveBeenCalledWith(createArg.username, createArg.password);
 		});
 	});
 
@@ -59,9 +52,7 @@ describe('user', () => {
 			logout();
 			expect(mockPb.authStore.model).toBeNull();
 			expect(mockPb.collection).toHaveBeenCalled();
-			const collectionNames = vi.mocked(mockPb.collection).mock.calls.map(
-				(c) => c[0]
-			);
+			const collectionNames = vi.mocked(mockPb.collection).mock.calls.map((c) => c[0]);
 			for (const name of mockPb.COLLECTIONS) {
 				expect(collectionNames).toContain(name);
 			}
@@ -79,9 +70,7 @@ describe('user', () => {
 
 		it('redirects to join with target when no user', async () => {
 			mockPb.authStore.model = null;
-			vi.mocked(mockPb.collection('users').authRefresh).mockResolvedValueOnce(
-				null as never
-			);
+			vi.mocked(mockPb.collection('users').authRefresh).mockResolvedValueOnce(null as never);
 			Object.defineProperty(window, 'location', {
 				value: { href: 'http://localhost/home' },
 				writable: true
@@ -107,7 +96,9 @@ describe('user', () => {
 			const users = mockPb.collection('users');
 			const [createArg] = vi.mocked(users.create).mock.calls[0];
 			// name with non-alpha removed: BobSmith
-			expect(createArg.username).toMatch(/^BobSmith-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+			expect(createArg.username).toMatch(
+				/^BobSmith-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+			);
 		});
 	});
 });

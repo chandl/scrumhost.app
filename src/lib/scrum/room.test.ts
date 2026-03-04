@@ -179,9 +179,7 @@ describe('room', () => {
 			expect(result.room_type).toBe('REFINEMENT');
 			expect(result.room_key_hash).toBe('mock-hash');
 			// Mock create does not set participants; implementation returns newRoom.participants as-is
-			expect(
-				result.participants === undefined || Array.isArray(result.participants)
-			).toBe(true);
+			expect(result.participants === undefined || Array.isArray(result.participants)).toBe(true);
 
 			expect(mockPb.collection('rooms').create).toHaveBeenCalledWith(
 				expect.objectContaining({

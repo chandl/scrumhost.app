@@ -6,11 +6,7 @@ vi.mock('$lib/pocketbase/pocketbase', async () => {
 	return { default: mockPb };
 });
 
-import {
-	getEstimateByStoryAndUser,
-	createOrUpdateEstimate,
-	deleteEstimates
-} from './estimates';
+import { getEstimateByStoryAndUser, createOrUpdateEstimate, deleteEstimates } from './estimates';
 
 describe('estimates', () => {
 	beforeEach(() => {
@@ -153,9 +149,9 @@ describe('estimates', () => {
 			expect(estimatesColl.delete).toHaveBeenCalledWith(est1.id);
 			expect(estimatesColl.delete).toHaveBeenCalledWith(est2.id);
 
-			const storiesColl = mockPb.collection('stories') as ReturnType<
-				typeof mockPb.collection
-			> & { update: ReturnType<typeof vi.fn> };
+			const storiesColl = mockPb.collection('stories') as ReturnType<typeof mockPb.collection> & {
+				update: ReturnType<typeof vi.fn>;
+			};
 			expect(storiesColl.update).toHaveBeenCalledWith(storyId, {
 				'story_estimates-': [est1.id, est2.id]
 			});

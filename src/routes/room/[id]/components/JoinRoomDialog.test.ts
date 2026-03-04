@@ -12,7 +12,8 @@ vi.mock('$lib/components/ui/dialog', async () => {
 	const DialogContentStub = (await import('./__mocks__/dialog-content-stub.svelte')).default;
 	const DialogHeaderStub = (await import('./__mocks__/dialog-header-stub.svelte')).default;
 	const DialogTitleStub = (await import('./__mocks__/dialog-title-stub.svelte')).default;
-	const DialogDescriptionStub = (await import('./__mocks__/dialog-description-stub.svelte')).default;
+	const DialogDescriptionStub = (await import('./__mocks__/dialog-description-stub.svelte'))
+		.default;
 	const DialogFooterStub = (await import('./__mocks__/dialog-footer-stub.svelte')).default;
 	return {
 		Dialog: DialogStub,

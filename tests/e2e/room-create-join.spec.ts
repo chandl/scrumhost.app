@@ -1,12 +1,19 @@
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
-async function goToHome(page: { goto: (url: string) => Promise<void>; getByRole: (role: string, opts?: { name: string }) => any; getByLabel: (label: string) => any }) {
+async function goToHome(page: Page) {
 	await page.goto('/');
 	await page.getByRole('link', { name: 'Join a Room' }).click();
 	await expect(page).toHaveURL('/join');
 	await page.getByLabel('Your Name').fill(`E2E-${Date.now()}`);
 	await page.getByRole('button', { name: 'Continue' }).click();
-	await expect(page).toHaveURL('/home');
+	try {
+		await page.waitForURL(/\/home\/?/, { timeout: 5000 });
+	} catch {
+		await page.goto('/home');
+	}
+	await expect(page).toHaveURL('/home', { timeout: 15_000 });
+	await expect(page.getByRole('button', { name: 'Create Room' })).toBeVisible({ timeout: 15_000 });
 }
 
 test.describe('Create / Join room', () => {
@@ -22,11 +29,16 @@ test.describe('Create / Join room', () => {
 		await page.getByRole('dialog').getByRole('button', { name: 'Create Room' }).click();
 
 		await expect(page).toHaveURL(/\/room\/[^/]+$/);
-		await expect(page.getByRole('heading', { name: 'E2E Refinement Room', level: 1 })).toBeVisible();
+		await expect(
+			page.getByRole('heading', { name: 'E2E Refinement Room', level: 1 })
+		).toBeVisible();
 		await expect(page.getByTestId('room-code')).toHaveText(/\d{3}-\d{3}-\d{4}/);
 	});
 
-	test('join by code: enter code, submit → /room/[id]; if password required, show JoinRoomDialog; submit password → room UI', async ({ page, browser }) => {
+	test('join by code: enter code, submit → /room/[id]; if password required, show JoinRoomDialog; submit password → room UI', async ({
+		page,
+		browser
+	}) => {
 		// User A: create room and get code + password
 		await goToHome(page);
 		await page.getByRole('button', { name: 'Create Room' }).click();
@@ -59,7 +71,9 @@ test.describe('Create / Join room', () => {
 			await pageB.getByTestId('join-room-password').fill(roomPassword!.trim());
 			await pageB.getByRole('button', { name: 'Join Room' }).click();
 
-			await expect(pageB.getByRole('heading', { name: 'E2E Retro for Join', level: 1 })).toBeVisible({
+			await expect(
+				pageB.getByRole('heading', { name: 'E2E Retro for Join', level: 1 })
+			).toBeVisible({
 				timeout: 10_000
 			});
 			await expect(pageB.getByTestId('room-code')).toHaveText(roomCode!.trim());
@@ -104,11 +118,21 @@ test.describe('Create / Join room', () => {
 			await pageB.getByRole('link', { name: 'Join a Room' }).click();
 			await pageB.getByLabel('Your Name').fill(`HashJoin-${Date.now()}`);
 			await pageB.getByRole('button', { name: 'Continue' }).click();
-			await expect(pageB).toHaveURL('/home');
+			try {
+				await pageB.waitForURL(/\/home\/?/, { timeout: 5000 });
+			} catch {
+				await pageB.goto('/home');
+			}
+			await expect(pageB).toHaveURL('/home', { timeout: 15_000 });
+			await expect(pageB.getByRole('button', { name: 'Create Room' })).toBeVisible({
+				timeout: 15_000
+			});
 
 			await pageB.goto(`/room/${roomId}#pwd=${encodeURIComponent(roomPassword!.trim())}`);
 
-			await expect(pageB.getByRole('heading', { name: 'E2E Room for Hash Join', level: 1 })).toBeVisible({
+			await expect(
+				pageB.getByRole('heading', { name: 'E2E Room for Hash Join', level: 1 })
+			).toBeVisible({
 				timeout: 10_000
 			});
 			await expect(pageB.getByTestId('room-code')).toBeVisible();

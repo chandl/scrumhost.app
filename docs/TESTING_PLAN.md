@@ -25,15 +25,15 @@ No test runner or E2E tooling is currently configured.
 
 ### 2.2 What to Unit Test
 
-| Area | Files / modules | Strategy |
-|------|-----------------|----------|
-| **Pure utils** | `src/lib/utils.ts` | Test `cn()`, `formatTimeAgo()`, `getRoomKeyCookie` / `setRoomKeyCookie` (with jsdom or by mocking `document.cookie`). |
-| **Crypto** | `src/lib/crypto.ts` | Test `hashString()` (deterministic output for known input), `encryptString`/`decryptString` round-trip. Use fake timers or skip heavy PBKDF2 in CI if needed. |
-| **Room helpers** | `src/lib/scrum/room.ts` | Mock PocketBase (`vi.mock('$lib/pocketbase/pocketbase')`). Test: `getParticipantInRoom`, `getUserParticipant`, `getRoomDetails`, `joinRoomAndGetParticipantDetails`, `createRoom` (with mocked pb). Extract `createRoomCode` / `createRoomPasscode` into a testable module if you want to assert format (e.g. `\d{3}-\d{3}-\d{4}`). |
-| **Estimates** | `src/lib/scrum/estimates.ts` | Mock pb; test `getEstimateByStoryAndUser`, `createOrUpdateEstimate` (create vs update path), `deleteEstimates`. |
-| **Stories** | `src/lib/scrum/story.ts` | Mock pb; test `createStory`, `getStoryWithEstimatesById`, `setStoryStatus`. |
-| **User** | `src/lib/scrum/user.ts` | Mock pb and `goto`; test `signup`, `login`, `logout`, `validateLogin` (redirect when no user), `generatePassword` (length), `generateUsername` (format). |
-| **Components** | Buttons, cards, forms, dialogs | Test rendering and key interactions (e.g. JoinRoomDialog submit, RoomCreator create, form validation). Prefer testing behavior, not implementation. |
+| Area             | Files / modules                | Strategy                                                                                                                                                                                                                                                                                                                            |
+| ---------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Pure utils**   | `src/lib/utils.ts`             | Test `cn()`, `formatTimeAgo()`, `getRoomKeyCookie` / `setRoomKeyCookie` (with jsdom or by mocking `document.cookie`).                                                                                                                                                                                                               |
+| **Crypto**       | `src/lib/crypto.ts`            | Test `hashString()` (deterministic output for known input), `encryptString`/`decryptString` round-trip. Use fake timers or skip heavy PBKDF2 in CI if needed.                                                                                                                                                                       |
+| **Room helpers** | `src/lib/scrum/room.ts`        | Mock PocketBase (`vi.mock('$lib/pocketbase/pocketbase')`). Test: `getParticipantInRoom`, `getUserParticipant`, `getRoomDetails`, `joinRoomAndGetParticipantDetails`, `createRoom` (with mocked pb). Extract `createRoomCode` / `createRoomPasscode` into a testable module if you want to assert format (e.g. `\d{3}-\d{3}-\d{4}`). |
+| **Estimates**    | `src/lib/scrum/estimates.ts`   | Mock pb; test `getEstimateByStoryAndUser`, `createOrUpdateEstimate` (create vs update path), `deleteEstimates`.                                                                                                                                                                                                                     |
+| **Stories**      | `src/lib/scrum/story.ts`       | Mock pb; test `createStory`, `getStoryWithEstimatesById`, `setStoryStatus`.                                                                                                                                                                                                                                                         |
+| **User**         | `src/lib/scrum/user.ts`        | Mock pb and `goto`; test `signup`, `login`, `logout`, `validateLogin` (redirect when no user), `generatePassword` (length), `generateUsername` (format).                                                                                                                                                                            |
+| **Components**   | Buttons, cards, forms, dialogs | Test rendering and key interactions (e.g. JoinRoomDialog submit, RoomCreator create, form validation). Prefer testing behavior, not implementation.                                                                                                                                                                                 |
 
 ### 2.3 Test Layout
 
@@ -72,15 +72,15 @@ No test runner or E2E tooling is currently configured.
 
 ### 3.3 Single-User E2E Flows
 
-| Flow | Steps |
-|------|--------|
-| **Landing → Join** | Open `/` → click “Join a Room” / “Host a Room” → redirect to `/join`. |
-| **Join (name)** | On `/join`, enter name, submit → redirect to `/home`, see “Welcome, &lt;name&gt;”. |
-| **Create room** | On `/home`, fill room name, choose type (Refinement / Retrospective), submit → redirect to `/room/[id]`, see room name and code. |
-| **Join by code** | On `/home`, enter room code, submit → redirect to `/room/[id]`. If password required, show JoinRoomDialog. |
-| **Room with password** | Open room URL with `#pwd=<password>` → join and see room UI. |
-| **Refinement (single user)** | In refinement room, create a task, open it, vote, reveal (if applicable). |
-| **Retrospective (single user)** | In retro room, add item to a lane, add comment. |
+| Flow                            | Steps                                                                                                                            |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **Landing → Join**              | Open `/` → click “Join a Room” / “Host a Room” → redirect to `/join`.                                                            |
+| **Join (name)**                 | On `/join`, enter name, submit → redirect to `/home`, see “Welcome, &lt;name&gt;”.                                               |
+| **Create room**                 | On `/home`, fill room name, choose type (Refinement / Retrospective), submit → redirect to `/room/[id]`, see room name and code. |
+| **Join by code**                | On `/home`, enter room code, submit → redirect to `/room/[id]`. If password required, show JoinRoomDialog.                       |
+| **Room with password**          | Open room URL with `#pwd=<password>` → join and see room UI.                                                                     |
+| **Refinement (single user)**    | In refinement room, create a task, open it, vote, reveal (if applicable).                                                        |
+| **Retrospective (single user)** | In retro room, add item to a lane, add comment.                                                                                  |
 
 These can be one spec per flow or grouped (e.g. `auth.spec.ts`, `room-create-join.spec.ts`, `refinement.spec.ts`, `retrospective.spec.ts`).
 
@@ -88,12 +88,12 @@ These can be one spec per flow or grouped (e.g. `auth.spec.ts`, `room-create-joi
 
 Use Playwright’s **multiple browser contexts** (or incognito-like contexts) to simulate different users in the same room.
 
-| Scenario | User A | User B (and optionally C) | What to assert |
-|----------|--------|----------------------------|----------------|
-| **Two users join same room** | Create room, copy room code + password | Go to `/join`, then `/home`, join by code + password | Both see same room name/code; participant list shows both. |
-| **Refinement: voting visibility** | Create refinement room, add story, vote | Join room, open same story, vote | Both see story; after reveal, both see same vote summary. |
-| **Retrospective: shared board** | Create retro room, add item to lane | Join room | Both see same lanes and items (real-time via PocketBase subscriptions). |
-| **Room code validation** | — | Enter invalid code | Error or no navigation to room. |
+| Scenario                          | User A                                  | User B (and optionally C)                            | What to assert                                                          |
+| --------------------------------- | --------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------- |
+| **Two users join same room**      | Create room, copy room code + password  | Go to `/join`, then `/home`, join by code + password | Both see same room name/code; participant list shows both.              |
+| **Refinement: voting visibility** | Create refinement room, add story, vote | Join room, open same story, vote                     | Both see story; after reveal, both see same vote summary.               |
+| **Retrospective: shared board**   | Create retro room, add item to lane     | Join room                                            | Both see same lanes and items (real-time via PocketBase subscriptions). |
+| **Room code validation**          | —                                       | Enter invalid code                                   | Error or no navigation to room.                                         |
 
 Implementation pattern:
 
@@ -140,14 +140,14 @@ Optional: use **storageState** to save auth after “join” and reuse for faste
 
 ```json
 {
-  "scripts": {
-    "test": "vitest",
-    "test:unit": "vitest run",
-    "test:unit:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
-  }
+	"scripts": {
+		"test": "vitest",
+		"test:unit": "vitest run",
+		"test:unit:watch": "vitest",
+		"test:coverage": "vitest run --coverage",
+		"test:e2e": "playwright test",
+		"test:e2e:ui": "playwright test --ui"
+	}
 }
 ```
 
@@ -162,10 +162,10 @@ Optional: use **storageState** to save auth after “join” and reuse for faste
 
 ## 7. Summary
 
-| Test type | Tool | Scope |
-|-----------|------|--------|
-| Unit | Vitest + Testing Library | Utils, crypto, scrum logic (mocked PB), selected components |
-| E2E single-user | Playwright | Landing, join, create/join room, refinement, retrospective |
-| E2E multi-user | Playwright (multi-context) | Two users in same room; refinement voting and retro board in sync |
+| Test type       | Tool                       | Scope                                                             |
+| --------------- | -------------------------- | ----------------------------------------------------------------- |
+| Unit            | Vitest + Testing Library   | Utils, crypto, scrum logic (mocked PB), selected components       |
+| E2E single-user | Playwright                 | Landing, join, create/join room, refinement, retrospective        |
+| E2E multi-user  | Playwright (multi-context) | Two users in same room; refinement voting and retro board in sync |
 
 This plan gives you a clear path to add unit tests and Playwright-based integration tests with multi-user scenarios, aligned with your current SvelteKit + PocketBase setup.

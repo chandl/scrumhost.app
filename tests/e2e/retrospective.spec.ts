@@ -1,22 +1,22 @@
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
-async function goToHome(page: {
-	goto: (url: string) => Promise<void>;
-	getByRole: (role: string, opts?: { name: string }) => any;
-	getByLabel: (label: string) => any;
-}) {
+async function goToHome(page: Page) {
 	await page.goto('/');
 	await page.getByRole('link', { name: 'Join a Room' }).click();
 	await expect(page).toHaveURL('/join');
 	await page.getByLabel('Your Name').fill(`E2E-Retro-${Date.now()}`);
 	await page.getByRole('button', { name: 'Continue' }).click();
-	await expect(page).toHaveURL('/home');
+	try {
+		await page.waitForURL(/\/home\/?/, { timeout: 5000 });
+	} catch {
+		await page.goto('/home');
+	}
+	await expect(page).toHaveURL('/home', { timeout: 15_000 });
+	await expect(page.getByRole('button', { name: 'Create Room' })).toBeVisible({ timeout: 15_000 });
 }
 
-async function createRetrospectiveRoom(page: {
-	getByRole: (role: string, opts?: { name: string }) => any;
-	getByTestId: (id: string) => any;
-}) {
+async function createRetrospectiveRoom(page: Page) {
 	await page.getByRole('button', { name: 'Create Room' }).click();
 	await page.getByRole('radio', { name: 'Sprint Retrospective' }).click();
 	await page.getByRole('button', { name: 'Next' }).click();

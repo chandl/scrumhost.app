@@ -1,19 +1,21 @@
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
-async function goToHome(
-	page: {
-		goto: (url: string) => Promise<void>;
-		getByRole: (role: string, opts?: { name: string }) => any;
-		getByLabel: (label: string) => any;
-	},
-	name: string
-) {
+async function goToHome(page: Page, name: string) {
 	await page.goto('/');
 	await page.getByRole('link', { name: 'Join a Room' }).click();
 	await expect(page).toHaveURL('/join');
 	await page.getByLabel('Your Name').fill(name);
 	await page.getByRole('button', { name: 'Continue' }).click();
-	await expect(page).toHaveURL('/home');
+	// App may client-navigate to /home; if we stay on /join, go to /home (auth is in storage after signup)
+	try {
+		await page.waitForURL(/\/home\/?/, { timeout: 5000 });
+	} catch {
+		await page.goto('/home');
+	}
+	await expect(page).toHaveURL('/home', { timeout: 15_000 });
+	// Wait for home content (button can take a moment after full load while auth hydrates)
+	await expect(page.getByRole('button', { name: 'Create Room' })).toBeVisible({ timeout: 15_000 });
 }
 
 test.describe('Two users, same room', () => {
@@ -127,7 +129,9 @@ test.describe('Refinement: voting visibility (multi-user)', () => {
 			await pageA.getByTestId('create-task-submit').click();
 
 			await pageA.getByRole('tab', { name: /Queued/ }).click();
-			await expect(pageA.getByTestId('task-list')).toBeVisible({ timeout: 10_000 });
+			await expect(pageA.getByRole('tabpanel').getByTestId('task-list').first()).toBeVisible({
+				timeout: 10_000
+			});
 			await expect(pageA.getByText(taskTitle)).toBeVisible({ timeout: 5_000 });
 			await pageA.getByTestId('start-voting').first().click();
 

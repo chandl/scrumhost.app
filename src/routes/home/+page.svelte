@@ -26,7 +26,7 @@
 
 	let rooms: ParticipantRoomDetails[];
 	onMount(async () => {
-		validateLogin();
+		await validateLogin();
 		rooms = await getUserRooms();
 		console.log('Found rooms:', rooms);
 	});

@@ -11,7 +11,8 @@ vi.mock('$lib/components/ui/dialog', async () => {
 	const DialogContentStub = (await import('./__mocks__/dialog-content-stub.svelte')).default;
 	const DialogHeaderStub = (await import('./__mocks__/dialog-header-stub.svelte')).default;
 	const DialogTitleStub = (await import('./__mocks__/dialog-title-stub.svelte')).default;
-	const DialogDescriptionStub = (await import('./__mocks__/dialog-description-stub.svelte')).default;
+	const DialogDescriptionStub = (await import('./__mocks__/dialog-description-stub.svelte'))
+		.default;
 	const DialogFooterStub = (await import('./__mocks__/dialog-footer-stub.svelte')).default;
 	const DialogTriggerStub = (await import('./__mocks__/dialog-trigger-stub.svelte')).default;
 	return {
@@ -68,7 +69,9 @@ describe('RoomCreator', () => {
 	it('renders step 1: room type selection description and Next button', () => {
 		render(RoomCreator);
 
-		expect(document.body.contains(screen.getByText('Select the type of room to create.'))).toBe(true);
+		expect(document.body.contains(screen.getByText('Select the type of room to create.'))).toBe(
+			true
+		);
 		expect(document.body.contains(screen.getByRole('button', { name: 'Next' }))).toBe(true);
 	});
 
@@ -82,7 +85,9 @@ describe('RoomCreator', () => {
 
 		expect(
 			document.body.contains(
-				screen.getByText((content) => content.includes('Set up your') && content.includes('room details here'))
+				screen.getByText(
+					(content) => content.includes('Set up your') && content.includes('room details here')
+				)
 			)
 		).toBe(true);
 		const createButtons = screen.getAllByRole('button', { name: 'Create Room' });

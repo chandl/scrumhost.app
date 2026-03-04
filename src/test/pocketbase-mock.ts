@@ -24,7 +24,10 @@ export const COLLECTIONS = [
 type Record = Record<string, unknown>;
 
 const collectionsStore = new Map<string, Map<string, Record>>();
-const subscriptionsStore = new Map<string, Array<{ recordId: string; callback: (e: { action: string; record: Record }) => void }>>();
+const subscriptionsStore = new Map<
+	string,
+	Array<{ recordId: string; callback: (e: { action: string; record: Record }) => void }>
+>();
 
 function getStore(name: string): Map<string, Record> {
 	let store = collectionsStore.get(name);
@@ -126,11 +129,7 @@ function createCollectionMock(name: string) {
 	});
 
 	const update = vi.fn(
-		async (
-			id: string,
-			data: Record,
-			_options?: { headers?: Record<string, string> }
-		) => {
+		async (id: string, data: Record, _options?: { headers?: Record<string, string> }) => {
 			const record = store.get(id);
 			if (!record) {
 				const err = new Error('Record not found') as Error & { status?: number };

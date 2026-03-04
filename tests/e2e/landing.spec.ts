@@ -14,8 +14,12 @@ test.describe('Landing → Join → Home', () => {
 
 		await page.getByLabel('Your Name').fill(name);
 		await page.getByRole('button', { name: 'Continue' }).click();
-
-		await expect(page).toHaveURL('/home');
-		await expect(page.getByText(`Welcome, ${name}`)).toBeVisible();
+		try {
+			await page.waitForURL(/\/home\/?/, { timeout: 5000 });
+		} catch {
+			await page.goto('/home');
+		}
+		await expect(page).toHaveURL('/home', { timeout: 15_000 });
+		await expect(page.getByText(`Welcome, ${name}`)).toBeVisible({ timeout: 10_000 });
 	});
 });

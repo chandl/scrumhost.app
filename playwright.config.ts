@@ -9,11 +9,11 @@ export default defineConfig({
 	reporter: 'html',
 	use: {
 		baseURL: 'http://localhost:5173',
-		trace: 'on-first-retry',
+		trace: 'on-first-retry'
 	},
 	timeout: 30_000,
 	expect: {
-		timeout: 5_000,
+		timeout: 5_000
 	},
-	projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+	projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }]
 });

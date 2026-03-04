@@ -43,10 +43,9 @@ describe('story', () => {
 					author: 'user-1'
 				})
 			);
-			expect(mockPb.collection('refinement_metadata').update).toHaveBeenCalledWith(
-				refinementId,
-				{ 'stories+': result.id }
-			);
+			expect(mockPb.collection('refinement_metadata').update).toHaveBeenCalledWith(refinementId, {
+				'stories+': result.id
+			});
 		});
 
 		it('sets author to undefined when authStore has no model', async () => {
@@ -142,10 +141,9 @@ describe('story', () => {
 
 			await setStoryStatus(storyId, 'REVIEWED');
 
-			expect(mockPb.collection('stories').update).toHaveBeenCalledWith(
-				storyId,
-				{ story_status: 'REVIEWED' }
-			);
+			expect(mockPb.collection('stories').update).toHaveBeenCalledWith(storyId, {
+				story_status: 'REVIEWED'
+			});
 			const updated = await mockPb.collection('stories').getOne(storyId);
 			expect(updated.story_status).toBe('REVIEWED');
 		});
@@ -158,10 +156,9 @@ describe('story', () => {
 			});
 
 			await setStoryStatus(storyRecord.id, 'SKIPPED');
-			expect(mockPb.collection('stories').update).toHaveBeenCalledWith(
-				storyRecord.id,
-				{ story_status: 'SKIPPED' }
-			);
+			expect(mockPb.collection('stories').update).toHaveBeenCalledWith(storyRecord.id, {
+				story_status: 'SKIPPED'
+			});
 		});
 
 		it('throws when update fails', async () => {
@@ -169,9 +166,7 @@ describe('story', () => {
 				new Error('Record not found')
 			);
 
-			await expect(setStoryStatus('missing-id', 'REVIEWED')).rejects.toThrow(
-				'Record not found'
-			);
+			await expect(setStoryStatus('missing-id', 'REVIEWED')).rejects.toThrow('Record not found');
 		});
 	});
 });
