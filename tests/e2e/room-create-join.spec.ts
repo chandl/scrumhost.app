@@ -95,6 +95,21 @@ test.describe('Create / Join room', () => {
 		await expect(page.getByText(/Room not found|Check the code/)).toBeVisible();
 	});
 
+	test('Copy join link: button visible after create, click shows Copied!', async ({ page }) => {
+		await goToHome(page);
+		await page.getByRole('button', { name: 'Create Room' }).click();
+		await page.getByRole('radio', { name: 'Sprint Retrospective' }).click();
+		await page.getByRole('button', { name: 'Next' }).click();
+		await page.getByTestId('room-name-input').fill('E2E Copy Link Room');
+		await page.getByRole('dialog').getByRole('button', { name: 'Create Room' }).click();
+
+		await expect(page).toHaveURL(/\/room\/[^/]+$/);
+		await expect(page.getByTestId('copy-join-link')).toBeVisible();
+		await expect(page.getByTestId('copy-join-link')).toBeEnabled();
+		await page.getByTestId('copy-join-link').click();
+		await expect(page.getByText('Copied!')).toBeVisible({ timeout: 2000 });
+	});
+
 	test('room URL with #pwd=<password> → join and see room UI', async ({ page, browser }) => {
 		// User A: create room, reveal password, get id and password
 		await goToHome(page);

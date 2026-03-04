@@ -12,7 +12,7 @@
 	import BacklogRefinementRoom from './components/refinement/BacklogRefinementRoom.svelte';
 	import type { Participant, RoomDetails, RoomType } from '$lib/scrum/types/room';
 	import RetrospectiveRoom from './components/retrospective/RetrospectiveRoom.svelte';
-	import { Eye, EyeClosed } from 'lucide-svelte';
+	import { Copy, Eye, EyeClosed } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 
 	import PageLoading from '../../components/PageLoading.svelte';
@@ -127,6 +127,17 @@
 			}
 		}
 	});
+
+	let joinLinkCopied = $state(false);
+	function copyJoinLink() {
+		if (!room || !roomKey) return;
+		const url = new URL(window.location.href);
+		url.hash = 'pwd=' + encodeURIComponent(roomKey);
+		navigator.clipboard.writeText(url.toString()).then(() => {
+			joinLinkCopied = true;
+			setTimeout(() => (joinLinkCopied = false), 2000);
+		});
+	}
 </script>
 
 <svelte:head>
@@ -176,6 +187,20 @@
 							</Button>
 						</div>
 					{/if}
+					<span class="ml-4 mr-4 hidden text-2xl md:block">&bull;</span>
+					<div class="flex items-center space-x-2">
+						<Button
+							data-testid="copy-join-link"
+							onclick={copyJoinLink}
+							disabled={!roomKey}
+							size="sm"
+							variant="outline"
+							title={roomKey ? 'Copy join link (includes password)' : 'Re-enter password to share link'}
+						>
+							<Copy class="mr-1 h-4 w-4" />
+							{joinLinkCopied ? 'Copied!' : 'Copy join link'}
+						</Button>
+					</div>
 				</div>
 			</div>
 			{#if roomType === 'REFINEMENT'}

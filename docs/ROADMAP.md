@@ -32,7 +32,7 @@ Teams (or facilitators) running refinement or retros. No accounts beyond “name
 - Testing plan in `docs/TESTING_PLAN.md` (unit + E2E, multi-user).
 - `PUBLIC_ENABLE_BACKLOG_MERGE_TASKS` in test env suggests future “merge tasks” or similar.
 - ~~Room join by code currently fails silently~~ — fixed: join errors surface via ScrumAlert on home (404 → “Room not found. Check the code and try again.”).
-- Share flow exists in `ParticipantList` (copy page URL) but **no “copy join link with password”** (#pwd=), so sharing is manual.
+- Room header has "Copy join link" (URL with #pwd=); ParticipantList shows "Re-enter password to share link" when key missing.
 
 ---
 
@@ -98,7 +98,7 @@ A **default tool for distributed teams** for refinement and retros: one link, no
 | #   | Action                                                                                           | Category  | Strategic rationale                                                                   | Effort |
 | --- | ------------------------------------------------------------------------------------------------ | --------- | ------------------------------------------------------------------------------------- | ------ |
 | 1   | ~~**Show join-by-code errors** (ScrumAlert or inline on home when join fails)~~                      | Feature   | Removes silent failure and builds trust; no point in more features if join is broken. | Low ✅ |
-| 2   | **“Copy join link” with #pwd=** in room (and handle missing key)                                 | Feature   | Unlocks viral sharing and reduces “how do I invite?” friction.                        | Low    |
+| 2   | ~~**“Copy join link” with #pwd=** in room (and handle missing key)~~                                 | Feature   | Unlocks viral sharing and reduces “how do I invite?” friction.                        | Low ✅ |
 | 3   | **Room not found / 404** handling (redirect or dedicated view)                                   | Feature   | Completes error story; professional and clear.                                        | Low    |
 | 4   | **Export retro** (markdown or CSV: lanes, items, votes, comments)                                | Feature   | Makes retros actionable and shareable; increases perceived value.                     | Med    |
 | 5   | **Export refinement** (story list + status + point summary)                                      | Feature   | Same as above for refinement; consistent “takeaway” story.                            | Med    |
