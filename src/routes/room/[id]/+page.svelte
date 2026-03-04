@@ -61,7 +61,7 @@
 	async function loadRoom() {
 		// Get the room details
 		try {
-			if (!room) {
+			if (!room && roomId) {
 				room = await getRoomDetails(roomId);
 				console.log('Initializing room to', room);
 
@@ -77,14 +77,14 @@
 	}
 
 	async function joinRoomWithPwd(password: string) {
-		userParticipant = await joinRoomAndGetParticipantDetails(roomId, password);
+		if (roomId) userParticipant = await joinRoomAndGetParticipantDetails(roomId, password);
 	}
 
 	onMount(async () => {
 		validateLogin();
 
 		try {
-			userParticipant = await getUserParticipant(roomId);
+			if (roomId) userParticipant = await getUserParticipant(roomId);
 		} catch (err) {
 			console.warn('User not in this room', err);
 		}

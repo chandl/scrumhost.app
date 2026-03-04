@@ -73,7 +73,7 @@
 	<CardHeader class="pb-2">
 		<CardTitle class="flex items-center justify-between text-lg">
 			<div class="flex items-center">
-				<Icon class="mr-2 h-5 w-5"><svelte:component this={icon} /></Icon>
+				<Icon class="mr-2 h-5 w-5"><icon></icon></Icon>
 				{title}
 			</div>
 

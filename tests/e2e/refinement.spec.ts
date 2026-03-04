@@ -16,10 +16,7 @@ async function goToHome(page: Page) {
 	await expect(page.getByRole('button', { name: 'Create Room' })).toBeVisible({ timeout: 15_000 });
 }
 
-async function createRefinementRoom(page: {
-	getByRole: (role: string, opts?: { name: string }) => any;
-	getByTestId: (id: string) => any;
-}) {
+async function createRefinementRoom(page: Page) {
 	await page.getByRole('button', { name: 'Create Room' }).click();
 	await page.getByRole('radio', { name: 'Backlog Refinement (Planning Poker)' }).click();
 	await page.getByRole('button', { name: 'Next' }).click();

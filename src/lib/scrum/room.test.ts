@@ -40,8 +40,7 @@ describe('room', () => {
 			const result = await getParticipantInRoom('user-1', 'room-1');
 			expect(result).toBeDefined();
 			expect(result?.id).toBe(created.id);
-			expect(result?.user).toBe('user-1');
-			expect(result?.room).toBe('room-1');
+			expect(result?.userId).toBe('user-1');
 			expect(result?.name).toBe('Alice');
 		});
 
@@ -61,7 +60,7 @@ describe('room', () => {
 			});
 			const result = await getUserParticipant('room-1');
 			expect(result).toBeDefined();
-			expect(result?.user).toBe('user-1');
+			expect(result?.userId).toBe('user-1');
 			expect(result?.name).toBe('Alice');
 		});
 

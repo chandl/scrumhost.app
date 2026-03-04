@@ -25,9 +25,14 @@ export async function getParticipantInRoom(
 	roomId: string
 ): Promise<Participant | undefined> {
 	try {
-		return await pb
+		const record = await pb
 			.collection('participants')
 			.getFirstListItem(`user = "${userId}" && room = "${roomId}"`);
+		return {
+			id: record.id,
+			userId: record.user,
+			name: record.name
+		};
 	} catch (err) {
 		console.warn('Could not find participant in room', userId, roomId, err);
 		return undefined;

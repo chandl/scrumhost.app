@@ -122,13 +122,15 @@
 	};
 
 	onMount(async () => {
-		retroMetadata = await getRetroMetadata(parentRoomId);
+		if (parentRoomId) retroMetadata = await getRetroMetadata(parentRoomId);
 		console.log('Initialized room with retro metadata', retroMetadata);
 
-		subscribeToRetroMetadata(retroMetadata.id, (updatedMetadata) => {
-			console.log('Received metadata update', updatedMetadata);
-			retroMetadata = updatedMetadata;
-		});
+		if (retroMetadata) {
+			subscribeToRetroMetadata(retroMetadata.id, (updatedMetadata) => {
+				console.log('Received metadata update', updatedMetadata);
+				retroMetadata = updatedMetadata;
+			});
+		}
 	});
 </script>
 

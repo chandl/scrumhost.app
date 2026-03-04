@@ -9,14 +9,9 @@
 		"skipLibCheck": true,
 		"sourceMap": true,
 		"strict": true,
-		"moduleResolution": "bundler",
-		"baseUrl": ".",
-		"paths": {
-			"$lib": ["./src/lib"],
-			"$lib/*": ["./src/lib/*"]
-		}
+		"moduleResolution": "bundler"
 	}
-	// Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
+	// Path aliases: use kit.files.lib and kit.alias in svelte.config.js
 	// except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
 	//
 	// If you want to overwrite includes/excludes, make sure to copy over the relevant includes/excludes

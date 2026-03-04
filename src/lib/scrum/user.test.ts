@@ -19,7 +19,7 @@ import { login, logout, signup, validateLogin, generatePassword } from './user';
 describe('user', () => {
 	beforeEach(() => {
 		resetPocketBaseMock();
-		goto.mockClear();
+		vi.mocked(goto).mockClear();
 	});
 
 	describe('signup', () => {
@@ -70,7 +70,7 @@ describe('user', () => {
 
 		it('redirects to join with target when no user', async () => {
 			mockPb.authStore.model = null;
-			vi.mocked(mockPb.collection('users').authRefresh).mockResolvedValueOnce(null as never);
+			vi.mocked(mockPb.collection('users').authRefresh!).mockResolvedValueOnce(null as never);
 			Object.defineProperty(window, 'location', {
 				value: { href: 'http://localhost/home' },
 				writable: true

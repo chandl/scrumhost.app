@@ -3,23 +3,29 @@
 	import { type Events, type Props, buttonVariants } from './index.js';
 	import { cn } from '$lib/utils.js';
 
-	type $$Props = Props;
 	type $$Events = Events;
 
-	let className: $$Props['class'] = undefined;
-	export let variant: $$Props['variant'] = 'default';
-	export let size: $$Props['size'] = 'default';
-	export let builders: $$Props['builders'] = [];
-	export { className as class };
+	let {
+		variant = 'default',
+		size = 'default',
+		class: className,
+		builders = [],
+		...restProps
+	}: Props = $props();
+
+	// buttonVariants + cn produce a string; Bits UI Root expects ClassNameValue
+	// @ts-expect-error - ClassValue from clsx not assignable to ClassNameValue from bits-ui
+	const buttonClass = $derived(cn(buttonVariants({ variant, size, className })) as string);
 </script>
 
 <ButtonPrimitive.Root
 	{builders}
-	class={cn(buttonVariants({ variant, size, className }))}
+	class={buttonClass}
 	type="button"
-	{...$$restProps}
+	{...(restProps as Record<string, unknown>)}
 	on:click
 	on:keydown
 >
+	<!-- Svelte 5: <slot /> deprecated in favor of {@render children()} but bits-ui Root expects slot -->
 	<slot />
 </ButtonPrimitive.Root>

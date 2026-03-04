@@ -21,15 +21,51 @@ export const COLLECTIONS = [
 	'retro_comments'
 ] as const;
 
-type Record = Record<string, unknown>;
+/** Record from PocketBase. create() accepts data without id (mock generates it); create() return and getOne() include id. */
+export type PbRecord = Record<string, unknown>;
 
-const collectionsStore = new Map<string, Map<string, Record>>();
+/** Return type of create() - always includes id. */
+export type PbCreateResult = PbRecord & { id: string };
+
+/** Typed collection interface so tests get proper inference for create/getOne etc. */
+export interface CollectionMock {
+	getOne: (id: string, options?: { expand?: string; fields?: string }) => Promise<PbRecord>;
+	getFirstListItem: (
+		filter: string,
+		options?: { expand?: string; fields?: string }
+	) => Promise<PbRecord>;
+	getList: (
+		page: number,
+		perPage: number,
+		options?: { filter?: string; expand?: string; sort?: string }
+	) => Promise<{ items: PbRecord[]; totalItems: number; page: number; perPage: number }>;
+	create: (
+		data: Record<string, unknown>,
+		options?: { headers?: Record<string, string> }
+	) => Promise<PbCreateResult>;
+	update: (
+		id: string,
+		data: PbRecord,
+		options?: { headers?: Record<string, string> }
+	) => Promise<PbRecord>;
+	delete: (id: string) => Promise<void>;
+	subscribe: (
+		recordId: string,
+		callback: (e: { action: string; record: PbRecord }) => void,
+		options?: { expand?: string; fields?: string }
+	) => void;
+	unsubscribe: () => Promise<void>;
+	authWithPassword?: (username: string, password: string) => Promise<PbRecord | null>;
+	authRefresh?: () => Promise<PbRecord | null>;
+}
+
+const collectionsStore = new Map<string, Map<string, PbRecord>>();
 const subscriptionsStore = new Map<
 	string,
-	Array<{ recordId: string; callback: (e: { action: string; record: Record }) => void }>
+	Array<{ recordId: string; callback: (e: { action: string; record: PbRecord }) => void }>
 >();
 
-function getStore(name: string): Map<string, Record> {
+function getStore(name: string): Map<string, PbRecord> {
 	let store = collectionsStore.get(name);
 	if (!store) {
 		store = new Map();
@@ -53,7 +89,7 @@ function parseFilter(filter: string): Map<string, string> {
 	return out;
 }
 
-function recordMatchesFilter(record: Record, filter: string): boolean {
+function recordMatchesFilter(record: PbRecord, filter: string): boolean {
 	const pairs = parseFilter(filter);
 	for (const [key, value] of pairs) {
 		if (record[key] !== value) return false;
@@ -61,7 +97,7 @@ function recordMatchesFilter(record: Record, filter: string): boolean {
 	return true;
 }
 
-function applyUpdate(record: Record, data: Record): void {
+function applyUpdate(record: PbRecord, data: PbRecord): void {
 	for (const [key, value] of Object.entries(data)) {
 		if (key.endsWith('+')) {
 			const field = key.slice(0, -1);
@@ -120,16 +156,18 @@ function createCollectionMock(name: string) {
 		}
 	);
 
-	const create = vi.fn(async (data: Record, _options?: { headers?: Record<string, string> }) => {
-		const id = generateId();
-		const now = new Date().toISOString();
-		const record: Record = { id, ...data, created: now, updated: now };
-		store.set(id, record);
-		return { ...record };
-	});
+	const create = vi.fn(
+		async (data: Record<string, unknown>, _options?: { headers?: Record<string, string> }) => {
+			const id = generateId();
+			const now = new Date().toISOString();
+			const record: PbRecord = { ...data, id, created: now, updated: now };
+			store.set(id, record);
+			return { ...record } as PbCreateResult;
+		}
+	);
 
 	const update = vi.fn(
-		async (id: string, data: Record, _options?: { headers?: Record<string, string> }) => {
+		async (id: string, data: PbRecord, _options?: { headers?: Record<string, string> }) => {
 			const record = store.get(id);
 			if (!record) {
 				const err = new Error('Record not found') as Error & { status?: number };
@@ -156,7 +194,7 @@ function createCollectionMock(name: string) {
 	const subscribe = vi.fn(
 		(
 			recordId: string,
-			callback: (e: { action: string; record: Record }) => void,
+			callback: (e: { action: string; record: PbRecord }) => void,
 			_options?: { expand?: string; fields?: string }
 		) => {
 			let subs = subscriptionsStore.get(name);
@@ -172,7 +210,7 @@ function createCollectionMock(name: string) {
 		subscriptionsStore.set(name, []);
 	});
 
-	const coll: Record<string, unknown> = {
+	const coll: CollectionMock = {
 		getOne,
 		getFirstListItem,
 		getList,
@@ -204,10 +242,10 @@ function createCollectionMock(name: string) {
 	return coll;
 }
 
-const collectionCache = new Map<string, ReturnType<typeof createCollectionMock>>();
+const collectionCache = new Map<string, CollectionMock>();
 
 const authStore = {
-	model: null as Record | null,
+	model: null as PbRecord | null,
 	_onChangeCbs: [] as Array<() => void>,
 	onChange(cb: () => void) {
 		this._onChangeCbs.push(cb);
@@ -218,7 +256,7 @@ const authStore = {
 	}
 };
 
-function collectionImpl(name: string) {
+function collectionImpl(name: string): CollectionMock {
 	let coll = collectionCache.get(name);
 	if (!coll) {
 		coll = createCollectionMock(name);
@@ -231,7 +269,7 @@ const collection = vi.fn(collectionImpl);
 
 export const mockPb = {
 	COLLECTIONS,
-	collection,
+	collection: collection as unknown as (name: string) => CollectionMock,
 	authStore
 };
 

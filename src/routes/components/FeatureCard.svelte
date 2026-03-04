@@ -9,7 +9,7 @@
 <Card class="border-none drop-shadow-md dark:shadow-gray-500">
 	<CardContent class="flex flex-col items-center justify-center p-6">
 		<div class="mb-4 text-blue-500 dark:text-blue-600">
-			<Icon class="h-8 w-8"><svelte:component this={icon} /></Icon>
+			<Icon class="h-8 w-8"><icon></icon></Icon>
 		</div>
 		<h3 class="font-medium text-gray-900 dark:text-gray-100">{title}</h3>
 	</CardContent>
