@@ -22,10 +22,10 @@
 	{builders}
 	class={buttonClass}
 	type="button"
-	{...restProps as Record}
+	{...restProps as Record<string, unknown>}
 	on:click
 	on:keydown
 >
-	<!-- Svelte 5: <slot /> deprecated in favor of {@render children()} but bits-ui Root expects slot -->
+	<!-- svelte-ignore slot_element_deprecated -- bits-ui Root expects slot; migrate when bits-ui supports snippets -->
 	<slot />
 </ButtonPrimitive.Root>

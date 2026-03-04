@@ -56,10 +56,13 @@
 
 	let roomCreationStepState = $state('SELECT_ROOM_TYPE') as CreationStep;
 	let isOpen = $state(false);
+	let userRequestedClose = $state(false);
 	let roomType = $state() as RoomType | undefined;
 	let effectiveStep = $derived((initialStep ?? roomCreationStepState) as CreationStep);
 	let effectiveRoomType = $derived(initialRoomType ?? roomType);
-	let effectiveIsOpen = $derived(initialStep != null || isOpen);
+	let effectiveIsOpen = $derived(
+		(initialStep != null && !userRequestedClose) || (initialStep == null && isOpen)
+	);
 	let roomName = $state('');
 	let pointValues = $state(REFINEMENT_POINT_VALUES[0]) as PointValueSelection;
 
@@ -101,13 +104,22 @@
 	open={effectiveIsOpen}
 	onOpenChange={(open) => {
 		isOpen = open;
+		if (open) userRequestedClose = false;
+		else userRequestedClose = true;
 		roomType = undefined;
 		roomCreationStepState = 'SELECT_ROOM_TYPE';
 		roomName = '';
 	}}
 >
 	<DialogTrigger asChild>
-		<Button class="w-full py-6 text-lg" on:click={() => (isOpen = true)}>Create Room</Button>
+		<Button
+			class="w-full py-6 text-lg"
+			on:click={() => {
+				isOpen = true;
+				userRequestedClose = false;
+			}}
+			>Create Room</Button
+		>
 	</DialogTrigger>
 	<DialogContent class="sm:max-w-[425px]">
 		<DialogHeader>

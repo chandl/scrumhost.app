@@ -41,6 +41,9 @@ export async function getParticipantInRoom(
 
 export async function getUserParticipant(roomId: string): Promise<Participant | undefined> {
 	const userId = pb.authStore.model?.id;
+	if (userId == null) {
+		return undefined;
+	}
 	const existingUser = await getParticipantInRoom(userId, roomId);
 	if (existingUser) {
 		return existingUser;

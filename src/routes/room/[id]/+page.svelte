@@ -81,7 +81,7 @@
 	}
 
 	onMount(async () => {
-		validateLogin();
+		await validateLogin();
 
 		try {
 			if (roomId) userParticipant = await getUserParticipant(roomId);

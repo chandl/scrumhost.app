@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import { Icon, Merge, SortDesc } from 'lucide-svelte';
+	import { Merge, SortDesc } from 'lucide-svelte';
+	import type { Icon } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import type { RetroItem } from '$lib/scrum/types/retro_types';
@@ -67,13 +68,15 @@
 		onMerge(selectedItems);
 		selectedItems = [];
 	};
+
+	const IconComponent = $derived(icon);
 </script>
 
 <Card class="flex flex-col" data-testid={testId}>
 	<CardHeader class="pb-2">
 		<CardTitle class="flex items-center justify-between text-lg">
 			<div class="flex items-center">
-				<Icon class="mr-2 h-5 w-5"><icon></icon></Icon>
+				<IconComponent class="mr-2 h-5 w-5" />
 				{title}
 			</div>
 
