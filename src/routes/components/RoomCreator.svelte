@@ -117,8 +117,7 @@
 			on:click={() => {
 				isOpen = true;
 				userRequestedClose = false;
-			}}
-			>Create Room</Button
+			}}>Create Room</Button
 		>
 	</DialogTrigger>
 	<DialogContent class="sm:max-w-[425px]">

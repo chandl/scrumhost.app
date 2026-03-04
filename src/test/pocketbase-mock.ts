@@ -142,11 +142,14 @@ function createCollectionMock(name: string) {
 		async (
 			page: number,
 			perPage: number,
-			_options?: { filter?: string; expand?: string; sort?: string }
+			options?: { filter?: string; expand?: string; sort?: string }
 		) => {
-			const items = Array.from(store.values()).map((r) => ({ ...r }));
-			const start = (page - 1) * perPage;
+			let items = Array.from(store.values()).map((r) => ({ ...r }));
+			if (options?.filter) {
+				items = items.filter((r) => recordMatchesFilter(r, options.filter!));
+			}
 			const totalItems = items.length;
+			const start = (page - 1) * perPage;
 			return {
 				items: items.slice(start, start + perPage),
 				totalItems,

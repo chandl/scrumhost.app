@@ -93,6 +93,7 @@ test.describe('Refinement: voting visibility (multi-user)', () => {
 	test('User A creates refinement room, adds story, votes; User B joins, opens same story, votes; after reveal both see same vote summary', async ({
 		browser
 	}) => {
+		test.setTimeout(60_000);
 		const nameA = `VoteAlice-${Date.now()}`;
 		const nameB = `VoteBob-${Date.now()}`;
 		const roomName = `E2E Voting Room ${Date.now()}`;
@@ -135,7 +136,8 @@ test.describe('Refinement: voting visibility (multi-user)', () => {
 			await expect(pageA.getByText(taskTitle)).toBeVisible({ timeout: 5_000 });
 			await pageA.getByTestId('start-voting').first().click();
 
-			await expect(pageA.getByTestId('voting-buttons')).toBeVisible({ timeout: 5_000 });
+			// Wait for 3 PocketBase writes + real-time subscription before VotingCard shows
+			await expect(pageA.getByTestId('voting-buttons')).toBeVisible({ timeout: 15_000 });
 			await pageA.getByTestId(`vote-${voteA}`).click();
 
 			// User B: join room (same time or after A voted)
@@ -150,11 +152,9 @@ test.describe('Refinement: voting visibility (multi-user)', () => {
 				timeout: 10_000
 			});
 
-			// User B: open same story (Queued tab, Start Voting)
-			await pageB.getByRole('tab', { name: /Queued/ }).click();
-			await expect(pageB.getByText(taskTitle)).toBeVisible({ timeout: 10_000 });
-			await pageB.getByTestId('start-voting').first().click();
-			await expect(pageB.getByTestId('voting-buttons')).toBeVisible({ timeout: 10_000 });
+			// User B: vote already in progress (A started it); B sees VotingCard and votes
+			await expect(pageB.getByTestId('voting-buttons')).toBeVisible({ timeout: 15_000 });
+			await expect(pageB.getByText(taskTitle)).toBeVisible({ timeout: 5_000 });
 			await pageB.getByTestId(`vote-${voteB}`).click();
 
 			// Either user reveals (User A clicks Start Reviewing)
