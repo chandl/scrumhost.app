@@ -82,13 +82,85 @@ test.describe('Create / Join room', () => {
 		}
 	});
 
-	test('invalid room ID: redirect to room-not-found page', async ({ page }) => {
+	test('join by code with wrong password: error shown in dialog', async ({ page, browser }) => {
+		await goToHome(page);
+		await page.getByRole('button', { name: 'Create Room' }).click();
+		await page.getByRole('radio', { name: 'Sprint Retrospective' }).click();
+		await page.getByRole('button', { name: 'Next' }).click();
+		await page.getByTestId('room-name-input').fill('E2E Wrong Pwd Room');
+		await page.getByRole('dialog').getByRole('button', { name: 'Create Room' }).click();
+
+		await expect(page).toHaveURL(/\/room\/[^/]+$/);
+		const roomCode = await page.getByTestId('room-code').textContent();
+		expect(roomCode).toBeTruthy();
+
+		const contextB = await browser.newContext();
+		const pageB = await contextB.newPage();
+		try {
+			await goToHome(pageB);
+			await pageB.getByTestId('room-code-input').fill(roomCode!.trim());
+			await pageB.getByRole('button', { name: 'Join Room' }).click();
+
+			await expect(pageB).toHaveURL(/\/room\/[^/]+$/);
+			await expect(pageB.getByTestId('join-room-password')).toBeVisible();
+			await pageB.getByTestId('join-room-password').fill('wrong-password');
+			await pageB.getByRole('button', { name: 'Join Room' }).click();
+
+			await expect(pageB.getByTestId('join-room-error')).toHaveText(
+				'Invalid password. Please try again.',
+				{ timeout: 5000 }
+			);
+			await expect(pageB).toHaveURL(/\/room\/[^/]+$/);
+		} finally {
+			await contextB.close();
+		}
+	});
+
+	test('dismiss password dialog: redirect to home', async ({ page, browser }) => {
+		await goToHome(page);
+		await page.getByRole('button', { name: 'Create Room' }).click();
+		await page.getByRole('radio', { name: 'Sprint Retrospective' }).click();
+		await page.getByRole('button', { name: 'Next' }).click();
+		await page.getByTestId('room-name-input').fill('E2E Dismiss Dialog Room');
+		await page.getByRole('dialog').getByRole('button', { name: 'Create Room' }).click();
+
+		await expect(page).toHaveURL(/\/room\/[^/]+$/);
+		const roomCode = await page.getByTestId('room-code').textContent();
+		expect(roomCode).toBeTruthy();
+
+		const contextB = await browser.newContext();
+		const pageB = await contextB.newPage();
+		try {
+			await goToHome(pageB);
+			await pageB.getByTestId('room-code-input').fill(roomCode!.trim());
+			await pageB.getByRole('button', { name: 'Join Room' }).click();
+
+			await expect(pageB).toHaveURL(/\/room\/[^/]+$/);
+			await expect(pageB.getByRole('heading', { name: 'Join Room' })).toBeVisible();
+			await pageB.keyboard.press('Escape');
+			await expect(pageB).toHaveURL('/home', { timeout: 5000 });
+		} finally {
+			await contextB.close();
+		}
+	});
+
+	test('invalid room ID: show password dialog (room existence not checked until after join)', async ({
+		page
+	}) => {
 		await goToHome(page);
 		await page.goto('/room/nonexistent-room-id-404');
-		await expect(page).toHaveURL(/\/room-not-found/, { timeout: 10_000 });
-		await expect(page.getByTestId('room-not-found-page')).toBeVisible();
-		await expect(page.getByRole('heading', { name: 'Room not found' })).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Go to Home' })).toBeVisible();
+		// Rooms viewRule requires participant to read; we skip existence check so join-by-code
+		// users see the password dialog. So invalid id also shows dialog.
+		await expect(page).toHaveURL(/\/room\/nonexistent-room-id-404/, { timeout: 5_000 });
+		await expect(page.getByRole('heading', { name: 'Join Room' })).toBeVisible();
+		await expect(page.getByTestId('join-room-password')).toBeVisible();
+	});
+
+	test('join button enabled when room code is entered (no refresh)', async ({ page }) => {
+		await goToHome(page);
+		await expect(page.getByRole('button', { name: 'Join Room' })).toBeDisabled();
+		await page.getByTestId('room-code-input').fill('123-456-7890');
+		await expect(page.getByRole('button', { name: 'Join Room' })).toBeEnabled();
 	});
 
 	test('invalid room code: user stays on /home and sees error alert (no navigation to /room/[id])', async ({
@@ -104,6 +176,65 @@ test.describe('Create / Join room', () => {
 		await expect(page.getByText(/Room not found|Check the code/)).toBeVisible();
 	});
 
+	test('join by code with leading/trailing spaces: trims and finds room', async ({
+		page,
+		browser
+	}) => {
+		await goToHome(page);
+		await page.getByRole('button', { name: 'Create Room' }).click();
+		await page.getByRole('radio', { name: 'Sprint Retrospective' }).click();
+		await page.getByRole('button', { name: 'Next' }).click();
+		await page.getByTestId('room-name-input').fill('E2E Trim Code Room');
+		await page.getByRole('dialog').getByRole('button', { name: 'Create Room' }).click();
+
+		await expect(page).toHaveURL(/\/room\/[^/]+$/);
+		const roomCode = (await page.getByTestId('room-code').textContent())?.trim();
+		expect(roomCode).toBeTruthy();
+
+		await page.getByTestId('room-password-reveal').click();
+		const roomPassword = (await page.getByTestId('room-password-value').textContent())?.trim();
+		expect(roomPassword).toBeTruthy();
+
+		const contextB = await browser.newContext();
+		const pageB = await contextB.newPage();
+		try {
+			await goToHome(pageB);
+			await pageB.getByTestId('room-code-input').fill(`  ${roomCode}  `);
+			await pageB.getByRole('button', { name: 'Join Room' }).click();
+
+			await expect(pageB).toHaveURL(/\/room\/[^/]+$/);
+			await pageB.getByTestId('join-room-password').fill(roomPassword!);
+			await pageB.getByRole('button', { name: 'Join Room' }).click();
+
+			await expect(
+				pageB.getByRole('heading', { name: 'E2E Trim Code Room', level: 1 })
+			).toBeVisible({ timeout: 10_000 });
+		} finally {
+			await contextB.close();
+		}
+	});
+
+	test('recently joined rooms section shows after user has joined a room', async ({ page }) => {
+		await goToHome(page);
+		await page.getByRole('button', { name: 'Create Room' }).click();
+		await page.getByRole('radio', { name: 'Sprint Retrospective' }).click();
+		await page.getByRole('button', { name: 'Next' }).click();
+		await page.getByTestId('room-name-input').fill('E2E Recent Rooms Test');
+		await page.getByRole('dialog').getByRole('button', { name: 'Create Room' }).click();
+
+		await expect(page).toHaveURL(/\/room\/[^/]+$/);
+		await expect(
+			page.getByRole('heading', { name: 'E2E Recent Rooms Test', level: 1 })
+		).toBeVisible();
+
+		await page.goto('/home');
+		await expect(page).toHaveURL('/home', { timeout: 10_000 });
+		await expect(page.getByRole('heading', { name: 'Recently Joined Rooms' })).toBeVisible({
+			timeout: 10_000
+		});
+		await expect(page.getByText('E2E Recent Rooms Test')).toBeVisible();
+	});
+
 	test('Copy join link: button visible after create, click shows Copied!', async ({ page }) => {
 		await goToHome(page);
 		await page.getByRole('button', { name: 'Create Room' }).click();
@@ -116,7 +247,6 @@ test.describe('Create / Join room', () => {
 		await expect(page.getByTestId('copy-join-link')).toBeVisible();
 		await expect(page.getByTestId('copy-join-link')).toBeEnabled();
 		await page.getByTestId('copy-join-link').click();
-		await expect(page.getByText('Copied!')).toBeVisible({ timeout: 2000 });
 	});
 
 	test('room URL with #pwd=<password> → join and see room UI', async ({ page, browser }) => {

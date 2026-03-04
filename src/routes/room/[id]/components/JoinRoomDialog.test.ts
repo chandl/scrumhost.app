@@ -71,4 +71,13 @@ describe('JoinRoomDialog', () => {
 		expect(handleJoinRoom).toHaveBeenCalledTimes(1);
 		expect(handleJoinRoom).toHaveBeenCalledWith('mypass');
 	});
+
+	it('displays error message when error prop is set', () => {
+		render(JoinRoomDialog, {
+			props: { handleJoinRoom, error: 'Invalid password. Please try again.' }
+		});
+
+		const errorEl = screen.getByTestId('join-room-error');
+		expect(errorEl.textContent).toContain('Invalid password. Please try again.');
+	});
 });

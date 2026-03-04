@@ -57,6 +57,7 @@
 	let loadingError: string = $state('');
 
 	let requirePassword = $state(false);
+	let joinPasswordError = $state<string | null>(null);
 
 	async function loadRoom() {
 		// Get the room details
@@ -70,8 +71,8 @@
 					room = roomUpdate;
 				});
 			}
-		} catch (err) {
-			await goto(`/room-not-found?id=${encodeURIComponent(roomId)}`);
+		} catch {
+			await goto(`/room-not-found?id=${encodeURIComponent(roomId ?? '')}`);
 			return;
 		}
 	}
@@ -83,14 +84,8 @@
 	onMount(async () => {
 		await validateLogin();
 
-		// If room doesn't exist, redirect to room-not-found immediately
-		try {
-			if (roomId) await getRoomDetails(roomId);
-		} catch (err) {
-			await goto(`/room-not-found?id=${encodeURIComponent(roomId)}`);
-			return;
-		}
-
+		// Don't call getRoomDetails here: rooms viewRule only allows read if user is already
+		// a participant, so it would 404 for users who just joined by code and need to enter password.
 		try {
 			if (roomId) userParticipant = await getUserParticipant(roomId);
 		} catch (err) {
@@ -98,7 +93,6 @@
 		}
 		if (!userParticipant && preSetPwd) {
 			console.log('Try joining room with password from URL hash', preSetPwd);
-			// Attempt to join the room. Will fail if already in it, but that's fine
 			await joinRoomWithPwd(preSetPwd);
 		}
 
@@ -116,11 +110,21 @@
 	});
 
 	async function rejoinWithPwd(password: string) {
-		await joinRoomWithPwd(password);
-		if (userParticipant) {
-			requirePassword = false;
-			await loadRoom();
+		joinPasswordError = null;
+		try {
+			await joinRoomWithPwd(password);
+			if (userParticipant) {
+				requirePassword = false;
+				await loadRoom();
+			}
+		} catch {
+			joinPasswordError = 'Invalid password. Please try again.';
 		}
+	}
+
+	function handlePasswordDialogDismiss() {
+		joinPasswordError = null;
+		goto('/home');
 	}
 
 	let showRoomPassword = $state(false);
@@ -159,7 +163,11 @@
 		{:else if loadingError !== ''}
 			<ScrumAlert title="Error Loading Room" body={loadingError} duration={-1} onClose={() => {}} />
 		{:else if requirePassword}
-			<JoinRoomDialog handleJoinRoom={(password) => rejoinWithPwd(password)} />
+			<JoinRoomDialog
+				handleJoinRoom={(password) => rejoinWithPwd(password)}
+				error={joinPasswordError}
+				onDismiss={handlePasswordDialogDismiss}
+			/>
 		{:else}
 			<div class="items-center">
 				<h1 class="text-4xl font-bold">{room?.room_name}</h1>
@@ -203,7 +211,9 @@
 							disabled={!roomKey}
 							size="sm"
 							variant="outline"
-							title={roomKey ? 'Copy join link (includes password)' : 'Re-enter password to share link'}
+							title={roomKey
+								? 'Copy join link (includes password)'
+								: 'Re-enter password to share link'}
 						>
 							<Copy class="mr-1 h-4 w-4" />
 							{joinLinkCopied ? 'Copied!' : 'Copy join link'}

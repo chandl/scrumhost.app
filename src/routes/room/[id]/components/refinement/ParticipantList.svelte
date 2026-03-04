@@ -84,7 +84,10 @@
 					<p class="mt-1 text-sm text-green-600">Link copied to clipboard!</p>
 				{/if}
 			{:else}
-				<p class="mt-1 text-sm text-amber-600 dark:text-amber-400" data-testid="share-link-no-password">
+				<p
+					class="mt-1 text-sm text-amber-600 dark:text-amber-400"
+					data-testid="share-link-no-password"
+				>
 					Re-enter password to share link.
 				</p>
 			{/if}

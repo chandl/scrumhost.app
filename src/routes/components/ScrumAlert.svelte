@@ -23,9 +23,13 @@
 </script>
 
 {#if visible}
-	<div class="fixed bottom-4">
-		<Root variant="destructive">
-			<CircleAlert class="h-4 w-4" />
+	<div
+		class="fixed bottom-4 left-1/2 z-50 w-full max-w-md -translate-x-1/2 px-4"
+		role="alert"
+		aria-live="assertive"
+	>
+		<Root variant="destructive" class="bg-background shadow-lg dark:bg-background">
+			<CircleAlert class="h-4 w-4 shrink-0" />
 			<Title>{title}</Title>
 			<Description>
 				{body}

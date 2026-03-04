@@ -97,13 +97,13 @@ A **default tool for distributed teams** for refinement and retros: one link, no
 
 | #   | Action                                                                                           | Category  | Strategic rationale                                                                   | Effort |
 | --- | ------------------------------------------------------------------------------------------------ | --------- | ------------------------------------------------------------------------------------- | ------ |
-| 1   | ~~**Show join-by-code errors** (ScrumAlert or inline on home when join fails)~~                      | Feature   | Removes silent failure and builds trust; no point in more features if join is broken. | Low ✅ |
-| 2   | ~~**“Copy join link” with #pwd=** in room (and handle missing key)~~                                 | Feature   | Unlocks viral sharing and reduces “how do I invite?” friction.                        | Low ✅ |
-| 3   | ~~**Room not found / 404** handling (redirect or dedicated view)~~                                   | Feature   | Completes error story; professional and clear.                                        | Low ✅ |
+| 1   | ~~**Show join-by-code errors** (ScrumAlert or inline on home when join fails)~~                  | Feature   | Removes silent failure and builds trust; no point in more features if join is broken. | Low ✅ |
+| 2   | ~~**“Copy join link” with #pwd=** in room (and handle missing key)~~                             | Feature   | Unlocks viral sharing and reduces “how do I invite?” friction.                        | Low ✅ |
+| 3   | ~~**Room not found / 404** handling (redirect or dedicated view)~~                               | Feature   | Completes error story; professional and clear.                                        | Low ✅ |
 | 4   | **Export retro** (markdown or CSV: lanes, items, votes, comments)                                | Feature   | Makes retros actionable and shareable; increases perceived value.                     | Med    |
 | 5   | **Export refinement** (story list + status + point summary)                                      | Feature   | Same as above for refinement; consistent “takeaway” story.                            | Med    |
 | 6   | **Host badge + facilitator-only actions** (reveal, skip, clear votes; confirm where destructive) | Feature   | Clarifies control and prevents chaos in multi-participant rooms.                      | Med    |
-| 7   | ~~**Landing copy alignment** (Sprint Planning → “Coming soon” or remove)~~                           | Direction | Keeps promise and positioning honest.                                                 | Low ✅ |
+| 7   | ~~**Landing copy alignment** (Sprint Planning → “Coming soon” or remove)~~                       | Direction | Keeps promise and positioning honest.                                                 | Low ✅ |
 | 8   | **Custom / configurable point scales** for refinement                                            | Feature   | Different teams estimate differently; schema supports it.                             | Med    |
 | 9   | **Sprint planning mode** (refinement variant with commitment/capacity view)                      | Feature   | Delivers on landing and fills the ceremony gap.                                       | High   |
 | 10  | **Reopen session from home** (join by code + password when not in room; “recent” with re-auth)   | Feature   | Reduces lost-room anxiety and encourages reuse.                                       | Med    |

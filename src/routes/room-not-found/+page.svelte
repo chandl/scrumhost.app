@@ -4,7 +4,6 @@
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Card,
-		CardContent,
 		CardDescription,
 		CardFooter,
 		CardHeader,
@@ -19,7 +18,10 @@
 	<title>Room not found - scrumhost.app</title>
 </svelte:head>
 
-<div class="flex min-h-screen grow flex-col items-center justify-center p-4" data-testid="room-not-found-page">
+<div
+	class="flex min-h-screen grow flex-col items-center justify-center p-4"
+	data-testid="room-not-found-page"
+>
 	<Card class="w-full max-w-md">
 		<CardHeader>
 			<CardTitle class="flex items-center gap-2 text-xl">
@@ -28,11 +30,11 @@
 			</CardTitle>
 			<CardDescription>
 				{#if invalidId}
-					The room you're looking for doesn't exist or you don't have access. Check the room code and try
-					again from home.
+					The room you're looking for doesn't exist or you don't have access. Check the room code
+					and try again from home.
 				{:else}
-					The room you're looking for doesn't exist or you don't have access. Join with a room code from
-					home or create a new room.
+					The room you're looking for doesn't exist or you don't have access. Join with a room code
+					from home or create a new room.
 				{/if}
 			</CardDescription>
 		</CardHeader>
