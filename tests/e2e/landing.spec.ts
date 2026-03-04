@@ -1,6 +1,15 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('Landing → Join → Home', () => {
+	test('landing shows product positioning (typewriter includes Backlog Refinement or Coming soon)', async ({
+		page
+	}) => {
+		await page.goto('/');
+		await expect(page.getByText(/Backlog Refinement|Coming soon/, { exact: false })).toBeVisible({
+			timeout: 15_000
+		});
+	});
+
 	test('open /, click Join/Host → /join; enter name, submit → /home with Welcome, <name>', async ({
 		page
 	}) => {
