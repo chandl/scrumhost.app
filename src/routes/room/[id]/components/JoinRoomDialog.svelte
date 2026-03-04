@@ -12,6 +12,7 @@
 
 	let isOpen = $state(true);
 	let roomPassword = $state('');
+	let isSubmitting = $state(false);
 
 	let {
 		handleJoinRoom,
@@ -39,11 +40,20 @@
 		</DialogHeader>
 		<div class="grid gap-2 py-2">
 			<form
+				id="join-room-form"
 				class="flex flex-col gap-2"
-				onsubmit={(e) => {
+				onsubmit={async (e) => {
 					e.preventDefault();
-					handleJoinRoom(roomPassword);
-					isOpen = false;
+					if (isSubmitting) return;
+					isSubmitting = true;
+					try {
+						await handleJoinRoom(roomPassword);
+						// Do not set isOpen = false here. On success the parent unmounts the dialog
+						// (requirePassword = false). On validation failure the parent sets error and we
+						// stay open so the user sees the message.
+					} finally {
+						isSubmitting = false;
+					}
 				}}
 			>
 				<Input
@@ -62,7 +72,7 @@
 			</form>
 		</div>
 		<DialogFooter>
-			<Button on:click={() => handleJoinRoom(roomPassword)}>Join Room</Button>
+			<Button type="submit" form="join-room-form" disabled={isSubmitting}>Join Room</Button>
 		</DialogFooter>
 	</DialogContent>
 </Dialog>
