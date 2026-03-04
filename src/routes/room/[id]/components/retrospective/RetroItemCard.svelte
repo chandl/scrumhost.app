@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { PUBLIC_ENABLE_BACKLOG_MERGE_TASKS } from '$env/static/public';
+	import { env } from '$env/dynamic/public';
+	const PUBLIC_ENABLE_BACKLOG_MERGE_TASKS = env.PUBLIC_ENABLE_BACKLOG_MERGE_TASKS ?? 'false';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Button } from '$lib/components/ui/button';

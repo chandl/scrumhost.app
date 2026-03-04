@@ -22,7 +22,7 @@
 	{builders}
 	class={buttonClass}
 	type="button"
-	{...restProps as Record}
+	{...restProps as Record<string, unknown>}
 	on:click
 	on:keydown
 >

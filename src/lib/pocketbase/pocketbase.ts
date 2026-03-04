@@ -1,8 +1,8 @@
 import PocketBase from 'pocketbase';
-import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import { env } from '$env/dynamic/public';
 
 export const COLLECTIONS = ['users', 'participants', 'rooms', 'stories', 'story_estimates'];
 
-const pb = new PocketBase(PUBLIC_BACKEND_URL);
+const pb = new PocketBase(env.PUBLIC_BACKEND_URL ?? 'http://localhost:8090');
 
 export default pb;
