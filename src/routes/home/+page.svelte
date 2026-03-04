@@ -18,6 +18,7 @@
 	import { formatTimeAgo } from '$lib/utils';
 	import type { ParticipantRoomDetails, RoomType } from '$lib/scrum/types/room';
 	import RoomCreator from '../components/RoomCreator.svelte';
+	import ScrumAlert from '../components/ScrumAlert.svelte';
 
 	let currentUser: AuthModel;
 	user.subscribe((value) => {
@@ -32,9 +33,14 @@
 	});
 
 	let joinRoomCode: string;
-	function handleJoinRoom() {
-		console.log('handleJoinRoom', joinRoomCode);
-		joinRoomWithCode(joinRoomCode);
+	let joinError = $state<string | null>(null);
+	async function handleJoinRoom() {
+		joinError = null;
+		try {
+			await joinRoomWithCode(joinRoomCode);
+		} catch (err) {
+			joinError = err instanceof Error ? err.message : 'Failed to join room. Try again.';
+		}
 	}
 
 	function truncate(str: string, n: number) {
@@ -58,6 +64,14 @@
 </svelte:head>
 
 <div class="flex min-h-screen grow flex-col items-center justify-center space-y-8 p-4">
+	{#if joinError}
+		<ScrumAlert
+			title="Could not join room"
+			body={joinError}
+			duration={-1}
+			onClose={() => (joinError = null)}
+		/>
+	{/if}
 	<Card class="w-full max-w-md">
 		<CardHeader>
 			<CardTitle class="text-center text-2xl font-bold dark:text-gray-100"

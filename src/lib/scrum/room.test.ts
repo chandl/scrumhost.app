@@ -15,10 +15,14 @@ vi.mock('$lib/utils', async (importOriginal) => {
 	return { ...actual, setRoomKeyCookie: vi.fn() };
 });
 
+vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
+
+import { goto } from '$app/navigation';
 import {
 	getParticipantInRoom,
 	getUserParticipant,
 	getRoomDetails,
+	joinRoomWithCode,
 	joinRoomAndGetParticipantDetails,
 	createRoom
 } from './room';
@@ -28,6 +32,43 @@ describe('room', () => {
 	beforeEach(() => {
 		resetPocketBaseMock();
 		vi.mocked(setRoomKeyCookie).mockClear();
+		vi.mocked(goto).mockClear();
+	});
+
+	describe('joinRoomWithCode', () => {
+		it('navigates to room when code is valid', async () => {
+			const roomsSearch = mockPb.collection('rooms_search');
+			vi.mocked(roomsSearch.getOne).mockResolvedValueOnce({
+				room_id: 'room-123'
+			} as never);
+
+			await joinRoomWithCode('123-456-7890');
+
+			expect(roomsSearch.getOne).toHaveBeenCalledWith('123-456-7890');
+			expect(goto).toHaveBeenCalledWith('/room/room-123');
+		});
+
+		it('throws user-friendly message on 404 (room not found)', async () => {
+			const roomsSearch = mockPb.collection('rooms_search');
+			const err = new Error('Record not found') as Error & { status?: number };
+			err.status = 404;
+			vi.mocked(roomsSearch.getOne).mockRejectedValueOnce(err);
+
+			await expect(joinRoomWithCode('000-000-0000')).rejects.toThrow(
+				'Room not found. Check the code and try again.'
+			);
+			expect(goto).not.toHaveBeenCalled();
+		});
+
+		it('throws generic message on non-404 errors', async () => {
+			const roomsSearch = mockPb.collection('rooms_search');
+			vi.mocked(roomsSearch.getOne).mockRejectedValueOnce(new Error('Network error'));
+
+			await expect(joinRoomWithCode('111-222-3333')).rejects.toThrow(
+				'Something went wrong joining the room. Try again.'
+			);
+			expect(goto).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('getParticipantInRoom', () => {
