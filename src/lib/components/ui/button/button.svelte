@@ -16,16 +16,9 @@
 	// buttonVariants + cn produce a string; Bits UI Root expects ClassNameValue
 	// @ts-expect-error - ClassValue from clsx not assignable to ClassNameValue from bits-ui
 	const buttonClass = $derived(cn(buttonVariants({ variant, size, className })) as string);
+	const rest = restProps as Record<string, unknown>;
 </script>
 
-<ButtonPrimitive.Root
-	{builders}
-	class={buttonClass}
-	type="button"
-	{...restProps as Record<string, unknown>}
-	on:click
-	on:keydown
->
-	<!-- svelte-ignore slot_element_deprecated -- bits-ui Root expects slot; migrate when bits-ui supports snippets -->
+<ButtonPrimitive.Root {builders} class={buttonClass} type="button" {...rest} on:click on:keydown>
 	<slot />
 </ButtonPrimitive.Root>

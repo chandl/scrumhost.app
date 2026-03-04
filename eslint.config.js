@@ -49,6 +49,7 @@ export default ts.config(
 		ignores: [
 			'build/',
 			'.svelte-kit/',
+			'coverage/',
 			'dist/',
 			'pb/pb_data/',
 			'playwright-report/',
