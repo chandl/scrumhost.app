@@ -81,8 +81,7 @@
 	);
 
 	onMount(async () => {
-		if (parentRoomId)
-			refinementMetadata = await getRefinementMetadataDetails(parentRoomId);
+		if (parentRoomId) refinementMetadata = await getRefinementMetadataDetails(parentRoomId);
 		console.log('Initializing refinement metadata to', refinementMetadata);
 		subscribeToRefinementMetadataUpdates(refinementMetadataId, (updatedMetadata) => {
 			console.log('Received updated refinement metadata:', updatedMetadata);

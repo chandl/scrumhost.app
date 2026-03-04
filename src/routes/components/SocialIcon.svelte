@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-at-html-tags -- SVG from trusted icons map */
 	export let name: keyof typeof icons;
 	export let width = '1rem';
 	export let height = '1rem';

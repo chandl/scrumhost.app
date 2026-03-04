@@ -7,7 +7,7 @@
 	let displayText = ''; // Text to display
 	let stringIndex = 0; // Current string index
 	let isDeleting = false; // Whether we are deleting
-	let timer: NodeJS.Timeout; // Reference to the timeout
+	let timer: ReturnType<typeof setTimeout>; // Reference to the timeout
 
 	const type = () => {
 		const currentString = strings[stringIndex];
@@ -40,7 +40,7 @@
 		timer = setTimeout(type, isDeleting ? deletingSpeed : typingSpeed);
 	};
 
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 
 	onMount(() => {
 		type();

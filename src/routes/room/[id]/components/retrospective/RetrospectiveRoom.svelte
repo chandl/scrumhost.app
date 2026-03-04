@@ -19,8 +19,6 @@
 	} from '$lib/scrum/retro';
 	import { onMount } from 'svelte';
 	import { decryptString, encryptString } from '$lib/crypto';
-	import type { StorySummary } from '$lib/scrum/types/refinement';
-
 	let {
 		participants,
 		userParticipant,

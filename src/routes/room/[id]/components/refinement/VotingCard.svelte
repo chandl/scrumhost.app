@@ -71,7 +71,7 @@
 		<div class="mb-8 flex flex-wrap justify-center gap-3" data-testid="voting-buttons">
 			{#each pointValues as value}
 				<Button
-					data-testid={"vote-" + String(value).trim()}
+					data-testid={'vote-' + String(value).trim()}
 					variant={userVoteValue === value ? 'default' : 'outline'}
 					class="h-12 w-40 font-medium"
 					on:click={() => handleVote(value)}

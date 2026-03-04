@@ -23,7 +23,11 @@
 			<div class="mb-2 flex space-x-2">
 				<div class="mt-2 flex space-x-2">
 					{#if currentStatus === 'QUEUED'}
-						<Button data-testid="start-voting" size="sm" on:click={() => onTaskAction(task.id, 'START_VOTING')}>
+						<Button
+							data-testid="start-voting"
+							size="sm"
+							on:click={() => onTaskAction(task.id, 'START_VOTING')}
+						>
 							<PlayCircle class="mr-2 h-4 w-4" />Start Voting
 						</Button>
 						<Button size="sm" variant="outline" on:click={() => onTaskAction(task.id, 'SKIP')}>

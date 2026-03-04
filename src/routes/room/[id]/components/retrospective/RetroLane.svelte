@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import { Icon, Merge, SortAsc, SortDesc } from 'lucide-svelte';
+	import { Icon, Merge, SortDesc } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import type { RetroItem } from '$lib/scrum/types/retro_types';

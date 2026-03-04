@@ -25,7 +25,11 @@
 	</CardHeader>
 	<CardContent class="flex space-x-2">
 		<form class="flex w-full" onsubmit={handleCreateTask}>
-			<Input data-testid="create-task-input" placeholder="Enter task description" bind:value={newTaskDescription} />
+			<Input
+				data-testid="create-task-input"
+				placeholder="Enter task description"
+				bind:value={newTaskDescription}
+			/>
 		</form>
 		<Button data-testid="create-task-submit" on:click={handleCreateTask}>
 			<Plus class="mr-2 h-4 w-4" /> Add Task

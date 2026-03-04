@@ -32,10 +32,8 @@
 	}
 	type CreationStep = 'SELECT_ROOM_TYPE' | 'SET_ROOM_PROPERTIES';
 
-	let {
-		initialStep,
-		initialRoomType
-	}: { initialStep?: CreationStep; initialRoomType?: RoomType } = $props();
+	let { initialStep, initialRoomType }: { initialStep?: CreationStep; initialRoomType?: RoomType } =
+		$props();
 
 	const REFINEMENT_POINT_VALUES: PointValueSelection[] = [
 		{
@@ -118,8 +116,8 @@
 				{#if effectiveStep === 'SELECT_ROOM_TYPE'}
 					Select the type of room to create.
 				{:else}
-					Set up your <strong>{effectiveRoomType?.toLowerCase()}</strong> room details here. Click create when
-					you're done.
+					Set up your <strong>{effectiveRoomType?.toLowerCase()}</strong> room details here. Click create
+					when you're done.
 				{/if}
 			</DialogDescription>
 		</DialogHeader>

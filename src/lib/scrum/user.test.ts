@@ -62,7 +62,7 @@ describe('user', () => {
 	describe('validateLogin', () => {
 		it('returns user in props when logged in', async () => {
 			mockPb.authStore.model = { id: 'u1', username: 'alice' } as never;
-			const users = mockPb.collection('users');
+			mockPb.collection('users');
 			const result = await validateLogin();
 			expect(result?.props?.user).toEqual({ id: 'u1', username: 'alice' });
 			expect(goto).not.toHaveBeenCalled();

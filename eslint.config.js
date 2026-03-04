@@ -25,9 +25,34 @@ export default ts.config(
 			parserOptions: {
 				parser: ts.parser
 			}
+		},
+		rules: {
+			'@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '^\\$\\$|^icon$' }]
 		}
 	},
 	{
-		ignores: ['build/', '.svelte-kit/', 'dist/']
+		files: ['**/components/ui/button/button.svelte'],
+		rules: {
+			'svelte/valid-compile': 'off'
+		}
+	},
+	{
+		files: ['**/*.test.ts', '**/__mocks__/**', '**/pocketbase-mock.ts'],
+		rules: {
+			'@typescript-eslint/no-unused-vars': [
+				'error',
+				{ argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
+			]
+		}
+	},
+	{
+		ignores: [
+			'build/',
+			'.svelte-kit/',
+			'dist/',
+			'pb/pb_data/',
+			'playwright-report/',
+			'test-results/'
+		]
 	}
 );

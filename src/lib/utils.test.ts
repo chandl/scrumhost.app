@@ -23,7 +23,9 @@ describe('cn', () => {
 	});
 
 	it('handles conditional classes', () => {
-		expect(cn('base', true && 'included', false && 'excluded')).toBe('base included');
+		const t = true;
+		const f = false;
+		expect(cn('base', t && 'included', f && 'excluded')).toBe('base included');
 	});
 });
 

@@ -150,7 +150,9 @@
 					<span class="ml-4 mr-4 hidden text-2xl md:block">&bull;</span>
 					{#if showRoomPassword}
 						<div class="flex items-center space-x-2">
-							<h2 class="text-xl">Password: <span class="blur-none" data-testid="room-password-value">{roomKey}</span></h2>
+							<h2 class="text-xl">
+								Password: <span class="blur-none" data-testid="room-password-value">{roomKey}</span>
+							</h2>
 							<Button
 								onclick={() => (showRoomPassword = false)}
 								size="icon"
