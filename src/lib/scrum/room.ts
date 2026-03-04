@@ -24,18 +24,23 @@ export async function getParticipantInRoom(
 	userId: string,
 	roomId: string
 ): Promise<Participant | undefined> {
-	try {
-		return await pb
-			.collection('participants')
-			.getFirstListItem(`user = "${userId}" && room = "${roomId}"`);
-	} catch (err) {
-		console.warn('Could not find participant in room', userId, roomId, err);
-		return undefined;
-	}
+	const { items } = await pb.collection('participants').getList(1, 1, {
+		filter: `user = "${userId}" && room = "${roomId}"`
+	});
+	const record = items[0];
+	if (!record) return undefined;
+	return {
+		id: record.id,
+		userId: record.user,
+		name: record.name
+	};
 }
 
 export async function getUserParticipant(roomId: string): Promise<Participant | undefined> {
 	const userId = pb.authStore.model?.id;
+	if (userId == null) {
+		return undefined;
+	}
 	const existingUser = await getParticipantInRoom(userId, roomId);
 	if (existingUser) {
 		return existingUser;

@@ -25,3 +25,8 @@ pb
 
 # IDEA
 .idea
+
+playwright-report/*
+test-results/*
+
+coverage/*

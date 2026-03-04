@@ -1,0 +1,31 @@
+name: Unit tests
+
+on:
+  push:
+    branches: [main, master, testing]
+  pull_request:
+    branches: [main, master, testing]
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check formatting
+        run: npx prettier --check .
+
+      - name: Check (svelte-kit sync + svelte-check)
+        run: npm run check
+
+      - name: Run unit tests with coverage
+        run: npm run test:coverage

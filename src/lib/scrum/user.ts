@@ -55,6 +55,12 @@ export async function signup(name: string) {
 export async function validateLogin() {
 	// Check if the user is logged in by trying to get the current user
 	try {
+		// If we already have a session (e.g. just signed up), skip refresh to avoid redirect
+		// when refresh fails or isValid is not yet true (e.g. E2E, slow storage).
+		if (pb.authStore.model) {
+			return { props: { user: pb.authStore.model } };
+		}
+
 		try {
 			await pb.collection('users').authRefresh();
 		} catch (err) {
@@ -62,7 +68,13 @@ export async function validateLogin() {
 			pb.authStore.clear();
 		}
 
-		const user = pb.authStore.model;
+		let user = pb.authStore.model;
+
+		// On full page load, auth may not be in memory yet; give storage a moment then recheck.
+		if (!user && typeof window !== 'undefined') {
+			await new Promise((r) => setTimeout(r, 300));
+			user = pb.authStore.model;
+		}
 
 		// If user is not logged in, redirect to the login page
 		if (!user) {
@@ -71,16 +83,14 @@ export async function validateLogin() {
 
 			console.log('Redirect', loginUrl);
 			goto(loginUrl); // Redirect to login page
+			return;
 		}
 
-		return {
-			props: {
-				user
-			}
-		};
+		return { props: { user } };
 	} catch (error) {
 		console.error('Error checking authentication:', error);
 		goto('/join'); // Redirect to login page if there’s an error
+		return;
 	}
 }
 

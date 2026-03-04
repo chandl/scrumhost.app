@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { PUBLIC_ENABLE_BACKLOG_MERGE_TASKS } from '$env/static/public';
+	import { env } from '$env/dynamic/public';
+	const PUBLIC_ENABLE_BACKLOG_MERGE_TASKS = env.PUBLIC_ENABLE_BACKLOG_MERGE_TASKS ?? 'false';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Button } from '$lib/components/ui/button';
@@ -34,7 +35,7 @@
 	let showComments = $state(false);
 </script>
 
-<Card class="mb-2">
+<Card class="mb-2" data-testid="retro-item-card">
 	<CardContent class="space-y-2 p-3">
 		<div class="flex items-center justify-between">
 			<div class="mr-2 flex flex-grow items-center space-x-2">
@@ -74,6 +75,7 @@
 					</Button>
 				{/if}
 				<Button
+					data-testid="retro-item-comment-toggle"
 					variant="ghost"
 					size="sm"
 					on:click={() => (showComments = !showComments)}

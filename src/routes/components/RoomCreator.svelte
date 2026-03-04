@@ -32,6 +32,9 @@
 	}
 	type CreationStep = 'SELECT_ROOM_TYPE' | 'SET_ROOM_PROPERTIES';
 
+	let { initialStep, initialRoomType }: { initialStep?: CreationStep; initialRoomType?: RoomType } =
+		$props();
+
 	const REFINEMENT_POINT_VALUES: PointValueSelection[] = [
 		{
 			value: '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ?',
@@ -53,26 +56,33 @@
 
 	let roomCreationStepState = $state('SELECT_ROOM_TYPE') as CreationStep;
 	let isOpen = $state(false);
+	let userRequestedClose = $state(false);
 	let roomType = $state() as RoomType | undefined;
+	let effectiveStep = $derived((initialStep ?? roomCreationStepState) as CreationStep);
+	let effectiveRoomType = $derived(initialRoomType ?? roomType);
+	let effectiveIsOpen = $derived(
+		(initialStep != null && !userRequestedClose) || (initialStep == null && isOpen)
+	);
 	let roomName = $state('');
 	let pointValues = $state(REFINEMENT_POINT_VALUES[0]) as PointValueSelection;
 
 	let enableCreateRoomButton = $derived.by(() => {
-		if (!roomType || !roomName) {
+		const type = effectiveRoomType ?? roomType;
+		if (!type || !roomName) {
 			return false;
 		}
-
-		return !(roomType === 'REFINEMENT' && !pointValues);
+		return !(type === 'REFINEMENT' && !pointValues);
 	});
 
 	async function handleCreateRoom() {
-		if (!roomType) {
+		const type = effectiveRoomType ?? roomType;
+		if (!type) {
 			throw new Error("Can't create room with undefined type");
 		}
-		const room = await createRoom(roomName, roomType);
+		const room = await createRoom(roomName, type);
 		console.log('Created room: ', room);
 
-		switch (roomType) {
+		switch (type) {
 			case 'REFINEMENT':
 				console.log(
 					'Created refinementMetadata',
@@ -91,32 +101,40 @@
 </script>
 
 <Dialog
-	open={isOpen}
+	open={effectiveIsOpen}
 	onOpenChange={(open) => {
 		isOpen = open;
+		if (open) userRequestedClose = false;
+		else userRequestedClose = true;
 		roomType = undefined;
 		roomCreationStepState = 'SELECT_ROOM_TYPE';
 		roomName = '';
 	}}
 >
 	<DialogTrigger asChild>
-		<Button class="w-full py-6 text-lg" on:click={() => (isOpen = true)}>Create Room</Button>
+		<Button
+			class="w-full py-6 text-lg"
+			on:click={() => {
+				isOpen = true;
+				userRequestedClose = false;
+			}}>Create Room</Button
+		>
 	</DialogTrigger>
 	<DialogContent class="sm:max-w-[425px]">
 		<DialogHeader>
 			<DialogTitle>Create a New Room</DialogTitle>
 			<DialogDescription>
-				{#if roomCreationStepState === 'SELECT_ROOM_TYPE'}
+				{#if effectiveStep === 'SELECT_ROOM_TYPE'}
 					Select the type of room to create.
 				{:else}
-					Set up your <strong>{roomType?.toLowerCase()}</strong> room details here. Click create when
-					you're done.
+					Set up your <strong>{effectiveRoomType?.toLowerCase()}</strong> room details here. Click create
+					when you're done.
 				{/if}
 			</DialogDescription>
 		</DialogHeader>
 
 		<div class="grid gap-4 py-4">
-			{#if roomCreationStepState === 'SELECT_ROOM_TYPE'}
+			{#if effectiveStep === 'SELECT_ROOM_TYPE'}
 				<RadioGroup bind:value={roomType}>
 					<div class="flex items-center space-x-2">
 						<RadioGroupItem value="REFINEMENT" id="refinement" />
@@ -139,13 +157,14 @@
 					<Label for="room-name" class="text-right">Room Name</Label>
 					<Input
 						id="room-name"
+						data-testid="room-name-input"
 						bind:value={roomName}
 						class="col-span-3"
 						placeholder="Enter room name"
 						autofocus
 					/>
 				</form>
-				{#if roomType === 'REFINEMENT'}
+				{#if effectiveRoomType === 'REFINEMENT'}
 					<div class="grid grid-cols-4 items-center gap-4">
 						<Label for="point-values" class="text-right">Point Values</Label>
 						<Select bind:selected={pointValues}>
@@ -163,7 +182,7 @@
 			{/if}
 		</div>
 		<DialogFooter>
-			{#if roomCreationStepState === 'SELECT_ROOM_TYPE'}
+			{#if effectiveStep === 'SELECT_ROOM_TYPE'}
 				<Button
 					on:click={() => (roomCreationStepState = 'SET_ROOM_PROPERTIES')}
 					disabled={!roomType}>Next</Button

@@ -60,7 +60,7 @@
 				>Please enter your name to continue</CardDescription
 			>
 		</CardHeader>
-		<form on:submit={handleSubmit}>
+		<form on:submit|preventDefault={handleSubmit}>
 			<CardContent class="space-y-4">
 				<div class="space-y-2">
 					<Label for="name">Your Name</Label>

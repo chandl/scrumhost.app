@@ -68,9 +68,10 @@
 		</p>
 
 		<!-- Voting Buttons Section -->
-		<div class="mb-8 flex flex-wrap justify-center gap-3">
+		<div class="mb-8 flex flex-wrap justify-center gap-3" data-testid="voting-buttons">
 			{#each pointValues as value}
 				<Button
+					data-testid={'vote-' + String(value).trim()}
 					variant={userVoteValue === value ? 'default' : 'outline'}
 					class="h-12 w-40 font-medium"
 					on:click={() => handleVote(value)}
@@ -94,6 +95,7 @@
 		<div class="mt-6 flex w-full flex-wrap space-x-2">
 			<!-- Mark as Reviewed Button -->
 			<Button
+				data-testid="start-reviewing"
 				size="lg"
 				disabled={(currentVotes?.length || 0) === 0}
 				class="mt-2 bg-blue-500 py-2 font-semibold text-white hover:bg-blue-600 dark:bg-blue-700 hover:dark:bg-blue-600 "

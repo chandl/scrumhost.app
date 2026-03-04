@@ -59,7 +59,9 @@ export async function encryptString(passphrase: string, plaintext: string): Prom
 	combined.set(iv, salt.length);
 	combined.set(new Uint8Array(ciphertext), salt.length + iv.length);
 
-	return arrayBufferToBase64(combined);
+	return arrayBufferToBase64(
+		combined.buffer.slice(combined.byteOffset, combined.byteOffset + combined.byteLength)
+	);
 }
 
 // Maintain an in-memory decryption cache. Every time there is an update to the page,

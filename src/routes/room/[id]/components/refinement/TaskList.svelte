@@ -15,15 +15,19 @@
 	} = $props();
 </script>
 
-<ul class="space-y-4">
+<ul class="space-y-4" data-testid="task-list">
 	{#each tasks as task}
-		<li class="border-b pb-4 last:border-b-0 last:pb-0">
+		<li class="border-b pb-4 last:border-b-0 last:pb-0" data-testid="story-card">
 			<h3 class="mb-2 text-2xl">{task.details}</h3>
 			<span class="text-sm">Updated {formatTimeAgo(new Date(task.updated))}</span>
 			<div class="mb-2 flex space-x-2">
 				<div class="mt-2 flex space-x-2">
 					{#if currentStatus === 'QUEUED'}
-						<Button size="sm" on:click={() => onTaskAction(task.id, 'START_VOTING')}>
+						<Button
+							data-testid="start-voting"
+							size="sm"
+							on:click={() => onTaskAction(task.id, 'START_VOTING')}
+						>
 							<PlayCircle class="mr-2 h-4 w-4" />Start Voting
 						</Button>
 						<Button size="sm" variant="outline" on:click={() => onTaskAction(task.id, 'SKIP')}>

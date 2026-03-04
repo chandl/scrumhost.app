@@ -82,9 +82,9 @@
 		<hr class="my-4 border-t border-gray-300" />
 
 		<!-- Participant List -->
-		<ul class="space-y-2">
+		<ul class="space-y-2" data-testid="participant-list">
 			{#each participants as participant}
-				<li class="flex items-center space-x-2">
+				<li class="flex items-center space-x-2" data-testid="participant-item">
 					<Avatar>
 						<AvatarImage alt={participant.name} />
 						<AvatarFallback>{participant.name[0]}</AvatarFallback>

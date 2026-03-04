@@ -74,7 +74,7 @@ export function subscribeToStoryUpdates(
 export async function setStoryStatus(storyId: string, story_status: StoryStatus) {
 	try {
 		const record = await pb.collection('stories').update(storyId, { story_status: story_status });
-		console.log(`Set story ${storyId} status to ${status}`, record);
+		console.log(`Set story ${storyId} status to ${story_status}`, record);
 	} catch (err) {
 		console.error('Failed to set story status', err);
 		throw err;
