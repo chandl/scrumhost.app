@@ -30,3 +30,6 @@ playwright-report/*
 test-results/*
 
 coverage/*
+
+# Canary build output
+canary/dist

@@ -1,0 +1,15 @@
+services:
+  canary:
+    build: .
+    environment:
+      CANARY_HTTP_ADDR: :8081
+      CANARY_INTERVAL: 2m # API/realtime contract check cadence (Go-style duration).
+      CANARY_TIMEOUT: 30s
+      CANARY_UI_INTERVAL: 15m # Browser/Playwright multi-user check cadence.
+      CANARY_UI_TIMEOUT: 120s
+      CANARY_APP_URL: https://scrumhost.app
+      CANARY_API_URL: https://api.scrumhost.app
+      CANARY_NAME_PREFIX: canary
+    ports:
+      - '8081:8081'
+    restart: unless-stopped

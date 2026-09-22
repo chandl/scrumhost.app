@@ -1,0 +1,24 @@
+{
+	"name": "scrum-host-canary",
+	"private": true,
+	"version": "0.0.1",
+	"description": "Standalone service that continuously exercises the scrum-host end-to-end contract (PocketBase API + rendered UI) and exposes health for monitoring.",
+	"main": "dist/index.js",
+	"scripts": {
+		"build": "tsc -p tsconfig.json",
+		"start": "node dist/index.js",
+		"dev": "tsx watch src/index.ts",
+		"typecheck": "tsc -p tsconfig.json --noEmit"
+	},
+	"dependencies": {
+		"eventsource": "^2.0.2",
+		"playwright": "^1.58.2",
+		"pocketbase": "^0.21.5"
+	},
+	"devDependencies": {
+		"@types/eventsource": "^1.1.15",
+		"@types/node": "^22.9.0",
+		"tsx": "^4.19.0",
+		"typescript": "^5.6.0"
+	}
+}
