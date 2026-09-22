@@ -2,7 +2,7 @@
  * @vitest-environment happy-dom
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/svelte';
+import { render, screen, waitFor } from '@testing-library/svelte';
 import { fireEvent } from '@testing-library/dom';
 import RoomCreator from './RoomCreator.svelte';
 
@@ -94,7 +94,7 @@ describe('RoomCreator', () => {
 		expect(createButtons.length).toBeGreaterThanOrEqual(1);
 	});
 
-	it('calls createRoom, initRefinementMetadata, and goto when Create Room is clicked with room name (REFINEMENT)', () => {
+	it('calls createRoom, initRefinementMetadata, and goto when Create Room is clicked with room name (REFINEMENT)', async () => {
 		render(RoomCreator, {
 			props: {
 				initialStep: 'SET_ROOM_PROPERTIES',
@@ -112,12 +112,16 @@ describe('RoomCreator', () => {
 		// If form rendered and was submittable, mocks are called
 		if (roomNameInput) {
 			expect(mockCreateRoom).toHaveBeenCalledWith('My Refinement Room', 'REFINEMENT');
-			expect(mockInitRefinementMetadata).toHaveBeenCalledWith(mockRoom, expect.any(String));
-			expect(mockGoto).toHaveBeenCalledWith('/room/room-123');
+			await waitFor(() => {
+				expect(mockInitRefinementMetadata).toHaveBeenCalledWith(mockRoom, expect.any(String));
+			});
+			await waitFor(() => {
+				expect(mockGoto).toHaveBeenCalledWith('/room/room-123');
+			});
 		}
 	});
 
-	it('calls createRoom, initRetroMetadata, and goto when Create Room is clicked with room name (RETROSPECTIVE)', () => {
+	it('calls createRoom, initRetroMetadata, and goto when Create Room is clicked with room name (RETROSPECTIVE)', async () => {
 		render(RoomCreator, {
 			props: {
 				initialStep: 'SET_ROOM_PROPERTIES',
@@ -133,8 +137,12 @@ describe('RoomCreator', () => {
 
 		if (roomNameInput) {
 			expect(mockCreateRoom).toHaveBeenCalledWith('My Retro Room', 'RETROSPECTIVE');
-			expect(mockInitRetroMetadata).toHaveBeenCalledWith(mockRoom);
-			expect(mockGoto).toHaveBeenCalledWith('/room/room-123');
+			await waitFor(() => {
+				expect(mockInitRetroMetadata).toHaveBeenCalledWith(mockRoom);
+			});
+			await waitFor(() => {
+				expect(mockGoto).toHaveBeenCalledWith('/room/room-123');
+			});
 		}
 	});
 });
