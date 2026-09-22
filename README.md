@@ -73,20 +73,20 @@ The app will be available at `http://localhost:5173`.
 
 ## Available scripts
 
-| Script                  | Description                                       |
-| ------------------------ | -------------------------------------------------- |
-| `npm run dev`            | Start the SvelteKit dev server                     |
-| `npm run build`          | Build for production                                |
-| `npm run preview`        | Preview the production build locally                |
-| `npm run check`          | Type-check with `svelte-check`                      |
-| `npm run check:watch`    | Type-check in watch mode                             |
-| `npm run lint`           | Check formatting (Prettier) and lint (ESLint)        |
-| `npm run format`         | Auto-format the codebase with Prettier               |
-| `npm run test` / `test:unit` | Run unit tests once (Vitest)                    |
-| `npm run test:unit:watch`| Run unit tests in watch mode                          |
-| `npm run test:coverage`  | Run unit tests with coverage report                   |
-| `npm run test:e2e`       | Run Playwright E2E tests                              |
-| `npm run test:e2e:ui`    | Run Playwright tests with the interactive UI          |
+| Script                       | Description                                   |
+| ---------------------------- | --------------------------------------------- |
+| `npm run dev`                | Start the SvelteKit dev server                |
+| `npm run build`              | Build for production                          |
+| `npm run preview`            | Preview the production build locally          |
+| `npm run check`              | Type-check with `svelte-check`                |
+| `npm run check:watch`        | Type-check in watch mode                      |
+| `npm run lint`               | Check formatting (Prettier) and lint (ESLint) |
+| `npm run format`             | Auto-format the codebase with Prettier        |
+| `npm run test` / `test:unit` | Run unit tests once (Vitest)                  |
+| `npm run test:unit:watch`    | Run unit tests in watch mode                  |
+| `npm run test:coverage`      | Run unit tests with coverage report           |
+| `npm run test:e2e`           | Run Playwright E2E tests                      |
+| `npm run test:e2e:ui`        | Run Playwright tests with the interactive UI  |
 
 ## Project structure
 
