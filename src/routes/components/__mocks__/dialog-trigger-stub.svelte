@@ -1,5 +1,15 @@
 <script lang="ts">
-	let { children }: { children?: import('svelte').Snippet } = $props();
+	let {
+		children,
+		child
+	}: {
+		children?: import('svelte').Snippet;
+		child?: import('svelte').Snippet<[{ props: Record<string, unknown> }]>;
+	} = $props();
 </script>
 
-{@render children?.()}
+{#if child}
+	{@render child({ props: {} })}
+{:else}
+	{@render children?.()}
+{/if}

@@ -70,7 +70,7 @@
 				</AlertDialogHeader>
 				<AlertDialogFooter>
 					<AlertDialogCancel>Cancel</AlertDialogCancel>
-					<AlertDialogAction on:click={handleLogout}>Logout</AlertDialogAction>
+					<AlertDialogAction onclick={handleLogout}>Logout</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>
 		</AlertDialog>

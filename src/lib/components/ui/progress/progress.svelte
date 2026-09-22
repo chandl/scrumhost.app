@@ -2,17 +2,21 @@
 	import { Progress as ProgressPrimitive } from 'bits-ui';
 	import { cn } from '$lib/utils.js';
 
-	type $$Props = ProgressPrimitive.Props;
-
-	let className: $$Props['class'] = undefined;
-	export let max: $$Props['max'] = 100;
-	export let value: $$Props['value'] = undefined;
-	export { className as class };
+	let {
+		ref = $bindable(null),
+		class: className = undefined,
+		max = 100,
+		value = undefined,
+		...restProps
+	}: ProgressPrimitive.RootProps = $props();
 </script>
 
 <ProgressPrimitive.Root
+	bind:ref
+	{max}
+	{value}
 	class={cn('relative h-4 w-full overflow-hidden rounded-full bg-secondary', className)}
-	{...$$restProps}
+	{...restProps}
 >
 	<div
 		class="h-full w-full flex-1 bg-primary transition-all"
