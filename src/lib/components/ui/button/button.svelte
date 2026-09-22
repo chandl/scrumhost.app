@@ -1,24 +1,26 @@
 <script lang="ts">
-	import { Button as ButtonPrimitive } from 'bits-ui';
-	import { type Events, type Props, buttonVariants } from './index.js';
+	import { type Props, buttonVariants } from './index.js';
 	import { cn } from '$lib/utils.js';
 
-	type $$Events = Events;
+	type $$Props = Props;
 
-	let {
-		variant = 'default',
-		size = 'default',
-		class: className,
-		builders = [],
-		...restProps
-	}: Props = $props();
+	let className: $$Props['class'] = undefined;
+	export let variant: $$Props['variant'] = 'default';
+	export let size: $$Props['size'] = 'default';
+	export let href: string | undefined = undefined;
+	export let type: $$Props['type'] = 'button';
+	export { className as class };
 
-	// buttonVariants + cn produce a string; Bits UI Root expects ClassNameValue
-	// @ts-expect-error - ClassValue from clsx not assignable to ClassNameValue from bits-ui
-	const buttonClass = $derived(cn(buttonVariants({ variant, size, className })) as string);
-	const rest = restProps as Record<string, unknown>;
+	// buttonVariants + cn expect a string-like class value; className may be any ClassValue.
+	$: buttonClass = cn(buttonVariants({ variant, size, className: className as string }));
 </script>
 
-<ButtonPrimitive.Root {builders} class={buttonClass} type="button" {...rest} on:click on:keydown>
-	<slot />
-</ButtonPrimitive.Root>
+{#if href}
+	<a {href} class={buttonClass} {...$$restProps} role="button" on:click on:keydown>
+		<slot />
+	</a>
+{:else}
+	<button {type} class={buttonClass} {...$$restProps} on:click on:keydown>
+		<slot />
+	</button>
+{/if}

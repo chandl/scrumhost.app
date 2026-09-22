@@ -57,14 +57,17 @@
 	let roomCreationStepState = $state('SELECT_ROOM_TYPE') as CreationStep;
 	let isOpen = $state(false);
 	let userRequestedClose = $state(false);
-	let roomType = $state() as RoomType | undefined;
+	let roomType = $state('') as RoomType | undefined;
 	let effectiveStep = $derived((initialStep ?? roomCreationStepState) as CreationStep);
 	let effectiveRoomType = $derived(initialRoomType ?? roomType);
 	let effectiveIsOpen = $derived(
 		(initialStep != null && !userRequestedClose) || (initialStep == null && isOpen)
 	);
 	let roomName = $state('');
-	let pointValues = $state(REFINEMENT_POINT_VALUES[0]) as PointValueSelection;
+	let pointValuesKey = $state(REFINEMENT_POINT_VALUES[0].value);
+	let pointValues = $derived(
+		REFINEMENT_POINT_VALUES.find((item) => item.value === pointValuesKey)
+	) as PointValueSelection;
 
 	let enableCreateRoomButton = $derived.by(() => {
 		const type = effectiveRoomType ?? roomType;
@@ -106,19 +109,15 @@
 		isOpen = open;
 		if (open) userRequestedClose = false;
 		else userRequestedClose = true;
-		roomType = undefined;
+		roomType = '' as RoomType | undefined;
 		roomCreationStepState = 'SELECT_ROOM_TYPE';
 		roomName = '';
 	}}
 >
-	<DialogTrigger asChild>
-		<Button
-			class="w-full py-6 text-lg"
-			on:click={() => {
-				isOpen = true;
-				userRequestedClose = false;
-			}}>Create Room</Button
-		>
+	<DialogTrigger>
+		{#snippet child({ props })}
+			<Button class="w-full py-6 text-lg" {...props}>Create Room</Button>
+		{/snippet}
 	</DialogTrigger>
 	<DialogContent class="sm:max-w-[425px]">
 		<DialogHeader>
@@ -167,7 +166,7 @@
 				{#if effectiveRoomType === 'REFINEMENT'}
 					<div class="grid grid-cols-4 items-center gap-4">
 						<Label for="point-values" class="text-right">Point Values</Label>
-						<Select bind:selected={pointValues}>
+						<Select type="single" bind:value={pointValuesKey}>
 							<SelectTrigger class="col-span-3" id="point-values">
 								<SelectValue placeholder="Select point values" />
 							</SelectTrigger>

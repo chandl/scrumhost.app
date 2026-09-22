@@ -1,11 +1,8 @@
 <script lang="ts">
-	import { Select as SelectPrimitive } from 'bits-ui';
 	import { cn } from '$lib/utils.js';
+	import type { HTMLAttributes } from 'svelte/elements';
 
-	type $$Props = SelectPrimitive.SeparatorProps;
-
-	let className: $$Props['class'] = undefined;
-	export { className as class };
+	let { class: className = undefined, ...restProps }: HTMLAttributes<HTMLDivElement> = $props();
 </script>
 
-<SelectPrimitive.Separator class={cn('-mx-1 my-1 h-px bg-muted', className)} {...$$restProps} />
+<div role="separator" class={cn('-mx-1 my-1 h-px bg-muted', className)} {...restProps}></div>

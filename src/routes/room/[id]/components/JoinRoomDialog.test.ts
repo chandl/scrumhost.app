@@ -26,10 +26,10 @@ vi.mock('$lib/components/ui/dialog', async () => {
 });
 
 describe('JoinRoomDialog', () => {
-	let handleJoinRoom: ReturnType<typeof vi.fn>;
+	let handleJoinRoom: (password: string) => void;
 
 	beforeEach(() => {
-		handleJoinRoom = vi.fn();
+		handleJoinRoom = vi.fn() as unknown as (password: string) => void;
 	});
 
 	it('renders dialog title and description', () => {
