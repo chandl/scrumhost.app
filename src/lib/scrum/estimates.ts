@@ -45,6 +45,14 @@ export async function createOrUpdateEstimate(
 			});
 
 			console.log('Updated existing estimate', newEstimate);
+			// Already linked to the story, so skip the extra round trip
+			return {
+				id: newEstimate.id,
+				storyId: newEstimate.expand?.story,
+				estimate: newEstimate.expand?.estimate,
+				user: newEstimate.expand?.user,
+				participant: newEstimate.expand?.participant
+			};
 		} else {
 			// Create new estimate
 			newEstimate = await pb.collection('story_estimates').create({

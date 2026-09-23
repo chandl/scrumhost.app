@@ -31,16 +31,32 @@
 	} = $props();
 
 	let voteProgress = $derived(((currentVotes?.length || 0) / participants.length) * 100);
-	let userVoteValue: string | undefined = $derived(
+	// Optimistic vote shown immediately while the server round trips complete
+	let pendingVote: { storyId: string | undefined; value: string } | undefined = $state();
+	let serverVoteValue: string | undefined = $derived(
 		!currentVotes
 			? undefined
 			: currentVotes.find((vote) => vote.participant === userParticipant?.id)?.estimate
+	);
+	let userVoteValue: string | undefined = $derived(
+		pendingVote && pendingVote.storyId === activeStoryDetails?.id
+			? pendingVote.value
+			: serverVoteValue
 	);
 	let votingEnabled: boolean = $derived.by(() => roomStatus == 'VOTING');
 
 	async function handleVote(vote: string) {
 		console.log(`Voting for story ${activeStoryDetails?.id} with vote ${vote}`);
-		await createOrUpdateEstimate(userParticipant?.id || '', activeStoryDetails?.id || '', vote);
+		const storyId = activeStoryDetails?.id;
+		pendingVote = { storyId, value: vote };
+		try {
+			await createOrUpdateEstimate(userParticipant?.id || '', storyId || '', vote);
+		} catch (err) {
+			console.error('Vote failed, reverting', err);
+		} finally {
+			// Fall back to server state (the realtime update reflects the saved vote)
+			if (pendingVote?.value === vote && pendingVote.storyId === storyId) pendingVote = undefined;
+		}
 	}
 </script>
 
