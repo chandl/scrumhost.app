@@ -26,7 +26,7 @@
 		stories?.filter((story) => story.story_status == 'SKIPPED')
 	);
 
-	let currentTab = $state('');
+	let currentTab = $state('queued');
 </script>
 
 <Tabs bind:value={currentTab}>
