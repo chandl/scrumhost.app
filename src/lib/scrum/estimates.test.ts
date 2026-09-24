@@ -109,6 +109,37 @@ describe('estimates', () => {
 		});
 	});
 
+	describe('createOrUpdateEstimate (changing a vote)', () => {
+		it('still touches the story so realtime subscribers refresh votes', async () => {
+			mockPb.authStore.model = { id: 'user-1' } as never;
+			const storyRecord = await mockPb.collection('stories').create({
+				details: 'Story 1',
+				story_status: 'QUEUED',
+				story_estimates: []
+			});
+			const storyId = storyRecord.id;
+			const existing = await mockPb.collection('story_estimates').create({
+				story: storyId,
+				user: 'user-1',
+				estimate: '3',
+				participant: 'part-1'
+			});
+			await mockPb.collection('stories').update(storyId, {
+				'story_estimates+': existing.id
+			});
+			const storiesColl = mockPb.collection('stories') as ReturnType<typeof mockPb.collection> & {
+				update: ReturnType<typeof vi.fn>;
+			};
+			storiesColl.update.mockClear();
+
+			await createOrUpdateEstimate('part-1', storyId, '5');
+
+			expect(storiesColl.update).toHaveBeenCalledWith(storyId, {
+				'story_estimates+': existing.id
+			});
+		});
+	});
+
 	describe('deleteEstimates', () => {
 		it('deletes each estimate and removes their ids from story', async () => {
 			const storyRecord = await mockPb.collection('stories').create({

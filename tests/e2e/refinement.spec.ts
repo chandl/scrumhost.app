@@ -56,3 +56,39 @@ test.describe('Refinement (single user)', () => {
 		await expect(page.getByText('Vote Summary')).toBeVisible();
 	});
 });
+
+test.describe('Refinement: changing a vote', () => {
+	test('changed vote stays selected and is the one revealed', async ({ page }) => {
+		await goToHome(page);
+		await createRefinementRoom(page);
+
+		await page.getByTestId('create-task-input').fill('E2E change vote task');
+		await page.getByTestId('create-task-submit').click();
+		await page.getByTestId('start-voting').first().click();
+		await expect(page.getByTestId('voting-buttons')).toBeVisible({ timeout: 10_000 });
+
+		// First vote, wait until the server has it (Reveal is enabled once a vote exists)
+		await page.getByTestId('vote-3').click();
+		await expect(page.getByTestId('start-reviewing')).toBeEnabled({ timeout: 10_000 });
+
+		// Change the vote; it must stay selected after the save and realtime refresh settle
+		await page.getByTestId('vote-5').click();
+		await expect(page.getByTestId('vote-5')).toHaveAttribute('aria-pressed', 'true');
+		await page.waitForTimeout(1500);
+		await expect(page.getByTestId('vote-5')).toHaveAttribute('aria-pressed', 'true');
+		await expect(page.getByTestId('vote-3')).toHaveAttribute('aria-pressed', 'false');
+		// Server-backed vote (participant list) reflects the change via the realtime refresh
+		await expect(page.getByTestId('participant-item').filter({ hasText: '(You)' })).toContainText(
+			'5',
+			{ timeout: 5_000 }
+		);
+
+		// Reveal shows only the changed vote (one vote, value 5)
+		await page.getByTestId('start-reviewing').click();
+		const summary = page.getByTestId('vote-summary');
+		await expect(summary).toBeVisible({ timeout: 10_000 });
+		await expect(summary).toContainText('1 vote from');
+		await expect(summary.locator('li')).toHaveCount(1);
+		await expect(summary.locator('li')).toContainText('5');
+	});
+});

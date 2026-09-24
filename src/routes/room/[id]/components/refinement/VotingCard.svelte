@@ -11,6 +11,7 @@
 		StorySummary
 	} from '$lib/scrum/types/refinement';
 	import type { Participant } from '$lib/scrum/types/room';
+	import { untrack } from 'svelte';
 
 	let {
 		roomStatus,
@@ -32,8 +33,10 @@
 
 	let votedCount = $derived(currentVotes?.length || 0);
 	let voteProgress = $derived((votedCount / Math.max(participants.length, 1)) * 100);
-	// Optimistic vote shown immediately while the server round trips complete
-	let pendingVote: { storyId: string | undefined; value: string } | undefined = $state();
+	// Optimistic vote shown immediately while the server round trips complete.
+	// `settled` = the save finished; we then drop it on the next realtime refresh of votes.
+	let pendingVote: { storyId: string | undefined; value: string; settled: boolean } | undefined =
+		$state();
 	let serverVoteValue: string | undefined = $derived(
 		!currentVotes
 			? undefined
@@ -83,17 +86,55 @@
 		voteButtons[index]?.focus();
 	}
 
-	async function handleVote(vote: string) {
-		console.log(`Voting for story ${activeStoryDetails?.id} with vote ${vote}`);
+	// Once a save has settled, the next vote refresh from the server is authoritative
+	$effect(() => {
+		void currentVotes;
+		untrack(() => {
+			if (pendingVote?.settled) pendingVote = undefined;
+		});
+	});
+
+	// Votes are saved one at a time; if the user changes their mind mid-save, only the
+	// latest choice is sent next (avoids racing a create against an update).
+	let saving = false;
+	let queuedVote: { storyId: string | undefined; value: string } | undefined;
+
+	function handleVote(vote: string) {
 		const storyId = activeStoryDetails?.id;
-		pendingVote = { storyId, value: vote };
+		console.log(`Voting for story ${storyId} with vote ${vote}`);
+		pendingVote = { storyId, value: vote, settled: false };
+		if (saving) {
+			queuedVote = { storyId, value: vote };
+			return;
+		}
+		saveVote(storyId, vote);
+	}
+
+	async function saveVote(storyId: string | undefined, vote: string) {
+		saving = true;
+		let failed = false;
 		try {
 			await createOrUpdateEstimate(userParticipant?.id || '', storyId || '', vote);
 		} catch (err) {
+			failed = true;
 			console.error('Vote failed, reverting', err);
 		} finally {
-			// Fall back to server state (the realtime update reflects the saved vote)
-			if (pendingVote?.value === vote && pendingVote.storyId === storyId) pendingVote = undefined;
+			saving = false;
+		}
+
+		const next = queuedVote;
+		queuedVote = undefined;
+		if (next) {
+			saveVote(next.storyId, next.value);
+			return;
+		}
+
+		if (pendingVote?.value !== vote || pendingVote.storyId !== storyId) return;
+		if (failed || serverVoteValue === vote) {
+			// Revert on failure, or the realtime update already arrived
+			pendingVote = undefined;
+		} else {
+			pendingVote = { ...pendingVote, settled: true };
 		}
 	}
 </script>
