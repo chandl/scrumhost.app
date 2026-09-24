@@ -37,6 +37,13 @@ export default ts.config(
 		}
 	},
 	{
+		// shadcn-svelte primitives spread rest props; the custom-element warning doesn't apply here
+		files: ['**/components/ui/**/*.svelte'],
+		rules: {
+			'svelte/valid-compile': ['error', { ignoreWarnings: true }]
+		}
+	},
+	{
 		files: ['**/*.test.ts', '**/__mocks__/**', '**/pocketbase-mock.ts'],
 		rules: {
 			'@typescript-eslint/no-unused-vars': [

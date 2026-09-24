@@ -4,17 +4,8 @@
 	import { Moon, Sun } from 'lucide-svelte';
 </script>
 
-<Button
-	on:click={toggleMode}
-	variant="outline"
-	size="icon"
-	class="fixed bottom-4 right-4 rounded-full"
->
-	<Sun
-		class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
-	/>
-	<Moon
-		class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
-	/>
+<Button on:click={toggleMode} variant="ghost" size="icon" title="Toggle light/dark theme">
+	<Sun class="dark:hidden" aria-hidden="true" />
+	<Moon class="hidden dark:block" aria-hidden="true" />
 	<span class="sr-only">Toggle theme</span>
 </Button>

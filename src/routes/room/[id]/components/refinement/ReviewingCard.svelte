@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Check, CornerDownLeft } from 'lucide-svelte';
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
+	import { Check, RotateCcw } from 'lucide-svelte';
+	import { Card } from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import type { Estimate, StoryAction, StorySummary } from '$lib/scrum/types/refinement';
 	import VoteSummary from './VoteSummary.svelte';
@@ -9,11 +9,13 @@
 		activeStoryDetails,
 		currentVotes,
 		pointValues,
+		totalParticipants,
 		onTaskAction
 	}: {
 		activeStoryDetails: StorySummary | undefined;
 		currentVotes: Estimate[];
 		pointValues: string[];
+		totalParticipants?: number;
 		onTaskAction: (taskId: string, taskAction: StoryAction) => void;
 	} = $props();
 
@@ -69,71 +71,100 @@
 
 		return topVotes.sort((a: any, b: any) => a - b); // eslint-disable-line
 	});
+
+	let hasNumericVotes = $derived(currentVotes.some((vote) => !isNaN(Number(vote.estimate))));
+	// Everyone (2+ people) picked the same card
+	let isConsensus = $derived(currentVotes.length > 1 && voteResults.size === 1);
+
+	// Distribution rows in point-scale order, only for values that received votes
+	let distribution = $derived.by(() => {
+		const maxCount = Math.max(1, ...voteResults.values());
+		return pointValues
+			.filter((val) => voteResults.has(val))
+			.map((value) => {
+				const count: number = voteResults.get(value);
+				return {
+					value: value.trim(),
+					count,
+					percent: (count / currentVotes.length) * 100,
+					width: (count / maxCount) * 100,
+					isTop: mostVotes.includes(value)
+				};
+			});
+	});
 </script>
 
-<Card
-	class="rounded-lg border border-gray-200 shadow-lg dark:border-gray-800"
-	data-testid="vote-summary"
->
-	<CardHeader class="rounded-t-lg border-b border-gray-300 bg-gray-100 pb-4 dark:bg-gray-900">
-		<CardTitle class="text-lg font-semibold text-gray-800 dark:text-gray-200"
-			>Vote Summary</CardTitle
+<Card class="overflow-hidden" data-testid="vote-summary">
+	<div
+		class="flex flex-wrap items-center justify-between gap-2 border-b bg-muted/50 px-5 py-3 text-sm sm:px-8"
+	>
+		<h2 class="text-sm font-semibold tracking-normal">Vote Summary</h2>
+		<span class="tabular-nums text-foreground-secondary">
+			{currentVotes.length}
+			{currentVotes.length === 1 ? 'vote' : 'votes'}{totalParticipants
+				? ` from ${totalParticipants} ${totalParticipants === 1 ? 'person' : 'people'}`
+				: ''}
+		</span>
+	</div>
+
+	<div class="p-5 sm:p-8">
+		<p class="text-sm font-medium text-muted-foreground">Current story</p>
+		<h3
+			class="mt-1 break-words text-2xl font-semibold leading-tight tracking-tight sm:text-3xl lg:text-4xl"
 		>
-	</CardHeader>
-	<CardContent class="flex flex-col items-start px-6">
-		<!-- Task Description with Separation -->
-		<div
-			class="mb-6 w-full rounded-lg border-l-4 border-blue-500 bg-gray-50 p-4 shadow-md dark:bg-gray-900"
-		>
-			<h3 class="text-3xl font-semibold text-gray-800 dark:text-gray-200">
-				{activeStoryDetails?.details}
-			</h3>
+			{activeStoryDetails?.details}
+		</h3>
+
+		<div class="mt-8">
+			<VoteSummary
+				topVote={mostVotes.map((vote: string) => vote.trim())}
+				averageVote={hasNumericVotes ? averageVote : undefined}
+				consensus={isConsensus}
+			/>
 		</div>
-		<VoteSummary topVote={mostVotes} {averageVote} />
-		<p class="mb-4 text-lg text-gray-600 dark:text-gray-200">Vote Distribution:</p>
 
-		{#each pointValues.filter((val) => currentVotes
-				.map((vote) => vote.estimate)
-				.includes(val)) as value}
-			<div class="mb-4 flex w-full items-center justify-between">
-				<span class="text-lg text-gray-700 dark:text-gray-200">{value}</span>
-				<div class="mx-4 h-3 w-full max-w-xs rounded-full bg-gray-200">
-					<div
-						class="h-full rounded-full bg-blue-500"
-						style="width: {(currentVotes.filter((vote) => vote.estimate === value).length /
-							currentVotes.length) *
-							100}%"
-					></div>
-				</div>
-				<span class="text-sm text-gray-500 dark:text-gray-200"
-					>{currentVotes.filter((vote) => vote.estimate === value).length} vote(s) - {(
-						(currentVotes.filter((vote) => vote.estimate === value).length / currentVotes.length) *
-						100
-					).toFixed(0)}%</span
-				>
-			</div>
-		{/each}
+		<div class="mt-8">
+			<h4 class="mb-3 text-sm font-medium text-foreground-secondary">How people voted</h4>
+			<ul class="space-y-2.5">
+				{#each distribution as row, index (row.value)}
+					<li class="grid grid-cols-[2.75rem_minmax(0,1fr)_auto] items-center gap-3">
+						<span
+							class="text-right text-lg font-semibold tabular-nums {row.isTop
+								? 'text-primary'
+								: 'text-foreground'}">{row.value}</span
+						>
+						<div class="h-7 overflow-hidden rounded-md bg-muted">
+							<div
+								class="h-full origin-left animate-bar-in rounded-md {row.isTop
+									? 'bg-primary'
+									: 'bg-foreground/25'}"
+								style="width: {row.width}%; animation-delay: {80 + index * 40}ms"
+							></div>
+						</div>
+						<span class="w-20 text-sm tabular-nums text-muted-foreground">
+							{row.count}
+							{row.count === 1 ? 'vote' : 'votes'}
+							<span class="sr-only">({row.percent.toFixed(0)}%)</span>
+						</span>
+					</li>
+				{/each}
+			</ul>
+		</div>
 
-		<!-- Side-by-Side Action Buttons Section -->
-		<div class="mt-6 flex w-full flex-wrap space-x-2">
-			<!-- Mark as Reviewed Button -->
+		<div class="mt-8 flex flex-col gap-2 border-t pt-6 sm:flex-row">
 			<Button
 				size="lg"
-				class="mt-2 flex w-full items-center justify-start bg-blue-500 py-2 font-semibold text-white hover:bg-blue-600 dark:bg-blue-700 hover:dark:bg-blue-600 sm:w-auto"
 				on:click={() => onTaskAction(activeStoryDetails?.id || '', 'MARK_REVIEWED')}
 			>
-				<Check class="mr-2 h-5 w-5" />Finish Reviewing
+				<Check aria-hidden="true" />Mark as done
 			</Button>
-
-			<!-- Continue Voting Button -->
 			<Button
 				size="lg"
 				variant="outline"
-				class="mt-2 w-full border-gray-300 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800 sm:w-auto"
 				on:click={() => onTaskAction(activeStoryDetails?.id || '', 'START_VOTING')}
 			>
-				<CornerDownLeft class="mr-2 h-5 w-5" />Continue Voting
+				<RotateCcw aria-hidden="true" />Vote again
 			</Button>
 		</div>
-	</CardContent>
+	</div>
 </Card>

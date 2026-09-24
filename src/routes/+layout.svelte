@@ -3,18 +3,16 @@
 	import Header from './components/Header.svelte';
 	import { inject } from '@vercel/analytics';
 	import { ModeWatcher } from 'mode-watcher';
-	import ThemeSwitchButton from './components/ThemeSwitchButton.svelte';
 	import { TooltipProvider } from '$lib/components/ui/tooltip';
 	let { children } = $props();
 
 	inject();
 </script>
 
-<ModeWatcher />
-<TooltipProvider>
-	<div class="flex flex-col dark:bg-gray-950">
+<ModeWatcher themeColors={{ light: '#fafaf7', dark: '#09090b' }} />
+<TooltipProvider delayDuration={200}>
+	<div class="flex min-h-dvh flex-col">
 		<Header />
 		{@render children()}
-		<ThemeSwitchButton />
 	</div>
 </TooltipProvider>

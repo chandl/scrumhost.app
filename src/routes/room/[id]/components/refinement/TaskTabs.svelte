@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import TaskList from './TaskList.svelte';
 	import type { StoryAction, StorySummary } from '$lib/scrum/types/refinement';
 
@@ -27,55 +26,45 @@
 	);
 
 	let currentTab = $state('queued');
+
+	const countClass =
+		'min-w-5 rounded-full bg-muted px-1.5 text-xs tabular-nums text-muted-foreground';
 </script>
 
 <Tabs bind:value={currentTab}>
-	<TabsList class="grid w-full grid-cols-3 dark:bg-gray-900">
-		<TabsTrigger value="queued">Queued ({queuedTasks?.length})</TabsTrigger>
-		<TabsTrigger value="reviewed">Reviewed ({reviewedTasks?.length})</TabsTrigger>
-		<TabsTrigger value="skipped">Skipped ({skippedTasks?.length})</TabsTrigger>
+	<TabsList class="grid w-full grid-cols-3">
+		<TabsTrigger value="queued"
+			>Queued <span class={countClass}>{queuedTasks?.length}</span></TabsTrigger
+		>
+		<TabsTrigger value="reviewed"
+			>Done <span class={countClass}>{reviewedTasks?.length}</span></TabsTrigger
+		>
+		<TabsTrigger value="skipped"
+			>Skipped <span class={countClass}>{skippedTasks?.length}</span></TabsTrigger
+		>
 	</TabsList>
 	<TabsContent value="queued">
-		<Card>
-			<CardHeader>
-				<CardTitle>Queued Tasks</CardTitle>
-			</CardHeader>
-			<CardContent>
-				{#if queuedTasks.length === 0}
-					<p class="text-sm italic text-gray-700 dark:text-gray-300">Create a new task above.</p>
-				{/if}
-				<TaskList tasks={queuedTasks} {onTaskAction} currentStatus="QUEUED" />
-			</CardContent>
-		</Card>
+		{#if queuedTasks.length === 0}
+			<p class="px-1 py-6 text-center text-sm text-muted-foreground">
+				The queue is empty. Add a story above.
+			</p>
+		{/if}
+		<TaskList tasks={queuedTasks} {onTaskAction} currentStatus="QUEUED" />
 	</TabsContent>
 	<TabsContent value="reviewed">
-		<Card>
-			<CardHeader>
-				<CardTitle>Reviewed Tasks</CardTitle>
-			</CardHeader>
-			<CardContent>
-				{#if reviewedTasks.length === 0}
-					<p class="text-sm italic text-gray-700 dark:text-gray-300">
-						Previously reviewed tasks will appear here.
-					</p>
-				{/if}
-				<TaskList tasks={reviewedTasks} {onTaskAction} currentStatus="REVIEWED" />
-			</CardContent>
-		</Card>
+		{#if reviewedTasks.length === 0}
+			<p class="px-1 py-6 text-center text-sm text-muted-foreground">
+				Estimated stories will appear here.
+			</p>
+		{/if}
+		<TaskList tasks={reviewedTasks} {onTaskAction} currentStatus="REVIEWED" />
 	</TabsContent>
 	<TabsContent value="skipped">
-		<Card>
-			<CardHeader>
-				<CardTitle>Skipped Tasks</CardTitle>
-			</CardHeader>
-			<CardContent>
-				{#if skippedTasks.length === 0}
-					<p class="text-sm italic text-gray-700 dark:text-gray-300">
-						Any skipped tasks will appear here.
-					</p>
-				{/if}
-				<TaskList tasks={skippedTasks} {onTaskAction} currentStatus="SKIPPED" />
-			</CardContent>
-		</Card>
+		{#if skippedTasks.length === 0}
+			<p class="px-1 py-6 text-center text-sm text-muted-foreground">
+				Skipped stories will appear here.
+			</p>
+		{/if}
+		<TaskList tasks={skippedTasks} {onTaskAction} currentStatus="SKIPPED" />
 	</TabsContent>
 </Tabs>

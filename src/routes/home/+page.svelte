@@ -8,17 +8,17 @@
 		Card,
 		CardContent,
 		CardDescription,
-		CardFooter,
 		CardHeader,
 		CardTitle
 	} from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
 	import { goto } from '$app/navigation';
-	import { Clock2, User } from 'lucide-svelte';
+	import { CircleAlert, Clock2, Users } from 'lucide-svelte';
 	import { formatTimeAgo } from '$lib/utils';
-	import type { ParticipantRoomDetails, RoomType } from '$lib/scrum/types/room';
+	import type { ParticipantRoomDetails } from '$lib/scrum/types/room';
 	import RoomCreator from '../components/RoomCreator.svelte';
-	import ScrumAlert from '../components/ScrumAlert.svelte';
+	import RoomTypePill from '../components/RoomTypePill.svelte';
 
 	let currentUser = $state<AuthModel | null>(null);
 	user.subscribe((value) => {
@@ -46,109 +46,105 @@
 			joinError = err instanceof Error ? err.message : 'Failed to join room. Try again.';
 		}
 	}
-
-	function truncate(str: string, n: number) {
-		return str.length > n ? str.slice(0, n - 1) + '…' : str;
-	}
-
-	function formatRoomType(roomType: RoomType) {
-		switch (roomType) {
-			case 'REFINEMENT':
-				return 'Backlog Refinement';
-			case 'RETROSPECTIVE':
-				return 'Sprint Retrospective';
-			default:
-				return 'Unknown Room Type';
-		}
-	}
 </script>
 
 <svelte:head>
-	<title>scrumhost.app - home</title>
+	<title>Home · scrumhost</title>
 </svelte:head>
 
-<div class="flex min-h-screen grow flex-col items-center justify-center space-y-8 p-4">
-	{#if joinError}
-		<ScrumAlert
-			title="Could not join room"
-			body={joinError}
-			duration={-1}
-			onClose={() => (joinError = null)}
-		/>
-	{/if}
-	<Card class="w-full max-w-md">
+<main class="mx-auto flex w-full max-w-md flex-grow flex-col gap-6 px-4 py-10 sm:py-16">
+	<Card class="animate-rise-in">
 		<CardHeader>
-			<CardTitle class="text-center text-2xl font-bold dark:text-gray-100"
-				>Welcome, {currentUser?.name}</CardTitle
-			>
-			<CardDescription class="text-center dark:text-gray-200"
-				>Create or join a room to refine your backlog or have a retrospective.</CardDescription
-			>
+			<CardTitle tag="h1" class="text-2xl">Welcome, {currentUser?.name}</CardTitle>
+			<CardDescription>
+				Start a new room, or join one with the code your facilitator shared.
+			</CardDescription>
 		</CardHeader>
-		<CardContent class="space-y-4">
+		<CardContent class="space-y-5">
 			<RoomCreator />
-			<div class="relative">
-				<div class="absolute inset-0 flex items-center">
-					<span class="w-full border-t"></span>
-				</div>
-				<div class="relative flex justify-center text-xs uppercase">
-					<span class="bg-background px-2 text-muted-foreground">Or</span>
-				</div>
+
+			<div class="flex items-center gap-3 text-xs font-medium uppercase text-muted-foreground">
+				<span class="h-px flex-1 bg-border"></span>
+				or
+				<span class="h-px flex-1 bg-border"></span>
 			</div>
-			<Input
-				type="text"
-				placeholder="Enter Room Code"
-				bind:value={joinRoomCode}
-				class="py-6 text-lg dark:text-gray-200"
-				data-testid="room-code-input"
-			/>
+
+			<form
+				class="space-y-2"
+				onsubmit={(e) => {
+					e.preventDefault();
+					if (joinRoomCode.trim()) handleJoinRoom();
+				}}
+			>
+				<Label for="room-code-input">Room code</Label>
+				<div class="flex flex-col gap-2 sm:flex-row">
+					<Input
+						id="room-code-input"
+						type="text"
+						autocomplete="off"
+						placeholder="123-456-7890"
+						bind:value={joinRoomCode}
+						oninput={() => (joinError = null)}
+						aria-invalid={joinError ? 'true' : undefined}
+						aria-describedby={joinError ? 'join-room-code-error' : undefined}
+						class="h-12 font-mono text-base tracking-wide"
+						data-testid="room-code-input"
+					/>
+					<Button type="submit" size="lg" variant="outline" disabled={!joinRoomCode.trim()}>
+						Join Room
+					</Button>
+				</div>
+				{#if joinError}
+					<div
+						id="join-room-code-error"
+						role="alert"
+						class="flex animate-rise-in gap-2.5 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm"
+					>
+						<CircleAlert class="mt-0.5 h-4 w-4 shrink-0 text-destructive" aria-hidden="true" />
+						<div>
+							<p class="font-medium text-foreground">Could not join room</p>
+							<p class="text-foreground-secondary">{joinError}</p>
+						</div>
+					</div>
+				{/if}
+			</form>
 		</CardContent>
-		<CardFooter>
-			<Button class="w-full py-6 text-lg" disabled={!joinRoomCode.trim()} on:click={handleJoinRoom}>
-				Join Room
-			</Button>
-		</CardFooter>
 	</Card>
 
-	<!-- Recently Joined Rooms  -->
 	{#if rooms?.length > 0}
-		<Card class="w-full max-w-md">
-			<CardHeader>
-				<CardTitle class="text-xl font-bold">Recently Joined Rooms</CardTitle>
-			</CardHeader>
-			<CardContent>
-				<ul class="space-y-4">
-					{#each rooms as room}
-						<li
-							class="flex items-center justify-between rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100 dark:bg-gray-900 hover:dark:bg-gray-800"
-						>
-							<div>
-								<h3 class="font-semibold dark:text-gray-200">
-									{truncate(room.room_name, 25)} [{room.room_code}]
-								</h3>
-								<div class="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-300">
-									<span class="flex items-center">
-										{formatRoomType(room.room_type)}
-									</span>
-								</div>
-								<div class="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-300">
-									<span class="flex items-center">
-										<User class="mr-1 h-4 w-4" />
-										{room.participants?.length ?? 0} participant(s)
-									</span>
-									<span class="flex items-center dark:text-gray-300">
-										<Clock2 class="mr-1 h-4 w-4" />
-										{formatTimeAgo(new Date(room.time_joined))}
-									</span>
-								</div>
+		<section class="animate-rise-in">
+			<h2 class="mb-3 px-1 text-sm font-semibold text-foreground-secondary">
+				Recently Joined Rooms
+			</h2>
+			<ul class="divide-y overflow-hidden rounded-xl border bg-card shadow-soft">
+				{#each rooms as room}
+					<li class="flex items-center gap-3 p-4">
+						<div class="min-w-0 flex-1">
+							<div class="flex min-w-0 items-center gap-2">
+								<h3 class="truncate font-medium">{room.room_name}</h3>
+								<RoomTypePill type={room.room_type} short />
 							</div>
-							<Button variant="outline" size="sm" on:click={() => goto(`/room/${room.id}`)}>
-								Rejoin
-							</Button>
-						</li>
-					{/each}
-				</ul>
-			</CardContent>
-		</Card>
+							<div
+								class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground"
+							>
+								<span class="font-mono text-xs">{room.room_code}</span>
+								<span class="inline-flex items-center gap-1">
+									<Users class="h-3.5 w-3.5" aria-hidden="true" />
+									{room.participants?.length ?? 0}
+									<span class="sr-only">participants</span>
+								</span>
+								<span class="inline-flex items-center gap-1">
+									<Clock2 class="h-3.5 w-3.5" aria-hidden="true" />
+									{formatTimeAgo(new Date(room.time_joined))}
+								</span>
+							</div>
+						</div>
+						<Button variant="outline" size="sm" on:click={() => goto(`/room/${room.id}`)}>
+							Rejoin
+						</Button>
+					</li>
+				{/each}
+			</ul>
+		</section>
 	{/if}
-</div>
+</main>

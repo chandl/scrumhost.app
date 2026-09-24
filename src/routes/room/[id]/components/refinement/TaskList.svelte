@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import { CornerDownLeft, Eye, PlayCircle, SkipForward } from 'lucide-svelte';
+	import { CornerDownLeft, Eye, Play, SkipForward } from 'lucide-svelte';
 	import { formatTimeAgo } from '$lib/utils';
 	import type { StoryAction, StoryStatus, StorySummary } from '$lib/scrum/types/refinement';
+	import { fade } from 'svelte/transition';
 
 	let {
 		tasks,
@@ -15,35 +16,45 @@
 	} = $props();
 </script>
 
-<ul class="space-y-4" data-testid="task-list">
-	{#each tasks as task}
-		<li class="border-b pb-4 last:border-b-0 last:pb-0" data-testid="story-card">
-			<h3 class="mb-2 text-2xl">{task.details}</h3>
-			<span class="text-sm">Updated {formatTimeAgo(new Date(task.updated))}</span>
-			<div class="mb-2 flex space-x-2">
-				<div class="mt-2 flex space-x-2">
-					{#if currentStatus === 'QUEUED'}
+<ul class="space-y-2" data-testid="task-list">
+	{#each tasks as task (task.id)}
+		<li
+			class="rounded-lg border bg-background/60 p-3 transition-colors hover:border-foreground/15"
+			data-testid="story-card"
+			in:fade={{ duration: 150 }}
+		>
+			<h3 class="break-words text-[15px] font-medium leading-snug tracking-normal">
+				{task.details}
+			</h3>
+			<p class="mt-0.5 text-xs text-muted-foreground">
+				Updated {formatTimeAgo(new Date(task.updated))}
+			</p>
+			<div class="mt-2.5 flex flex-wrap gap-2">
+				{#if currentStatus === 'QUEUED'}
+					<Button
+						data-testid="start-voting"
+						size="sm"
+						on:click={() => onTaskAction(task.id, 'START_VOTING')}
+					>
+						<Play aria-hidden="true" />Start voting
+					</Button>
+					<Button size="sm" variant="ghost" on:click={() => onTaskAction(task.id, 'SKIP')}>
+						<SkipForward aria-hidden="true" />Skip
+					</Button>
+				{:else if currentStatus === 'REVIEWED' || currentStatus === 'SKIPPED'}
+					{#if currentStatus === 'REVIEWED'}
 						<Button
-							data-testid="start-voting"
 							size="sm"
-							on:click={() => onTaskAction(task.id, 'START_VOTING')}
+							variant="outline"
+							on:click={() => onTaskAction(task.id, 'REVIEW_RESULTS')}
 						>
-							<PlayCircle class="mr-2 h-4 w-4" />Start Voting
-						</Button>
-						<Button size="sm" variant="outline" on:click={() => onTaskAction(task.id, 'SKIP')}>
-							<SkipForward class="mr-2 h-4 w-4" /> Skip
-						</Button>
-					{:else if currentStatus === 'REVIEWED' || currentStatus === 'SKIPPED'}
-						{#if currentStatus === 'REVIEWED'}
-							<Button size="sm" on:click={() => onTaskAction(task.id, 'REVIEW_RESULTS')}>
-								<Eye class="mr-2 h-4 w-4" /> Review Results
-							</Button>
-						{/if}
-						<Button size="sm" variant="outline" on:click={() => onTaskAction(task.id, 'REQUEUE')}>
-							<CornerDownLeft class="mr-2 h-4 w-4" /> Requeue
+							<Eye aria-hidden="true" />See results
 						</Button>
 					{/if}
-				</div>
+					<Button size="sm" variant="ghost" on:click={() => onTaskAction(task.id, 'REQUEUE')}>
+						<CornerDownLeft aria-hidden="true" />Back to queue
+					</Button>
+				{/if}
 			</div>
 		</li>
 	{/each}

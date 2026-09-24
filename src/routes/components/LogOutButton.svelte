@@ -13,13 +13,14 @@
 	} from '$lib/components/ui/alert-dialog';
 	import { Button } from '$lib/components/ui/button';
 	import { logout, user } from '$lib/scrum/user';
-	import { Home, LogOut } from 'lucide-svelte';
+	import { DoorOpen, House, LogOut } from 'lucide-svelte';
 	import type { AuthModel } from 'pocketbase';
 
 	let showConfirmDialog = $state(false);
 
 	let isNotRootPage = $derived($page.url.pathname !== '/');
 	let isNotHomePage = $derived($page.url.pathname !== '/home');
+	let isInRoom = $derived($page.url.pathname.startsWith('/room/'));
 
 	let currentUser: AuthModel = $state(null);
 	user.subscribe((value) => {
@@ -33,46 +34,46 @@
 </script>
 
 {#if currentUser != null && isNotRootPage}
-	<div>
-		{#if isNotHomePage}
-			<Button
-				variant="outline"
-				size="icon"
-				class="fixed right-16 top-4 rounded-full bg-background p-2 text-foreground shadow-md transition-all duration-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50"
-				on:click={() => goto('/home')}
-				aria-label="Home"
-			>
-				<Home class="h-5 w-5" />
-			</Button>
-		{/if}
-		<Button
-			variant="outline"
-			size="icon"
-			class="fixed right-4 top-4 rounded-full bg-background p-2 text-foreground shadow-md transition-all duration-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50"
-			on:click={() => (showConfirmDialog = true)}
-			aria-label="Logout"
-		>
-			<LogOut class="h-5 w-5" />
+	{#if isNotHomePage}
+		<Button variant="ghost" on:click={() => goto('/home')} title={isInRoom ? 'Leave room' : 'Home'}>
+			{#if isInRoom}
+				<DoorOpen aria-hidden="true" />
+				<span class="hidden sm:inline">Leave room</span>
+				<span class="sr-only sm:hidden">Leave room</span>
+			{:else}
+				<House aria-hidden="true" />
+				<span class="hidden sm:inline">Home</span>
+				<span class="sr-only sm:hidden">Home</span>
+			{/if}
 		</Button>
+	{/if}
+	<Button
+		variant="ghost"
+		size="icon"
+		on:click={() => (showConfirmDialog = true)}
+		aria-label="Log out"
+		title="Log out"
+	>
+		<LogOut aria-hidden="true" />
+	</Button>
 
-		<AlertDialog
-			open={showConfirmDialog}
-			onOpenChange={() => {
-				showConfirmDialog = !showConfirmDialog;
-			}}
-		>
-			<AlertDialogContent>
-				<AlertDialogHeader>
-					<AlertDialogTitle>Are you sure you want to logout?</AlertDialogTitle>
-					<AlertDialogDescription>
-						This action will end your current session and return you to the login screen.
-					</AlertDialogDescription>
-				</AlertDialogHeader>
-				<AlertDialogFooter>
-					<AlertDialogCancel>Cancel</AlertDialogCancel>
-					<AlertDialogAction onclick={handleLogout}>Logout</AlertDialogAction>
-				</AlertDialogFooter>
-			</AlertDialogContent>
-		</AlertDialog>
-	</div>
+	<AlertDialog
+		open={showConfirmDialog}
+		onOpenChange={() => {
+			showConfirmDialog = !showConfirmDialog;
+		}}
+	>
+		<AlertDialogContent class="max-w-md">
+			<AlertDialogHeader>
+				<AlertDialogTitle>Log out?</AlertDialogTitle>
+				<AlertDialogDescription>
+					You'll need to enter your name again to rejoin your rooms.
+				</AlertDialogDescription>
+			</AlertDialogHeader>
+			<AlertDialogFooter>
+				<AlertDialogCancel>Cancel</AlertDialogCancel>
+				<AlertDialogAction onclick={handleLogout}>Log out</AlertDialogAction>
+			</AlertDialogFooter>
+		</AlertDialogContent>
+	</AlertDialog>
 {/if}

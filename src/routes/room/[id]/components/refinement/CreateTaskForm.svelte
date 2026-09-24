@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Plus } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -13,26 +12,37 @@
 
 	let newTaskDescription = $state('');
 	async function handleCreateTask() {
+		if (!newTaskDescription.trim()) return;
 		const encryptedTask = await encryptString(roomPassword, newTaskDescription);
 		await createStory(encryptedTask, refinementMetadataId);
 		newTaskDescription = '';
 	}
 </script>
 
-<Card>
-	<CardHeader>
-		<CardTitle>Create New Task</CardTitle>
-	</CardHeader>
-	<CardContent class="flex space-x-2">
-		<form class="flex w-full" onsubmit={handleCreateTask}>
-			<Input
-				data-testid="create-task-input"
-				placeholder="Enter task description"
-				bind:value={newTaskDescription}
-			/>
-		</form>
-		<Button data-testid="create-task-submit" on:click={handleCreateTask}>
-			<Plus class="mr-2 h-4 w-4" /> Add Task
-		</Button>
-	</CardContent>
-</Card>
+<form
+	class="flex gap-2"
+	onsubmit={(e) => {
+		e.preventDefault();
+		handleCreateTask();
+	}}
+>
+	<label for="create-task-input" class="sr-only">New story</label>
+	<Input
+		id="create-task-input"
+		data-testid="create-task-input"
+		placeholder="Add a story to estimate…"
+		autocomplete="off"
+		bind:value={newTaskDescription}
+	/>
+	<Button
+		type="submit"
+		data-testid="create-task-submit"
+		disabled={!newTaskDescription.trim()}
+		aria-label="Add story"
+		title="Add story"
+		class="shrink-0 px-3"
+	>
+		<Plus aria-hidden="true" />
+		<span class="hidden sm:inline lg:hidden xl:inline">Add</span>
+	</Button>
+</form>
