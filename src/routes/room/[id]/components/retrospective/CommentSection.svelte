@@ -26,40 +26,43 @@
 	};
 </script>
 
-<div class="mt-2 space-y-2">
-	<h4 class="text-sm font-semibold">Comments</h4>
-	{#each retroItem.comments as comment}
-		<div class="flex items-center rounded-md bg-muted p-2 text-sm dark:bg-gray-900">
-			<div>
-				<p>{comment.content}</p>
-			</div>
+<div class="mt-3 animate-rise-in space-y-2 border-t pt-3">
+	<h4 class="sr-only">Comments</h4>
+	{#each retroItem.comments as comment (comment.id)}
+		<div class="flex items-start gap-2 rounded-md bg-muted px-2.5 py-2 text-sm">
+			<p class="min-w-0 flex-1 break-words leading-snug">{comment.content}</p>
 			{#if participantId === comment.author}
-				<div class="ml-auto">
-					<Button
-						variant="ghost"
-						size="sm"
-						on:click={() => onDeleteComment(comment.id)}
-						class="h-8 px-2 text-destructive dark:text-red-500"
-					>
-						<X class="h-4 w-4" />
-					</Button>
-				</div>
+				<Button
+					variant="ghost"
+					size="icon"
+					on:click={() => onDeleteComment(comment.id)}
+					class="-my-1 -mr-1 h-7 w-7 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+					aria-label="Delete comment"
+					title="Delete comment"
+				>
+					<X />
+				</Button>
 			{/if}
 		</div>
 	{/each}
 	<form
-		class="flex space-x-2"
+		class="flex gap-2"
 		onsubmit={(event) => {
 			event.preventDefault();
 			handleAddComment();
 		}}
 	>
+		<label for="comment-{retroItem.id}" class="sr-only">Add a comment</label>
 		<Input
+			id="comment-{retroItem.id}"
 			data-testid="retro-comment-input"
-			placeholder="Add a comment"
+			placeholder="Add a comment…"
+			autocomplete="off"
 			bind:value={newComment}
-			class="text-sm"
+			class="h-9"
 		/>
-		<Button data-testid="retro-comment-submit" size="sm" on:click={handleAddComment}>Add</Button>
+		<Button data-testid="retro-comment-submit" type="submit" size="sm" variant="secondary"
+			>Add</Button
+		>
 	</form>
 </div>

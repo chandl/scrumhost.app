@@ -9,7 +9,7 @@
 </script>
 
 <DialogPrimitive.Title
-	class={cn('text-lg font-semibold leading-none tracking-tight', className)}
+	class={cn('text-xl font-semibold leading-tight tracking-tight', className)}
 	{...$$restProps}
 >
 	<slot />

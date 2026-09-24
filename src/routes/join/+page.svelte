@@ -12,7 +12,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { signup, user } from '$lib/scrum/user';
-	import { UserPen } from 'lucide-svelte';
+	import { ArrowRight, UserRound } from 'lucide-svelte';
 	import type { AuthModel } from 'pocketbase';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
@@ -49,37 +49,42 @@
 </script>
 
 <svelte:head>
-	<title>scrumhost.app - join</title>
+	<title>Enter your name · scrumhost</title>
 </svelte:head>
 
-<div class="flex min-h-screen flex-col items-center justify-center p-4">
-	<Card class="w-full max-w-md">
+<main class="flex flex-grow flex-col items-center justify-center px-4 py-10">
+	<Card class="w-full max-w-md animate-rise-in">
 		<CardHeader>
-			<CardTitle class="text-center text-2xl font-bold">scrumhost.app</CardTitle>
-			<CardDescription class="text-center dark:text-gray-300"
-				>Please enter your name to continue</CardDescription
-			>
+			<CardTitle tag="h1" class="text-2xl">What should we call you?</CardTitle>
+			<CardDescription>
+				Your name is shown to your teammates in the room. No account needed.
+			</CardDescription>
 		</CardHeader>
 		<form on:submit|preventDefault={handleSubmit}>
-			<CardContent class="space-y-4">
-				<div class="space-y-2">
-					<Label for="name">Your Name</Label>
-					<div class="relative">
-						<UserPen class="absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-500" />
-						<Input
-							id="name"
-							type="text"
-							placeholder="Enter your name"
-							bind:value={name}
-							class="py-6 pl-10 text-lg"
-							required
-						/>
-					</div>
+			<CardContent class="space-y-2">
+				<Label for="name">Your Name</Label>
+				<div class="relative">
+					<UserRound
+						class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+						aria-hidden="true"
+					/>
+					<Input
+						id="name"
+						type="text"
+						placeholder="e.g. Alex Kim"
+						autocomplete="nickname"
+						bind:value={name}
+						class="h-12 pl-10 text-base"
+						required
+					/>
 				</div>
 			</CardContent>
 			<CardFooter>
-				<Button type="submit" class="w-full py-6 text-lg" disabled={!name.trim()}>Continue</Button>
+				<Button type="submit" size="lg" class="w-full" disabled={!name.trim()}>
+					Continue
+					<ArrowRight aria-hidden="true" />
+				</Button>
 			</CardFooter>
 		</form>
 	</Card>
-</div>
+</main>

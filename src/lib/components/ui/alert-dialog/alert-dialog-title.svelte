@@ -12,7 +12,7 @@
 
 <AlertDialogPrimitive.Title
 	bind:ref
-	class={cn('text-lg font-semibold', className)}
+	class={cn('text-xl font-semibold tracking-tight', className)}
 	{level}
 	{...restProps}
 />

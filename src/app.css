@@ -1,4 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+/* Inter, self-hosted, latin subset only (no external font requests) */
+@import '@fontsource/inter/latin-400.css';
+@import '@fontsource/inter/latin-500.css';
+@import '@fontsource/inter/latin-600.css';
+
+/* Metric-matched fallback so swapping in Inter causes no layout shift */
+@font-face {
+	font-family: 'Inter Fallback';
+	src: local('Arial');
+	ascent-override: 90.2%;
+	descent-override: 22.48%;
+	line-gap-override: 0%;
+	size-adjust: 107.4%;
+}
 
 @tailwind base;
 @tailwind components;
@@ -6,67 +19,79 @@
 
 @layer base {
 	:root {
-		--background: 0 0% 100%;
-		--foreground: 222.2 84% 4.9%;
-
-		--muted: 210 40% 96.1%;
-		--muted-foreground: 215.4 16.3% 46.9%;
-
-		--popover: 0 0% 100%;
-		--popover-foreground: 222.2 84% 4.9%;
+		/* Neutrals */
+		--background: 60 23% 97.3%; /* #fafaf7 */
+		--foreground: 240 6% 7.1%; /* #111113 */
+		--foreground-secondary: 240 5% 25.3%; /* #3d3d44 */
 
 		--card: 0 0% 100%;
-		--card-foreground: 222.2 84% 4.9%;
+		--card-foreground: 240 6% 7.1%;
+		--popover: 0 0% 100%;
+		--popover-foreground: 240 6% 7.1%;
 
-		--border: 214.3 31.8% 91.4%;
-		--input: 214.3 31.8% 91.4%;
+		--muted: 60 13% 94.1%; /* #f2f2ee subtle surface */
+		--muted-foreground: 240 4% 44.1%; /* #6c6c75 */
 
-		--primary: 222.2 47.4% 11.2%;
-		--primary-foreground: 210 40% 98%;
+		--secondary: 60 13% 94.1%;
+		--secondary-foreground: 240 5% 25.3%;
 
-		--secondary: 210 40% 96.1%;
-		--secondary-foreground: 222.2 47.4% 11.2%;
+		--accent: 60 13% 94.1%;
+		--accent-foreground: 240 6% 7.1%;
 
-		--accent: 210 40% 96.1%;
-		--accent-foreground: 222.2 47.4% 11.2%;
+		--border: 60 5% 88%; /* ~10% black on background */
+		--input: 60 4% 83%; /* ~14% black on background */
 
-		--destructive: 0 72.2% 50.6%;
-		--destructive-foreground: 210 40% 98%;
+		/* Single accent: soft violet (AA on light) */
+		--primary: 247 67% 57.6%; /* #5b4bdb */
+		--primary-foreground: 0 0% 100%;
+		--ring: 247 67% 57.6%;
 
-		--ring: 222.2 84% 4.9%;
+		/* Muted semantic colors */
+		--success: 148 42% 32%;
+		--success-foreground: 0 0% 100%;
+		--warning: 34 78% 36%;
+		--warning-foreground: 0 0% 100%;
+		--destructive: 0 62% 47%;
+		--destructive-foreground: 0 0% 100%;
 
-		--radius: 0.5rem;
+		--radius: 0.75rem;
+		color-scheme: light;
 	}
 
 	.dark {
-		--background: 222.2 84% 4.9%;
-		--foreground: 210 40% 98%;
+		--background: 240 10% 3.9%; /* #09090b */
+		--foreground: 240 9% 93.5%; /* #ededf0 */
+		--foreground-secondary: 240 6% 72.2%; /* #b4b4bc */
 
-		--muted: 217.2 32.6% 17.5%;
-		--muted-foreground: 215 20.2% 65.1%;
+		--card: 240 8% 7.3%; /* #111114 */
+		--card-foreground: 240 9% 93.5%;
+		--popover: 240 8% 7.3%;
+		--popover-foreground: 240 9% 93.5%;
 
-		--popover: 222.2 84% 4.9%;
-		--popover-foreground: 210 40% 98%;
+		--muted: 240 8% 9.8%; /* #17171b */
+		--muted-foreground: 240 4% 50.6%; /* #7c7c86 */
 
-		--card: 222.2 84% 4.9%;
-		--card-foreground: 210 40% 98%;
+		--secondary: 240 8% 9.8%;
+		--secondary-foreground: 240 6% 72.2%;
 
-		--border: 217.2 32.6% 17.5%;
-		--input: 217.2 32.6% 17.5%;
+		--accent: 240 6% 12%;
+		--accent-foreground: 240 9% 93.5%;
 
-		--primary: 210 40% 98%;
-		--primary-foreground: 222.2 47.4% 11.2%;
+		--border: 240 5% 13.5%; /* ~10% white on background */
+		--input: 240 4% 17.5%; /* ~14% white on background */
 
-		--secondary: 217.2 32.6% 17.5%;
-		--secondary-foreground: 210 40% 98%;
+		--primary: 247 100% 74.3%; /* #8b7cff */
+		--primary-foreground: 240 10% 3.9%;
+		--ring: 247 100% 74.3%;
 
-		--accent: 217.2 32.6% 17.5%;
-		--accent-foreground: 210 40% 98%;
+		--success: 148 38% 58%;
+		--success-foreground: 240 10% 3.9%;
+		--warning: 38 80% 62%;
+		--warning-foreground: 240 10% 3.9%;
+		--destructive: 0 70% 66%;
+		--destructive-foreground: 240 10% 3.9%;
 
-		--destructive: 0 62.8% 30.6%;
-		--destructive-foreground: 210 40% 98%;
-
-		--ring: 212.7 26.8% 83.9%;
+		color-scheme: dark;
 	}
 }
 
@@ -74,8 +99,34 @@
 	* {
 		@apply border-border;
 	}
+	html {
+		-webkit-text-size-adjust: 100%;
+		text-rendering: optimizeLegibility;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
 	body {
-		@apply bg-background text-foreground;
-		font-family: 'Ubuntu Mono', monospace;
+		@apply bg-background text-[15px] leading-relaxed text-foreground sm:text-base;
+		font-feature-settings: 'cv11', 'calt';
+	}
+	h1,
+	h2,
+	h3,
+	h4 {
+		@apply font-semibold tracking-tight;
+	}
+	::selection {
+		@apply bg-primary/20;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		*::before,
+		*::after {
+			animation-duration: 0.01ms !important;
+			animation-iteration-count: 1 !important;
+			transition-duration: 0.01ms !important;
+			scroll-behavior: auto !important;
+		}
 	}
 }

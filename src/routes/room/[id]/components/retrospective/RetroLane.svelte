@@ -1,17 +1,19 @@
 <script lang="ts">
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import { Merge, SortDesc } from 'lucide-svelte';
+	import { ArrowDownWideNarrow, Merge, Plus } from 'lucide-svelte';
 	import type { Icon } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import type { RetroItem } from '$lib/scrum/types/retro_types';
 	import RetroItemCard from './RetroItemCard.svelte';
 	import type { ComponentType } from 'svelte';
-	import { mode } from 'mode-watcher';
+	import { fade } from 'svelte/transition';
+	import { flip } from 'svelte/animate';
 
 	let {
 		title,
 		icon,
+		tone = 'primary',
+		placeholder = 'Add an item…',
 		items,
 		participantId,
 		testId,
@@ -25,6 +27,9 @@
 	}: {
 		title: string;
 		icon: ComponentType<Icon>;
+		/** Soft tint used only in the lane header */
+		tone?: 'success' | 'warning' | 'primary';
+		placeholder?: string;
 		items: RetroItem[];
 		participantId: string;
 		testId?: string;
@@ -70,71 +75,101 @@
 	};
 
 	const IconComponent = $derived(icon);
+
+	const toneClasses = {
+		success: { header: 'bg-success/[0.07]', chip: 'bg-success/15 text-success' },
+		warning: { header: 'bg-warning/[0.08]', chip: 'bg-warning/15 text-warning' },
+		primary: { header: 'bg-primary/[0.07]', chip: 'bg-primary/15 text-primary' }
+	};
+
+	const inputId = $derived(`${testId ?? title}-add`);
 </script>
 
-<Card class="flex flex-col" data-testid={testId}>
-	<CardHeader class="pb-2">
-		<CardTitle class="flex items-center justify-between text-lg">
-			<div class="flex items-center">
-				<IconComponent class="mr-2 h-5 w-5" />
-				{title}
-			</div>
+<section
+	class="flex flex-col overflow-hidden rounded-xl border bg-card shadow-soft"
+	data-testid={testId}
+	aria-label={title}
+>
+	<header class="flex items-center gap-2.5 border-b px-4 py-3 {toneClasses[tone].header}">
+		<span
+			class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg {toneClasses[tone].chip}"
+		>
+			<IconComponent class="h-4 w-4" aria-hidden="true" />
+		</span>
+		<h2 class="text-base">{title}</h2>
+		<span class="text-sm tabular-nums text-muted-foreground">{items.length}</span>
 
-			<div class="ml-auto flex items-center">
-				{#if selectedItems.length > 1}
-					<Button size="sm" on:click={handleMerge}>
-						<Merge class="mr-2 h-4 w-4" />
-						Merge ({selectedItems.length})
-					</Button>
-				{/if}
-				<SortDesc
-					onclick={() => (sortItemsByVote = !sortItemsByVote)}
-					class={`ml-2 transition-colors duration-200 ${
-						sortItemsByVote
-							? 'text-blue-500 hover:text-red-500'
-							: $mode == 'light'
-								? 'text-black hover:text-blue-500'
-								: 'text-gray-200 hover:text-blue-500'
-					}`}
-					style="color: ${sortItemsByVote
-						? 'rgb(59, 130, 246)'
-						: $mode === 'light'
-							? 'black'
-							: 'white'};"
-				/>
-			</div>
-		</CardTitle>
-	</CardHeader>
-	<CardContent class="flex flex-grow flex-col space-y-2 pt-0">
+		<div class="ml-auto flex items-center gap-1">
+			{#if selectedItems.length > 1}
+				<Button size="sm" on:click={handleMerge}>
+					<Merge aria-hidden="true" />
+					Merge ({selectedItems.length})
+				</Button>
+			{/if}
+			<Button
+				variant="ghost"
+				size="icon"
+				class="h-8 w-8 {sortItemsByVote
+					? 'bg-card text-primary shadow-soft hover:text-primary'
+					: ''}"
+				aria-pressed={sortItemsByVote}
+				aria-label="Sort by votes"
+				title={sortItemsByVote ? 'Sorted by votes' : 'Sort by votes'}
+				on:click={() => (sortItemsByVote = !sortItemsByVote)}
+			>
+				<ArrowDownWideNarrow />
+			</Button>
+		</div>
+	</header>
+
+	<div class="flex flex-grow flex-col gap-3 p-3">
 		<form
-			class="mt-2 flex space-x-2"
+			class="flex gap-2"
 			onsubmit={(event) => {
 				event.preventDefault();
 				handleAddItem();
 			}}
 		>
+			<label for={inputId} class="sr-only">Add to {title}</label>
 			<Input
+				id={inputId}
 				data-testid="retro-lane-add-input"
-				placeholder="Enter new item"
+				{placeholder}
+				autocomplete="off"
 				bind:value={newItem}
-				class="text-sm"
 			/>
-			<Button data-testid="retro-lane-add-submit" size="sm" on:click={handleAddItem}>Add</Button>
+			<Button
+				type="submit"
+				data-testid="retro-lane-add-submit"
+				variant="secondary"
+				class="shrink-0 px-3"
+				aria-label="Add item"
+				title="Add item"
+			>
+				<Plus aria-hidden="true" /><span class="hidden sm:inline lg:hidden xl:inline">Add</span>
+			</Button>
 		</form>
-		<div class="flex-grow overflow-auto">
-			{#each sortedItems as item}
-				<RetroItemCard
-					{item}
-					{onUpvote}
-					{onDeleteUpvote}
-					{onDelete}
-					onSelect={handleSelectItem}
-					isSelected={selectedItems.includes(item.id)}
-					{onAddComment}
-					{onDeleteComment}
-					{participantId}
-				/>
+
+		{#if sortedItems.length === 0}
+			<p class="py-6 text-center text-sm text-muted-foreground">Nothing here yet.</p>
+		{/if}
+
+		<ul class="space-y-2">
+			{#each sortedItems as item (item.id)}
+				<li animate:flip={{ duration: 200 }} in:fade={{ duration: 150 }}>
+					<RetroItemCard
+						{item}
+						{onUpvote}
+						{onDeleteUpvote}
+						{onDelete}
+						onSelect={handleSelectItem}
+						isSelected={selectedItems.includes(item.id)}
+						{onAddComment}
+						{onDeleteComment}
+						{participantId}
+					/>
+				</li>
 			{/each}
-		</div>
-	</CardContent>
-</Card>
+		</ul>
+	</div>
+</section>

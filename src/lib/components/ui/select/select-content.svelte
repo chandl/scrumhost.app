@@ -15,7 +15,7 @@
 	bind:ref
 	{sideOffset}
 	class={cn(
-		'relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md outline-none',
+		'relative z-50 min-w-[8rem] animate-fade-in overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-lift outline-none',
 		className
 	)}
 	{...restProps}

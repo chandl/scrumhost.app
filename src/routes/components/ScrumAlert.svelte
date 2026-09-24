@@ -24,14 +24,14 @@
 
 {#if visible}
 	<div
-		class="fixed bottom-4 left-1/2 z-50 w-full max-w-md -translate-x-1/2 px-4"
+		class="fixed bottom-4 left-1/2 z-50 w-full max-w-md -translate-x-1/2 animate-fade-in px-4"
 		role="alert"
 		aria-live="assertive"
 	>
-		<Root variant="destructive" class="bg-background shadow-lg dark:bg-background">
+		<Root variant="destructive" class="shadow-lift">
 			<CircleAlert class="h-4 w-4 shrink-0" />
 			<Title>{title}</Title>
-			<Description>
+			<Description class="text-foreground-secondary">
 				{body}
 			</Description>
 		</Root>

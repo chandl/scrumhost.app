@@ -12,8 +12,10 @@
 	import BacklogRefinementRoom from './components/refinement/BacklogRefinementRoom.svelte';
 	import type { Participant, RoomDetails, RoomType } from '$lib/scrum/types/room';
 	import RetrospectiveRoom from './components/retrospective/RetrospectiveRoom.svelte';
-	import { Copy, Eye, EyeClosed } from 'lucide-svelte';
+	import { Check, Copy, Eye, EyeOff, Link } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
+	import RoomTypePill from '../../components/RoomTypePill.svelte';
+	import ParticipantAvatars from './components/ParticipantAvatars.svelte';
 
 	import PageLoading from '../../components/PageLoading.svelte';
 	import ScrumAlert from '../../components/ScrumAlert.svelte';
@@ -50,9 +52,7 @@
 	});
 
 	let pageTitle = $derived(
-		room
-			? `${room.room_name} [${room.room_code}] - scrumhost.app ${pageSuffix}`
-			: `scrumhost.app ${pageSuffix}`
+		room ? `${room.room_name} · scrumhost ${pageSuffix}` : `scrumhost ${pageSuffix}`
 	);
 	let loadingError: string = $state('');
 
@@ -140,6 +140,18 @@
 		}
 	});
 
+	// Short-lived "copied" feedback for the share strip's copy buttons
+	let copiedField = $state<'code' | 'password' | null>(null);
+	function copyText(field: 'code' | 'password', text: string | undefined) {
+		if (!text) return;
+		navigator.clipboard.writeText(text).then(() => {
+			copiedField = field;
+			setTimeout(() => {
+				if (copiedField === field) copiedField = null;
+			}, 1500);
+		});
+	}
+
 	let joinLinkCopied = $state(false);
 	function copyJoinLink() {
 		if (!room || !roomKey) return;
@@ -156,81 +168,118 @@
 	<title>{pageTitle}</title>
 </svelte:head>
 
-<div class="mt-12 h-[calc(100vh-50px)] p-8">
-	<div class="mx-auto max-w-6xl space-y-4">
-		{#if !room && loadingError === '' && !requirePassword}
-			<PageLoading />
-		{:else if loadingError !== ''}
-			<ScrumAlert title="Error Loading Room" body={loadingError} duration={-1} onClose={() => {}} />
-		{:else if requirePassword}
-			<JoinRoomDialog
-				handleJoinRoom={(password) => rejoinWithPwd(password)}
-				error={joinPasswordError}
-				onDismiss={handlePasswordDialogDismiss}
-			/>
-		{:else}
-			<div class="items-center">
-				<h1 class="text-4xl font-bold">{room?.room_name}</h1>
-
-				<div class="sm:grid sm:grid-cols-1 md:flex md:flex-auto md:items-center">
-					<h2 class="text-xl">Room Code: <span data-testid="room-code">{room?.room_code}</span></h2>
-					<span class="ml-4 mr-4 hidden text-2xl md:block">&bull;</span>
-					{#if showRoomPassword}
-						<div class="flex items-center space-x-2">
-							<h2 class="text-xl">
-								Password: <span class="blur-none" data-testid="room-password-value">{roomKey}</span>
-							</h2>
-							<Button
-								onclick={() => (showRoomPassword = false)}
-								size="icon"
-								variant="outline"
-								class="opacity-50"
-							>
-								<EyeClosed />
-							</Button>
-						</div>
-					{:else}
-						<div class="flex items-center space-x-2">
-							<h2 class="text-xl">Password: <span class="blur-sm">{roomKey}</span></h2>
-							<Button
-								data-testid="room-password-reveal"
-								onclick={() => (showRoomPassword = true)}
-								size="icon"
-								variant="outline"
-								class="opacity-50"
-							>
-								<Eye />
-							</Button>
-						</div>
-					{/if}
-					<span class="ml-4 mr-4 hidden text-2xl md:block">&bull;</span>
-					<div class="flex items-center space-x-2">
-						<Button
-							data-testid="copy-join-link"
-							onclick={copyJoinLink}
-							disabled={!roomKey}
-							size="sm"
-							variant="outline"
-							title={roomKey
-								? 'Copy join link (includes password)'
-								: 'Re-enter password to share link'}
-						>
-							<Copy class="mr-1 h-4 w-4" />
-							{joinLinkCopied ? 'Copied!' : 'Copy join link'}
-						</Button>
-					</div>
+<main class="mx-auto w-full max-w-6xl flex-grow px-4 py-6 sm:px-6 sm:py-8">
+	{#if !room && loadingError === '' && !requirePassword}
+		<PageLoading />
+	{:else if loadingError !== ''}
+		<ScrumAlert title="Error Loading Room" body={loadingError} duration={-1} onClose={() => {}} />
+	{:else if requirePassword}
+		<JoinRoomDialog
+			handleJoinRoom={(password) => rejoinWithPwd(password)}
+			error={joinPasswordError}
+			onDismiss={handlePasswordDialogDismiss}
+		/>
+	{:else}
+		<header class="mb-6 space-y-4 sm:mb-8">
+			<div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+				<div class="min-w-0 space-y-2">
+					<RoomTypePill type={roomType} />
+					<h1 class="break-words text-2xl leading-tight sm:text-3xl">{room?.room_name}</h1>
 				</div>
+				<ParticipantAvatars {participants} currentUserId={userParticipant?.id} />
 			</div>
-			{#if roomType === 'REFINEMENT'}
-				<BacklogRefinementRoom
-					parentRoom={room}
-					{participants}
-					{userParticipant}
-					roomPassword={roomKey || ''}
-				/>
-			{:else if roomType === 'RETROSPECTIVE'}
-				<RetrospectiveRoom {participants} {userParticipant} roomPassword={roomKey || ''} />
-			{/if}
+
+			<!-- Share strip: everything a teammate needs to join -->
+			<div
+				class="flex flex-col gap-2 rounded-xl border bg-card p-2 shadow-soft sm:flex-row sm:flex-wrap sm:items-center"
+				aria-label="Invite teammates"
+				role="group"
+			>
+				<div class="flex min-w-0 items-center gap-2 rounded-lg px-2 py-1">
+					<span class="text-sm text-muted-foreground">Code</span>
+					<span
+						class="font-mono text-[15px] font-medium tracking-wide text-foreground"
+						data-testid="room-code">{room?.room_code}</span
+					>
+					<Button
+						variant="ghost"
+						size="icon"
+						class="h-8 w-8"
+						onclick={() => copyText('code', room?.room_code)}
+						aria-label="Copy room code"
+						title="Copy room code"
+					>
+						{#if copiedField === 'code'}<Check class="text-success" />{:else}<Copy />{/if}
+					</Button>
+				</div>
+
+				<span class="hidden h-6 w-px bg-border sm:block" aria-hidden="true"></span>
+
+				<div class="flex min-w-0 items-center gap-2 rounded-lg px-2 py-1">
+					<span class="text-sm text-muted-foreground">Password</span>
+					{#if showRoomPassword}
+						<span
+							class="min-w-0 truncate font-mono text-[15px] font-medium text-foreground"
+							data-testid="room-password-value">{roomKey}</span
+						>
+					{:else}
+						<span class="font-mono text-[15px] tracking-widest text-muted-foreground">••••••••</span
+						>
+					{/if}
+					<Button
+						data-testid="room-password-reveal"
+						variant="ghost"
+						size="icon"
+						class="h-8 w-8"
+						onclick={() => (showRoomPassword = !showRoomPassword)}
+						aria-label={showRoomPassword ? 'Hide password' : 'Show password'}
+						aria-pressed={showRoomPassword}
+						title={showRoomPassword ? 'Hide password' : 'Show password'}
+					>
+						{#if showRoomPassword}<EyeOff />{:else}<Eye />{/if}
+					</Button>
+					{#if roomKey}
+						<Button
+							variant="ghost"
+							size="icon"
+							class="h-8 w-8"
+							onclick={() => copyText('password', roomKey)}
+							aria-label="Copy password"
+							title="Copy password"
+						>
+							{#if copiedField === 'password'}<Check class="text-success" />{:else}<Copy />{/if}
+						</Button>
+					{/if}
+				</div>
+
+				<Button
+					data-testid="copy-join-link"
+					onclick={copyJoinLink}
+					disabled={!roomKey}
+					variant="secondary"
+					class="sm:ml-auto"
+					title={roomKey
+						? 'Copy a link that includes the password'
+						: 'Re-enter password to share link'}
+				>
+					{#if joinLinkCopied}<Check class="text-success" />{:else}<Link />{/if}
+					{joinLinkCopied ? 'Copied!' : 'Copy invite link'}
+				</Button>
+				<span class="sr-only" aria-live="polite"
+					>{joinLinkCopied || copiedField ? 'Copied to clipboard' : ''}</span
+				>
+			</div>
+		</header>
+
+		{#if roomType === 'REFINEMENT'}
+			<BacklogRefinementRoom
+				parentRoom={room}
+				{participants}
+				{userParticipant}
+				roomPassword={roomKey || ''}
+			/>
+		{:else if roomType === 'RETROSPECTIVE'}
+			<RetrospectiveRoom {participants} {userParticipant} roomPassword={roomKey || ''} />
 		{/if}
-	</div>
-</div>
+	{/if}
+</main>

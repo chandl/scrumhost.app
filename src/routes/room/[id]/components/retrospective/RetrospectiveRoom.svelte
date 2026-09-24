@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 
 	import RetroLane from './RetroLane.svelte';
-	import { ArrowUpCircle, ListTodo, ThumbsUp } from 'lucide-svelte';
+	import { ListTodo, Sprout, ThumbsUp } from 'lucide-svelte';
 	import type { RetroItem, RetroItemCategory, RetroMetadata } from '$lib/scrum/types/retro_types';
 	import ParticipantList from '../refinement/ParticipantList.svelte';
 	import {
@@ -132,59 +132,64 @@
 	});
 </script>
 
-<div class="grid grid-cols-1 gap-8 md:grid-cols-3">
-	<div class="space-y-4 md:col-span-2">
-		<RetroLane
-			testId="retro-lane-went-well"
-			title="What Went Well"
-			items={wentWellItems}
-			icon={ThumbsUp}
-			onAddItem={addRetroItem('WENT_WELL')}
-			onUpvote={upvoteItem}
-			onDeleteUpvote={deleteUpvote}
-			onDelete={deleteItem}
-			onMerge={mergeItems('WENT_WELL')}
-			onAddComment={addComment}
-			onDeleteComment={deleteComment}
-			{participantId}
-		/>
-		<RetroLane
-			testId="retro-lane-to-improve"
-			title="What Could Be Improved"
-			items={toImproveItems}
-			icon={ArrowUpCircle}
-			onAddItem={addRetroItem('TO_IMPROVE')}
-			onUpvote={upvoteItem}
-			onDeleteUpvote={deleteUpvote}
-			onDelete={deleteItem}
-			onMerge={mergeItems('TO_IMPROVE')}
-			onAddComment={addComment}
-			onDeleteComment={deleteComment}
-			{participantId}
-		/>
-		<RetroLane
-			testId="retro-lane-action-items"
-			title="Action Items"
-			items={actionItems}
-			icon={ListTodo}
-			onAddItem={addRetroItem('ACTION_ITEMS')}
-			onUpvote={upvoteItem}
-			onDeleteUpvote={deleteUpvote}
-			onDelete={deleteItem}
-			onMerge={mergeItems('ACTION_ITEMS')}
-			onAddComment={addComment}
-			onDeleteComment={deleteComment}
-			{participantId}
-		/>
-	</div>
+<div class="grid grid-cols-1 items-start gap-4 md:grid-cols-2 lg:grid-cols-3">
+	<RetroLane
+		testId="retro-lane-went-well"
+		title="What went well"
+		tone="success"
+		placeholder="Something that went well…"
+		items={wentWellItems}
+		icon={ThumbsUp}
+		onAddItem={addRetroItem('WENT_WELL')}
+		onUpvote={upvoteItem}
+		onDeleteUpvote={deleteUpvote}
+		onDelete={deleteItem}
+		onMerge={mergeItems('WENT_WELL')}
+		onAddComment={addComment}
+		onDeleteComment={deleteComment}
+		{participantId}
+	/>
+	<RetroLane
+		testId="retro-lane-to-improve"
+		title="What to improve"
+		tone="warning"
+		placeholder="Something we could do better…"
+		items={toImproveItems}
+		icon={Sprout}
+		onAddItem={addRetroItem('TO_IMPROVE')}
+		onUpvote={upvoteItem}
+		onDeleteUpvote={deleteUpvote}
+		onDelete={deleteItem}
+		onMerge={mergeItems('TO_IMPROVE')}
+		onAddComment={addComment}
+		onDeleteComment={deleteComment}
+		{participantId}
+	/>
+	<RetroLane
+		testId="retro-lane-action-items"
+		title="Action items"
+		tone="primary"
+		placeholder="A next step for the team…"
+		items={actionItems}
+		icon={ListTodo}
+		onAddItem={addRetroItem('ACTION_ITEMS')}
+		onUpvote={upvoteItem}
+		onDeleteUpvote={deleteUpvote}
+		onDelete={deleteItem}
+		onMerge={mergeItems('ACTION_ITEMS')}
+		onAddComment={addComment}
+		onDeleteComment={deleteComment}
+		{participantId}
+	/>
+</div>
 
-	<div>
-		<ParticipantList
-			currentUser={userParticipant}
-			{participants}
-			showOtherParticipantVotes={false}
-			currentVotes={[]}
-			{roomPassword}
-		/>
-	</div>
+<div class="mt-6">
+	<ParticipantList
+		currentUser={userParticipant}
+		{participants}
+		showOtherParticipantVotes={false}
+		currentVotes={[]}
+		{roomPassword}
+		layout="row"
+	/>
 </div>

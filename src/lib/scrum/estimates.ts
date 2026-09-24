@@ -45,14 +45,6 @@ export async function createOrUpdateEstimate(
 			});
 
 			console.log('Updated existing estimate', newEstimate);
-			// Already linked to the story, so skip the extra round trip
-			return {
-				id: newEstimate.id,
-				storyId: newEstimate.expand?.story,
-				estimate: newEstimate.expand?.estimate,
-				user: newEstimate.expand?.user,
-				participant: newEstimate.expand?.participant
-			};
 		} else {
 			// Create new estimate
 			newEstimate = await pb.collection('story_estimates').create({
@@ -64,7 +56,9 @@ export async function createOrUpdateEstimate(
 			console.log('Created new estimate:', newEstimate);
 		}
 
-		// Make the update on the story itself too
+		// Always touch the story, even when changing an existing vote: clients only refresh
+		// votes from the story's realtime update event, so skipping this leaves every
+		// participant (including the voter) showing the previous estimate.
 		await pb.collection('stories').update(storyId, {
 			'story_estimates+': newEstimate.id
 		});

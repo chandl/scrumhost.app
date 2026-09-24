@@ -28,6 +28,7 @@
 	} from '$lib/scrum/types/refinement';
 	import type { Participant, RoomDetails } from '$lib/scrum/types/room';
 	import { decryptString } from '$lib/crypto';
+	import { ListPlus } from 'lucide-svelte';
 
 	let {
 		parentRoom,
@@ -161,45 +162,67 @@
 	const pointValues: string[] = $derived(refinementMetadata?.point_values.split(',') || []);
 </script>
 
-<div class="grid grid-cols-1 gap-8 md:grid-cols-3">
-	<div class=" md:col-span-2">
-		<!-- Vote and Review Votes -->
-		<div class="mb-4">
-			{#if refinementMetadata?.room_status === 'REVIEWING'}
-				<!-- New Section: Voting Summary -->
-				<ReviewingCard
-					{activeStoryDetails}
-					{currentVotes}
-					{pointValues}
-					onTaskAction={handleTaskAction}
-				/>
-			{:else if refinementMetadata?.room_status === 'VOTING'}
-				<VotingCard
-					roomStatus={'VOTING'}
-					{activeStoryDetails}
-					{currentVotes}
-					{participants}
-					{userParticipant}
-					{pointValues}
-					onTaskAction={handleTaskAction}
-				/>
-			{/if}
-		</div>
+<div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+	<!-- Current story: front and center -->
+	<section aria-label="Current story" class="min-w-0">
+		{#if refinementMetadata?.room_status === 'REVIEWING'}
+			<ReviewingCard
+				{activeStoryDetails}
+				{currentVotes}
+				{pointValues}
+				totalParticipants={participants.length}
+				onTaskAction={handleTaskAction}
+			/>
+		{:else if refinementMetadata?.room_status === 'VOTING'}
+			<VotingCard
+				roomStatus={'VOTING'}
+				{activeStoryDetails}
+				{currentVotes}
+				{participants}
+				{userParticipant}
+				{pointValues}
+				onTaskAction={handleTaskAction}
+			/>
+		{:else}
+			<div
+				class="flex min-h-64 flex-col items-center justify-center rounded-xl border border-dashed bg-card/60 px-6 py-12 text-center"
+			>
+				<div
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary"
+				>
+					<ListPlus class="h-6 w-6" aria-hidden="true" />
+				</div>
+				<h2 class="text-lg">No story is being estimated</h2>
+				<p class="mt-1 max-w-sm text-foreground-secondary">
+					Add stories to the queue, then press <span class="font-medium text-foreground"
+						>Start voting</span
+					> on the one you want to estimate.
+				</p>
+			</div>
+		{/if}
+	</section>
 
-		<!-- Create and List Tasks -->
-		<div>
+	<aside class="min-w-0 space-y-4">
+		<section class="rounded-xl border bg-card p-4 shadow-soft" aria-labelledby="stories-heading">
+			<h2 id="stories-heading" class="mb-3 text-base">Stories</h2>
 			<CreateTaskForm {refinementMetadataId} {roomPassword} />
-			<TaskTabs {stories} activeStoryId={activeStoryDetails?.id} onTaskAction={handleTaskAction} />
-		</div>
-	</div>
+			<div class="mt-4">
+				<TaskTabs
+					{stories}
+					activeStoryId={activeStoryDetails?.id}
+					onTaskAction={handleTaskAction}
+				/>
+			</div>
+		</section>
 
-	<div>
 		<ParticipantList
 			currentUser={userParticipant}
 			{participants}
 			{currentVotes}
 			{showOtherParticipantVotes}
 			{roomPassword}
+			trackVotes={refinementMetadata?.room_status === 'VOTING' ||
+				refinementMetadata?.room_status === 'REVIEWING'}
 		/>
-	</div>
+	</aside>
 </div>

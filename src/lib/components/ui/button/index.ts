@@ -3,21 +3,22 @@ import type { HTMLButtonAttributes } from 'svelte/elements';
 import Root from './button.svelte';
 
 const buttonVariants = tv({
-	base: 'ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+	base: 'ring-offset-background focus-visible:ring-ring inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[color,background-color,border-color,box-shadow,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0',
 	variants: {
 		variant: {
-			default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+			default: 'bg-primary text-primary-foreground shadow-soft hover:bg-primary/90',
 			destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-			outline: 'border-input bg-background hover:bg-accent hover:text-accent-foreground border',
-			secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-			ghost: 'hover:bg-accent hover:text-accent-foreground',
+			outline:
+				'border-input bg-card text-foreground hover:bg-muted hover:border-foreground/20 border',
+			secondary: 'bg-secondary text-foreground hover:bg-accent',
+			ghost: 'text-foreground-secondary hover:bg-muted hover:text-foreground',
 			link: 'text-primary underline-offset-4 hover:underline'
 		},
 		size: {
-			default: 'h-10 px-4 py-2',
-			sm: 'h-9 rounded-md px-3',
-			lg: 'h-11 rounded-md px-8',
-			icon: 'h-10 w-10'
+			default: 'coarse:h-11 h-10 px-4',
+			sm: 'coarse:h-11 h-9 px-3',
+			lg: 'h-12 px-6 text-[15px]',
+			icon: 'coarse:h-11 coarse:w-11 h-10 w-10'
 		}
 	},
 	defaultVariants: {

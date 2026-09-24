@@ -2,16 +2,22 @@
 	import type { ComponentType } from 'svelte';
 	import type { Icon } from 'lucide-svelte';
 
-	let { icon, title }: { icon: ComponentType<Icon>; title: string } = $props();
+	let {
+		icon,
+		title,
+		description
+	}: { icon: ComponentType<Icon>; title: string; description: string } = $props();
 	const IconComponent = $derived(icon);
-	import { Card, CardContent } from '$lib/components/ui/card';
 </script>
 
-<Card class="border-none drop-shadow-md dark:shadow-gray-500">
-	<CardContent class="flex flex-col items-center justify-center p-6">
-		<div class="mb-4 text-blue-500 dark:text-blue-600">
-			<IconComponent class="h-8 w-8" />
-		</div>
-		<h3 class="font-medium text-gray-900 dark:text-gray-100">{title}</h3>
-	</CardContent>
-</Card>
+<div class="flex h-full gap-4 rounded-xl border bg-card p-5 shadow-soft">
+	<div
+		class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
+	>
+		<IconComponent class="h-5 w-5" aria-hidden="true" />
+	</div>
+	<div class="min-w-0">
+		<h2 class="text-[15px] font-semibold">{title}</h2>
+		<p class="mt-1 text-sm leading-relaxed text-muted-foreground">{description}</p>
+	</div>
+</div>

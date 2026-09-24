@@ -1,48 +1,38 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { Button } from '$lib/components/ui/button';
-	import {
-		Card,
-		CardDescription,
-		CardFooter,
-		CardHeader,
-		CardTitle
-	} from '$lib/components/ui/card';
-	import { Home, SearchX } from 'lucide-svelte';
+	import { buttonVariants } from '$lib/components/ui/button';
+	import { Card, CardContent } from '$lib/components/ui/card';
+	import { SearchX } from 'lucide-svelte';
 
 	const invalidId = $derived($page.url.searchParams.get('id'));
 </script>
 
 <svelte:head>
-	<title>Room not found - scrumhost.app</title>
+	<title>Room not found · scrumhost</title>
 </svelte:head>
 
-<div
-	class="flex min-h-screen grow flex-col items-center justify-center p-4"
+<main
+	class="flex flex-grow flex-col items-center justify-center px-4 py-10"
 	data-testid="room-not-found-page"
 >
-	<Card class="w-full max-w-md">
-		<CardHeader>
-			<CardTitle class="flex items-center gap-2 text-xl">
-				<SearchX class="h-6 w-6" />
-				Room not found
-			</CardTitle>
-			<CardDescription>
+	<Card class="w-full max-w-md animate-rise-in">
+		<CardContent class="flex flex-col items-center p-8 text-center sm:p-10">
+			<div
+				class="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground"
+			>
+				<SearchX class="h-6 w-6" aria-hidden="true" />
+			</div>
+			<h1 class="text-2xl">Room not found</h1>
+			<p class="mt-2 text-foreground-secondary">
 				{#if invalidId}
-					The room you're looking for doesn't exist or you don't have access. Check the room code
-					and try again from home.
+					This room doesn't exist, or you don't have access to it. Double-check the room code and
+					try again.
 				{:else}
-					The room you're looking for doesn't exist or you don't have access. Join with a room code
-					from home or create a new room.
+					This room doesn't exist, or you don't have access to it. Join with a room code or create a
+					new room.
 				{/if}
-			</CardDescription>
-		</CardHeader>
-		<CardFooter>
-			<Button class="w-full" onclick={() => goto('/home')}>
-				<Home class="mr-2 h-4 w-4" />
-				Go to Home
-			</Button>
-		</CardFooter>
+			</p>
+			<a href="/home" class="{buttonVariants()} mt-6 w-full sm:w-auto">Back to home</a>
+		</CardContent>
 	</Card>
-</div>
+</main>

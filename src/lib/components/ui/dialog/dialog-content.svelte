@@ -17,14 +17,14 @@
 	<DialogPrimitive.Content
 		bind:ref
 		class={cn(
-			'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg md:w-full',
+			'fixed left-[50%] top-[50%] z-50 grid max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] animate-dialog-in gap-5 overflow-y-auto rounded-xl border bg-card p-6 shadow-2xl focus:outline-none',
 			className
 		)}
 		{...restProps}
 	>
 		{@render children?.()}
 		<DialogPrimitive.Close
-			class="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
+			class="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none coarse:h-11 coarse:w-11"
 		>
 			<X class="h-4 w-4" />
 			<span class="sr-only">Close</span>
