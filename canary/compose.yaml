@@ -13,3 +13,15 @@ services:
     ports:
       - '8081:8081'
     restart: unless-stopped
+
+  cleanup:
+    build: .
+    command: ['node', 'dist/cleanup.js']
+    environment:
+      CANARY_API_URL: https://api.scrumhost.app
+      CANARY_NAME_PREFIX: canary
+      CANARY_ADMIN_EMAIL: ${CANARY_ADMIN_EMAIL:?set CANARY_ADMIN_EMAIL to a PocketBase superuser}
+      CANARY_ADMIN_PASSWORD: ${CANARY_ADMIN_PASSWORD:?set CANARY_ADMIN_PASSWORD to that superuser's password}
+      CANARY_CLEANUP_MAX_AGE: 30m # only purge canary-* records older than this, so an in-flight check is never mid-cleanup.
+      CANARY_CLEANUP_INTERVAL: 1h
+    restart: unless-stopped

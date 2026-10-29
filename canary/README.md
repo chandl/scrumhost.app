@@ -7,7 +7,9 @@
 
 It exposes JSON health on `GET /healthz`: `200` when every check in the most recent run of each tier passed, `503` otherwise. `GET /livez` always returns `200` while the process is running.
 
-Every canary-created user, room, and item is tagged with `CANARY_NAME_PREFIX` (default `canary`). **Nothing is cleaned up automatically** — every collection's `deleteRule` in `schema/pb_schema.json` is admin-only, so cleanup needs a separate, admin-authenticated job; it isn't part of this service so the always-running probe never holds superuser credentials. Purge `canary-*` users/rooms periodically via a separate script or PocketBase admin action.
+Every canary-created user, room, and item is tagged with `CANARY_NAME_PREFIX` (default `canary`). Every collection's `deleteRule` in `schema/pb_schema.json` is admin-only, so the always-running probe never holds superuser credentials and can't clean up after itself. A separate `cleanup` entrypoint ([src/cleanup.ts](src/cleanup.ts)) does that instead: authenticated as a PocketBase superuser, it periodically deletes `canary-*` rooms (and everything hanging off them — participants, refinement/retro metadata, stories, estimates, items, comments, votes; nothing in the schema cascades) plus `canary-*` users, skipping anything younger than `CANARY_CLEANUP_MAX_AGE` so it never touches a check that's still in flight.
+
+Run it with `npm run cleanup` (or `docker compose run --rm cleanup` / the `cleanup` service in [compose.yaml](compose.yaml)), which needs `CANARY_ADMIN_EMAIL` / `CANARY_ADMIN_PASSWORD` for a PocketBase superuser — credentials this service is the only place that should hold them.
 
 ## Run
 
@@ -47,3 +49,14 @@ The image is based on `mcr.microsoft.com/playwright` so the UI tier's Chromium h
 | `CANARY_APP_URL`     | `https://scrumhost.app`     | Base URL of the deployed SvelteKit frontend (UI checks).    |
 | `CANARY_API_URL`     | `https://api.scrumhost.app` | Base URL of the PocketBase API (API/realtime checks).       |
 | `CANARY_NAME_PREFIX` | `canary`                    | Prefix applied to all canary-created usernames/rooms/items. |
+
+### Cleanup job
+
+| Environment variable         | Default   | Purpose                                                            |
+| ----------------------------- | --------- | -------------------------------------------------------------------- |
+| `CANARY_ADMIN_EMAIL`         | _required_ | Email of a PocketBase superuser, used to authenticate deletes.       |
+| `CANARY_ADMIN_PASSWORD`      | _required_ | That superuser's password.                                           |
+| `CANARY_CLEANUP_MAX_AGE`     | `30m`     | Only purge canary-* records older than this.                         |
+| `CANARY_CLEANUP_INTERVAL`    | `1h`      | How often the cleanup job runs.                                      |
+
+Also reads `CANARY_API_URL` and `CANARY_NAME_PREFIX` from the table above.
